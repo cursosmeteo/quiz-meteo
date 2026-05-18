@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Atmosphere · Professor</title>
+<style>
+  :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; --text: #3A3A3A; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Calibri', 'Segoe UI', sans-serif; background: #fff; color: var(--text); }
+  .stage { display: flex; flex-direction: column; height: 100vh; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px; background: var(--navy); color: #fff; gap: 16px; }
+  .topbar .brand { font-size: 13px; letter-spacing: 1.2px; color: #9DB4D1; font-weight: 600; white-space: nowrap; }
+  .topbar .progress { font-size: 14px; color: #fff; font-weight: 600; }
+  .topbar .progress span { color: var(--amber); }
+  .conn { font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 700; letter-spacing: .5px; }
+  .conn.ok { background: var(--green); color: #fff; }
+  .conn.err { background: var(--red); color: #fff; }
+  .conn.wait { background: var(--steel); color: #fff; }
+  main { flex: 1; display: flex; overflow: hidden; }
+  .q-panel { flex: 1; padding: 24px 32px; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+  .cover-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; gap: 20px; }
+  .cover-center h1 { font-size: 52px; font-weight: 800; color: var(--navy); letter-spacing: -2px; }
+  .cover-center .sub { font-size: 18px; color: var(--steel); font-style: italic; }
+  .qr-link { font-size: 20px; font-weight: 800; color: var(--aviation); margin-top: 8px; }
+  .start-hint { font-size: 15px; color: var(--steel); margin-top: 12px; }
+  .start-hint kbd { background: var(--navy); color: #fff; padding: 4px 12px; border-radius: 4px; font-family: monospace; }
+  .scoring-info { background: var(--light); border: 1px solid var(--border); border-top: 3px solid var(--aviation); padding: 14px 20px; border-radius: 4px; font-size: 14px; color: var(--text); line-height: 1.8; max-width: 500px; }
+  .scoring-info b { color: var(--navy); }
+  .s1 { color: var(--green); font-weight: 700; }
+  .s2 { color: var(--amber); font-weight: 700; }
+  .s3 { color: var(--steel); font-weight: 700; }
+  .s0 { color: var(--red); font-weight: 700; }
+  .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .q-meta .eyebrow { font-size: 12px; color: var(--aviation); font-weight: 700; letter-spacing: 1.5px; }
+  .q-meta .code { font-family: monospace; font-size: 11px; color: var(--steel); margin-top: 3px; }
+  .timer { width: 96px; height: 96px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; flex-direction: column; transition: background .3s; flex-shrink: 0; }
+  .timer.warn { background: var(--amber); }
+  .timer.crit { background: var(--red); animation: pulse .5s infinite alternate; }
+  .timer.expired { background: var(--steel); }
+  .timer .n { font-size: 38px; font-weight: 800; color: #fff; line-height: 1; }
+  .timer .lbl { font-size: 9px; color: rgba(255,255,255,.85); letter-spacing: 1.5px; margin-top: 3px; }
+  @keyframes pulse { from{transform:scale(1)} to{transform:scale(1.05)} }
+  .q-text { font-size: 24px; color: var(--navy); font-weight: 700; line-height: 1.3; margin: 10px 0 16px; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt { background: var(--light); border: 2px solid var(--border); padding: 12px 16px; font-size: 15px; color: var(--text); border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; }
+  .opt .key { background: var(--aviation); color: #fff; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .opt.correct { background: #E8F5EE; border-color: var(--green); }
+  .opt.correct .key { background: var(--green); }
+  .feedback { margin-top: 12px; padding: 12px 16px; border-radius: 6px; font-size: 14px; display: none; line-height: 1.5; }
+  .feedback.show { display: block; background: var(--navy); color: #fff; }
+  .feedback .explain { font-size: 13px; opacity: .9; margin-top: 6px; }
+  .r-panel { width: 300px; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; }
+  .r-panel h3 { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: var(--steel); text-transform: uppercase; }
+  .connected-count { font-size: 13px; color: var(--steel); margin-top: -8px; }
+  .connected-count span { font-weight: 700; color: var(--navy); }
+  .response-bars { display: flex; flex-direction: column; gap: 6px; }
+  .r-bar-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .r-bar-label { display: flex; justify-content: space-between; font-size: 13px; }
+  .r-bar-label .opt-letter { font-weight: 700; color: var(--aviation); }
+  .r-bar-label .opt-count { color: var(--steel); }
+  .r-bar-track { height: 10px; background: var(--light); border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+  .r-bar-fill { height: 100%; background: var(--aviation); border-radius: 5px; transition: width .4s; }
+  .r-bar-wrap.correct .r-bar-fill { background: var(--green); }
+  .r-bar-wrap.wrong .r-bar-fill { background: var(--red); }
+  .responses-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+  .r-item { display: flex; align-items: center; gap: 8px; padding: 5px 10px; background: var(--light); border-radius: 4px; font-size: 12px; border: 1px solid var(--border); }
+  .r-item .r-name { flex: 1; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-item .r-ans { font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; background: var(--aviation); color: #fff; flex-shrink: 0; }
+  .r-item.correct .r-ans { background: var(--green); }
+  .r-item.wrong .r-ans { background: var(--red); }
+  .r-item .r-pts { font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; }
+  .r-item .r-pts.neg { color: var(--red); }
+  .scoreboard-panel { border-top: 1px solid var(--border); padding-top: 10px; }
+  .score-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border: none; }
+  .score-rank { font-size: 11px; color: var(--steel); width: 20px; text-align: center; font-weight: 700; }
+  .score-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .score-pts { font-size: 18px; font-weight: 800; color: var(--navy); min-width: 40px; text-align: right; }
+  .controls { border-top: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--light); }
+  .ctrl-btn { padding: 8px 20px; border: none; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .15s; }
+  .ctrl-btn:hover { opacity: .85; }
+  .ctrl-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .ctrl-btn.primary { background: var(--navy); color: #fff; }
+  .ctrl-btn.reveal { background: var(--amber); color: var(--navy); }
+  .ctrl-btn.danger { background: var(--red); color: #fff; }
+  .ctrl-hint { font-size: 12px; color: var(--steel); }
+  .ctrl-hint kbd { background: var(--navy); color: #fff; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 10px; }
+  .final-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 24px; text-align: center; }
+  .final-screen h1 { font-size: 52px; font-weight: 800; color: var(--navy); }
+  .podium { display: flex; gap: 20px; align-items: flex-end; }
+  .pillar { width: 150px; padding: 20px 12px; text-align: center; color: #fff; border-radius: 6px 6px 0 0; }
+  .pillar .rank { font-size: 12px; opacity: .85; letter-spacing: 2px; }
+  .pillar .name { font-size: 18px; font-weight: 700; margin: 6px 0; }
+  .pillar .pts { font-size: 44px; font-weight: 800; }
+  .pillar.gold { background: var(--amber); height: 220px; }
+  .pillar.silver { background: var(--steel); height: 185px; }
+  .pillar.bronze { background: #B87333; height: 155px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="topbar">
+    <div class="brand">THE ATMOSPHERE · 050 01 00 00 · PROFESSOR · ALL ANSWER</div>
+    <div class="progress" id="progress">Awaiting start</div>
+    <div class="conn wait" id="conn-status">Connecting...</div>
+  </div>
+  <main>
+    <div class="q-panel" id="q-panel">
+      <div class="cover-center">
+        <h1>THE ATMOSPHERE</h1>
+        <div class="sub">Session 01 · 10 questions · 050 01 00 00</div>
+        <div class="qr-link" id="aluno-url">— loading —</div>
+        <div id="qrcode-container"></div>
+        <div class="scoring-info">
+          <b>Scoring — all answer</b><br>
+          <span class="s1">+3 pts</span> correct in first 5s &nbsp;·&nbsp;
+          <span class="s2">+2 pts</span> correct between 5–15s<br>
+          <span class="s3">+1 pt</span> correct in last 5s &nbsp;·&nbsp;
+          <span class="s0">−1 pt</span> wrong or no answer
+        </div>
+        <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
+      </div>
+    </div>
+    <div class="r-panel">
+      <h3>Connected students</h3>
+      <div class="connected-count"><span id="connected-num">0</span> devices</div>
+      <div>
+        <h3>Answers <span id="answer-count" style="color:var(--navy);font-size:14px;"></span></h3>
+        <div class="response-bars" id="response-bars">
+          <div style="font-size:13px;color:var(--steel);">Awaiting start</div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:6px;">Detail</h3>
+        <div class="responses-list" id="responses-list"></div>
+      </div>
+      <div class="scoreboard-panel">
+        <h3 style="margin-bottom:8px;">Scoreboard</h3>
+        <div id="scoreboard-list"></div>
+      </div>
+    </div>
+  </main>
+  <div class="controls">
+    <div style="display:flex;gap:8px;">
+      <button class="ctrl-btn reveal" id="btn-reveal" onclick="revealAnswer()" disabled>Reveal answer</button>
+      <button class="ctrl-btn primary" id="btn-next" onclick="nextQuestion()">Start quiz</button>
+      <button class="ctrl-btn danger" onclick="resetQuiz()" style="margin-left:8px;">Restart</button>
+    </div>
+    <div class="ctrl-hint"><kbd>SPACE</kbd> next &nbsp; <kbd>R</kbd> reveal &nbsp; <kbd>ESC</kbd> restart</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",
+  authDomain: "meteorology-quiz-2b061.firebaseapp.com",
+  databaseURL: "https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meteorology-quiz-2b061",
+  storageBucket: "meteorology-quiz-2b061.firebasestorage.app",
+  messagingSenderId: "595212568307",
+  appId: "1:595212568307:web:e51bc42c187f13a6359986"
+};
+
+const TIME_PER_Q = 20;
+
+const QUESTIONS = [
+  {
+    eyebrow: "ATMOSPHERE · COMPOSITION",
+    code: "050 01 01 01",
+    q: "Which two gases make up approximately 99% of the dry atmosphere by volume?",
+    options: [
+      "Oxygen (21%) and Carbon Dioxide (78%)",
+      "Nitrogen (78%) and Oxygen (21%)",
+      "Nitrogen (78%) and Argon (21%)",
+      "Oxygen (78%) and Nitrogen (21%)"
+    ],
+    correct: 1,
+    explain: "Dry air is ~78% N₂ and ~21% O₂, with Argon at ~0.93% and CO₂ at ~0.04%. Together N₂ and O₂ account for ~99% of the dry atmosphere."
+  },
+  {
+    eyebrow: "ATMOSPHERE · LAYERS",
+    code: "050 01 01 02",
+    q: "At what altitude does the ISA tropopause occur, and what is the temperature there?",
+    options: [
+      "11 km / 36 090 ft · −56.5°C",
+      "20 km / 65 617 ft · −56.5°C",
+      "11 km / 36 090 ft · −57.5°C",
+      "8 km / 26 247 ft · −50°C"
+    ],
+    correct: 0,
+    explain: "The ISA defines the tropopause at 11 km (36 090 ft) with a temperature of −56.5°C (216.65 K). These values are essential reference numbers for ATPL calculations."
+  },
+  {
+    eyebrow: "ATMOSPHERE · TROPOSPHERE",
+    code: "050 01 01 02",
+    q: "What is the ISA environmental lapse rate (ELR) in the troposphere?",
+    options: [
+      "+1.98°C / 1 000 ft (6.5°C/km)",
+      "+0.65°C / 100 m (6.5°C/km)",
+      "+0.65°C / 1 000 ft (2°C/km)",
+      "+1.00°C / 100 m (10°C/km)"
+    ],
+    correct: 1,
+    explain: "The ISA ELR is 0.65°C per 100 m, equivalent to 6.5°C/km or approximately 2°C per 1 000 ft. Temperature decreases from +15°C at MSL to −56.5°C at the tropopause."
+  },
+  {
+    eyebrow: "ATMOSPHERE · TROPOPAUSE",
+    code: "050 01 01 02",
+    q: "Where is the tropopause at its highest altitude?",
+    options: [
+      "Over the poles in winter",
+      "Over mid-latitudes in summer",
+      "Over the equator",
+      "Over the poles in summer"
+    ],
+    correct: 2,
+    explain: "Intense tropical convection pushes the tropopause to 16–18 km (54 000–57 000 ft) over the equator. At the poles it is only 8–10 km (31 000–35 000 ft)."
+  },
+  {
+    eyebrow: "ATMOSPHERE · STRATOSPHERE",
+    code: "050 01 01 03",
+    q: "In the stratosphere (11–20 km), the lapse rate is described as:",
+    options: [
+      "Positive — temperature falls with altitude",
+      "Zero — temperature is constant (isothermal)",
+      "Negative — temperature rises with altitude",
+      "Super-adiabatic — temperature rises rapidly"
+    ],
+    correct: 1,
+    explain: "From 11 to 20 km the stratosphere is isothermal: temperature remains constant at −56.5°C. Above 20 km, O₃ absorption of UV causes temperature to rise (negative lapse rate), reaching ~0°C at 50 km."
+  },
+  {
+    eyebrow: "ATMOSPHERE · OZONE",
+    code: "050 01 01 03",
+    q: "Ozone (O₃) concentrations at cruise altitude (FL300–FL410) are an aviation hazard because:",
+    options: [
+      "They cause severe CAT near the tropopause",
+      "They reduce visibility below VMC minima",
+      "Concentrations are hazardous to human health",
+      "They freeze fuel systems at −56.5°C"
+    ],
+    correct: 2,
+    explain: "At jet cruise levels the ozone layer peaks at 20–25 km. Concentrations can be hazardous to respiratory health; aircraft ECS systems include catalytic converters, and EASA sets regulatory limits."
+  },
+  {
+    eyebrow: "ATMOSPHERE · LAYERS",
+    code: "050 01 01 04",
+    q: "In which layer does temperature decrease from 0°C to approximately −90°C?",
+    options: [
+      "Stratosphere",
+      "Thermosphere",
+      "Tropopause",
+      "Mesosphere"
+    ],
+    correct: 3,
+    explain: "The mesosphere extends from ~50 to 85 km. Temperature falls from ~0°C at the stratopause to roughly −90°C at the mesopause — the coldest region in the atmosphere. Meteors burn up in this layer."
+  },
+  {
+    eyebrow: "ATMOSPHERE · TROPOSPHERE",
+    code: "050 01 01 02",
+    q: "The tropopause is lower in winter than in summer mainly because:",
+    options: [
+      "Reduced solar heating leads to less convection, limiting troposphere height",
+      "Ozone absorbs more UV radiation in winter",
+      "Earth is further from the Sun in the Northern Hemisphere winter",
+      "Jet streams push the tropopause downward in winter"
+    ],
+    correct: 0,
+    explain: "Less solar heating in winter means less convection. With weaker vertical mixing, the troposphere does not extend as high. At mid-latitudes this produces a ~1–2 km seasonal variation in tropopause height."
+  },
+  {
+    eyebrow: "ATMOSPHERE · ISA",
+    code: "050 01 02 02",
+    q: "An aircraft at FL250 (7 620 m) reports OAT of −30°C. What is the ISA deviation?",
+    options: [
+      "ISA − 10°C",
+      "ISA + 10°C",
+      "ISA − 5°C",
+      "ISA + 5°C"
+    ],
+    correct: 1,
+    explain: "ISA temp at FL250 = +15 − (0.65 × 76.2) = +15 − 49.5 ≈ −34.5°C. OAT = −30°C. Deviation = −30 − (−34.5) = +4.5°C ≈ ISA+5. More precisely using 2°C/1 000 ft: 15 − (2 × 25) = −35°C; deviation = −30 − (−35) = +5°C → ISA+5."
+  },
+  {
+    eyebrow: "ATMOSPHERE · TROPOPAUSE",
+    code: "050 01 01 02",
+    q: "Which phenomena are typically associated with the tropopause? (Select the most complete answer)",
+    options: [
+      "Jet streams, CAT, and maximum cloud tops",
+      "Jet streams, thunderstorm bases, and maximum wind",
+      "CAT, aurora borealis, and ozone peak",
+      "Maximum cloud tops, inversion layer, and ITCZ"
+    ],
+    correct: 0,
+    explain: "The tropopause is characterised by jet streams (polar and subtropical), Clear Air Turbulence (CAT), and the maximum height of clouds. It also marks the boundary where the temperature lapse rate changes."
+  }
+];
+
+const DEBRIEF_TOPICS = "Atmospheric layers & boundaries · ISA temperature profile · Tropopause variation · Ozone & stratosphere";
+
+let state = {
+  idx: -1, timerInterval: null, timeLeft: TIME_PER_Q,
+  revealed: false, scores: {}, responses: {}, connected: {}
+};
+
+let db;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.database();
+  document.getElementById("conn-status").textContent = "Connected ✓";
+  document.getElementById("conn-status").className = "conn ok";
+  // Auto-reset: fresh session on every professor page load
+  db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" });
+  db.ref("responses").remove();
+} catch(e) {
+  document.getElementById("conn-status").textContent = "Firebase error";
+  document.getElementById("conn-status").className = "conn err";
+}
+
+window.addEventListener("load", () => {
+  const alunoUrl = window.location.origin + window.location.pathname.replace("professor.html","") + "aluno.html";
+  document.getElementById("aluno-url").textContent = alunoUrl;
+  try { new QRCode(document.getElementById("qrcode-container"), { text: alunoUrl, width: 130, height: 130, colorDark: "#0B2545", colorLight: "#ffffff" }); } catch(e) {}
+  listenFirebase();
+});
+
+function listenFirebase() {
+  if (!db) return;
+  db.ref("connected").on("value", snap => {
+    state.connected = snap.val() || {};
+    document.getElementById("connected-num").textContent = Object.keys(state.connected).length;
+  });
+  db.ref("responses").on("value", snap => {
+    state.responses = snap.val() || {};
+    renderResponses();
+    renderScoreboard();
+    const total = Object.keys(state.connected).length;
+    const answered = Object.keys(state.responses).length;
+    const el = document.getElementById("answer-count");
+    if (el && state.idx >= 0) el.textContent = `(${answered}/${total})`;
+  });
+}
+
+function calcPts(timeLeft) {
+  if (timeLeft > 15) return 3;
+  if (timeLeft >= 5) return 2;
+  if (timeLeft > 0) return 1;
+  return 0;
+}
+
+function pushQuestionToFirebase(idx) {
+  if (!db) return;
+  const Q = QUESTIONS[idx];
+  db.ref("currentQuestion").set({
+    idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code,
+    timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all"
+  });
+  db.ref("responses").remove();
+}
+
+function nextQuestion() {
+  if (state.idx === -1) {
+    state.idx = 0;
+  } else if (state.revealed) {
+    scoreCurrentQuestion();
+    state.idx++;
+    state.revealed = false;
+  }
+  if (state.idx >= QUESTIONS.length) { renderFinal(); return; }
+  state.responses = {};
+  renderQuestion();
+  pushQuestionToFirebase(state.idx);
+  startTimer();
+  document.getElementById("btn-reveal").disabled = false;
+  document.getElementById("btn-next").textContent = "Next question";
+  document.getElementById("btn-next").disabled = true;
+  document.getElementById("answer-count").textContent = "";
+}
+
+function revealAnswer() {
+  if (state.revealed) return;
+  state.revealed = true;
+  stopTimer();
+  if (db) {
+    db.ref("currentQuestion/revealed").set(true);
+    db.ref("currentQuestion/correct").set(QUESTIONS[state.idx].correct);
+  }
+  showCorrectAnswer();
+  document.getElementById("btn-reveal").disabled = true;
+  document.getElementById("btn-next").disabled = false;
+  if (state.idx >= QUESTIONS.length - 1) document.getElementById("btn-next").textContent = "View final results";
+}
+
+function scoreCurrentQuestion() {
+  const Q = QUESTIONS[state.idx];
+  Object.keys(state.connected).forEach(uid => {
+    if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
+  });
+  Object.entries(state.responses).forEach(([uid, data]) => {
+    if (!state.scores[uid]) state.scores[uid] = { name: data.name, pts: 0 };
+    if (data.answer === Q.correct) {
+      state.scores[uid].pts += calcPts(data.timeLeft || 0);
+    } else {
+      state.scores[uid].pts -= 1;
+    }
+  });
+  Object.keys(state.connected).forEach(uid => {
+    if (!state.responses[uid]) {
+      if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
+      state.scores[uid].pts -= 1;
+    }
+  });
+}
+
+function resetQuiz() {
+  if (!confirm("Restart the quiz? All scores will be lost.")) return;
+  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected };
+  stopTimer();
+  if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
+  location.reload();
+}
+
+function renderQuestion() {
+  const Q = QUESTIONS[state.idx];
+  document.getElementById("progress").innerHTML = `Question <span>${state.idx + 1} / ${QUESTIONS.length}</span>`;
+  const optsHtml = Q.options.map((o, i) => `<div class="opt" id="opt-${i}"><div class="key">${String.fromCharCode(65+i)}</div><div>${o}</div></div>`).join("");
+  document.getElementById("q-panel").innerHTML = `
+    <div class="q-header">
+      <div class="q-meta"><div class="eyebrow">${Q.eyebrow}</div><div class="code">${Q.code}</div></div>
+      <div class="timer" id="timer"><div class="n">${TIME_PER_Q}</div><div class="lbl">SECONDS</div></div>
+    </div>
+    <div class="q-text">${Q.q}</div>
+    <div class="options">${optsHtml}</div>
+    <div class="feedback" id="feedback"></div>`;
+  renderResponseBars({});
+}
+
+function showCorrectAnswer() {
+  const Q = QUESTIONS[state.idx];
+  const el = document.getElementById("opt-" + Q.correct);
+  if (el) el.classList.add("correct");
+  const fb = document.getElementById("feedback");
+  if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
+  renderResponses();
+}
+
+function renderResponses() {
+  const counts = [0,0,0,0];
+  Object.values(state.responses).forEach(r => { if (r.answer >= 0 && r.answer <= 3) counts[r.answer]++; });
+  const total = Math.max(1, Object.keys(state.responses).length);
+  renderResponseBars(counts, total);
+  const list = document.getElementById("responses-list");
+  if (!list) return;
+  const Q = state.idx >= 0 ? QUESTIONS[state.idx] : null;
+  const entries = Object.entries(state.responses).sort((a,b) => (b[1].timeLeft||0) - (a[1].timeLeft||0));
+  list.innerHTML = entries.map(([uid, r]) => {
+    const letter = r.answer >= 0 ? String.fromCharCode(65+r.answer) : "—";
+    const isCorrect = Q && state.revealed ? r.answer === Q.correct : null;
+    const cls = isCorrect === true ? "correct" : isCorrect === false ? "wrong" : "";
+    const pts = state.revealed && Q ? (r.answer === Q.correct ? `+${calcPts(r.timeLeft||0)}` : "−1") : "";
+    const ptsClass = pts.startsWith("+") ? "" : "neg";
+    return `<div class="r-item ${cls}">
+      <div class="r-name">${r.name||"Student"}</div>
+      <div class="r-ans">${letter}</div>
+      <div class="r-pts ${ptsClass}">${pts}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderResponseBars(counts, total) {
+  const barsEl = document.getElementById("response-bars");
+  if (!barsEl) return;
+  const Q = state.idx >= 0 && state.idx < QUESTIONS.length ? QUESTIONS[state.idx] : null;
+  if (!Q) { barsEl.innerHTML = `<div style="font-size:13px;color:var(--steel);">Awaiting start</div>`; return; }
+  const tot = total || 1;
+  barsEl.innerHTML = [0,1,2,3].map(i => {
+    const n = counts[i] || 0;
+    const pct = Math.round((n/tot)*100) || 0;
+    const cls = state.revealed ? (Q && i === Q.correct ? "correct" : n > 0 ? "wrong" : "") : "";
+    return `<div class="r-bar-wrap ${cls}">
+      <div class="r-bar-label"><span class="opt-letter">${String.fromCharCode(65+i)}</span><span class="opt-count">${n}</span></div>
+      <div class="r-bar-track"><div class="r-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderScoreboard() {
+  const el = document.getElementById("scoreboard-list");
+  if (!el) return;
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts).slice(0,10);
+  if (!sorted.length) { el.innerHTML = `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`; return; }
+  el.innerHTML = sorted.map(([uid,s],i) => `<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("");
+}
+
+function renderFinal() {
+  stopTimer();
+  scoreCurrentQuestion();
+  document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts);
+  const classes = ["gold","silver","bronze"];
+  const podium = sorted.slice(0,3).map(([uid,s],i) => `<div class="pillar ${classes[i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
+  document.getElementById("q-panel").innerHTML = `
+    <div class="final-screen">
+      <h1>FINAL RESULT</h1>
+      <div class="podium">${podium||"<p>No answers recorded.</p>"}</div>
+      <div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">
+        Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b>
+      </div>
+    </div>`;
+  if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
+}
+
+function startTimer() {
+  stopTimer(); state.timeLeft = TIME_PER_Q; updateTimer();
+  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
+}
+function stopTimer() { clearInterval(state.timerInterval); }
+function updateTimer() {
+  const t = document.getElementById("timer"); if (!t) return;
+  t.querySelector(".n").textContent = state.timeLeft;
+  t.classList.remove("warn","crit","expired");
+  if (state.timeLeft <= 0) t.classList.add("expired");
+  else if (state.timeLeft <= 5) t.classList.add("crit");
+  else if (state.timeLeft <= 10) t.classList.add("warn");
+}
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") { e.preventDefault(); if (!document.getElementById("btn-next").disabled) nextQuestion(); }
+  if (e.code === "KeyR") { e.preventDefault(); revealAnswer(); }
+  if (e.code === "Escape") resetQuiz();
+});
+</script>
+</body>
+</html>
