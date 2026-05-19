@@ -111,7 +111,6 @@
         <h1>HEAT TRANSFER &amp; INVERSIONS</h1>
         <div class="sub">Session 02 · 10 questions · 050 01 02 00</div>
         <div class="qr-link" id="aluno-url">— loading —</div>
-        <div id="qrcode-container"></div>
         <div class="scoring-info">
           <b>Scoring — all answer</b><br>
           <span class="s1">+3 pts</span> correct in first 5s &nbsp;·&nbsp;
@@ -324,7 +323,6 @@ try {
 window.addEventListener("load", () => {
   const alunoUrl = window.location.origin + window.location.pathname.replace("professor02.html","aluno02.html");
   document.getElementById("aluno-url").textContent = alunoUrl;
-  try { new QRCode(document.getElementById("qrcode-container"), { text: alunoUrl, width: 130, height: 130, colorDark: "#0B2545", colorLight: "#ffffff" }); } catch(e) {}
   listenFirebase();
 });
 
