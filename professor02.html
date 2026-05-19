@@ -314,8 +314,8 @@ try {
   document.getElementById("conn-status").textContent = "Connected ✓";
   document.getElementById("conn-status").className = "conn ok";
   // Auto-reset: fresh session on every professor page load
-  db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" });
-  db.ref("responses").remove();
+  db.ref("session02/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" });
+  db.ref("session02/responses").remove();
 } catch(e) {
   document.getElementById("conn-status").textContent = "Firebase error";
   document.getElementById("conn-status").className = "conn err";
@@ -330,11 +330,11 @@ window.addEventListener("load", () => {
 
 function listenFirebase() {
   if (!db) return;
-  db.ref("connected").on("value", snap => {
+  db.ref("session02/connected").on("value", snap => {
     state.connected = snap.val() || {};
     document.getElementById("connected-num").textContent = Object.keys(state.connected).length;
   });
-  db.ref("responses").on("value", snap => {
+  db.ref("session02/responses").on("value", snap => {
     state.responses = snap.val() || {};
     renderResponses();
     renderScoreboard();
@@ -355,11 +355,11 @@ function calcPts(timeLeft) {
 function pushQuestionToFirebase(idx) {
   if (!db) return;
   const Q = QUESTIONS[idx];
-  db.ref("currentQuestion").set({
+  db.ref("session02/currentQuestion").set({
     idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code,
     timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all"
   });
-  db.ref("responses").remove();
+  db.ref("session02/responses").remove();
 }
 
 function nextQuestion() {
@@ -380,7 +380,7 @@ function revealAnswer() {
   if (state.revealed) return;
   state.revealed = true;
   stopTimer();
-  if (db) { db.ref("currentQuestion/revealed").set(true); db.ref("currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
+  if (db) { db.ref("session02/currentQuestion/revealed").set(true); db.ref("session02/currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
   showCorrectAnswer();
   document.getElementById("btn-reveal").disabled = true;
   document.getElementById("btn-next").disabled = false;
@@ -403,7 +403,7 @@ function resetQuiz() {
   if (!confirm("Restart the quiz? All scores will be lost.")) return;
   state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected };
   stopTimer();
-  if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
+  if (db) { db.ref("session02/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("session02/responses").remove(); }
   location.reload();
 }
 
@@ -478,7 +478,7 @@ function renderFinal() {
   const classes = ["gold","silver","bronze"];
   const podium = sorted.slice(0,3).map(([uid,s],i) => `<div class="pillar ${classes[i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
   document.getElementById("q-panel").innerHTML = `<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
-  if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
+  if (db) db.ref("session02/currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
 }
 
 function startTimer() {

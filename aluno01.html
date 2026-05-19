@@ -176,7 +176,7 @@ function register() {
   userName = name;
   uid = "u_" + Math.random().toString(36).substr(2, 9);
   if (db) {
-    const ref = db.ref("connected/" + uid);
+    const ref = db.ref("session01/connected/" + uid);
     ref.set({ name: userName, joinedAt: Date.now() });
     ref.onDisconnect().remove();
   }
@@ -187,7 +187,7 @@ function register() {
 
 function listenForQuestion() {
   if (!db) return;
-  db.ref("currentQuestion").on("value", snap => {
+  db.ref("session01/currentQuestion").on("value", snap => {
     const data = snap.val();
     if (!data || data.idx === undefined) return;
     if (data.final) { showFinal(); return; }
@@ -244,7 +244,7 @@ function answer(optIdx, btn) {
   document.querySelectorAll(".opt-btn").forEach(b => b.disabled = true);
   btn.classList.add("selected");
   if (db) {
-    db.ref("responses/" + uid).set({ name: userName, answer: optIdx, timeLeft, answeredAt: Date.now(), qIdx: currentQIdx });
+    db.ref("session01/responses/" + uid).set({ name: userName, answer: optIdx, timeLeft, answeredAt: Date.now(), qIdx: currentQIdx });
   }
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
@@ -258,7 +258,7 @@ function answer(optIdx, btn) {
 
 function timeOut() {
   answered = true;
-  if (db) { db.ref("responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
+  if (db) { db.ref("session01/responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
   totalPts -= 1;
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
@@ -272,7 +272,7 @@ function timeOut() {
 
 function showReveal(correctIdx) {
   if (!db) return;
-  db.ref("responses/" + uid).once("value", snap => {
+  db.ref("session01/responses/" + uid).once("value", snap => {
     const r = snap.val();
     const s = document.getElementById("screen-answered");
     if (!r || r.answer === -1 || r.timeout) {
