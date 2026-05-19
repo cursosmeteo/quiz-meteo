@@ -322,7 +322,7 @@ try {
 }
 
 window.addEventListener("load", () => {
-  const alunoUrl = window.location.origin + window.location.pathname.replace("professor.html","") + "aluno.html";
+  const alunoUrl = window.location.origin + window.location.pathname.replace("professor01.html","aluno01.html");
   document.getElementById("aluno-url").textContent = alunoUrl;
   try { new QRCode(document.getElementById("qrcode-container"), { text: alunoUrl, width: 130, height: 130, colorDark: "#0B2545", colorLight: "#ffffff" }); } catch(e) {}
   listenFirebase();
