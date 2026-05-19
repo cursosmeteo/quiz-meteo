@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>The Atmosphere · Student</title>
+<title>Heat Transfer & Inversions · Student</title>
 <style>
   :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -72,9 +72,9 @@
 <body>
 
 <div class="screen active" id="screen-register">
-  <div class="reg-logo">METEOROLOGY · THE ATMOSPHERE · SESSION 01</div>
+  <div class="reg-logo">METEOROLOGY · HEAT TRANSFER & INVERSIONS · SESSION 02</div>
   <div class="reg-card">
-    <h2>The Atmosphere</h2>
+    <h2>Heat Transfer &amp; Inversions</h2>
     <p>All students answer each question</p>
     <div class="scoring-rules">
       <span class="s1">+3</span> correct in first 5s &nbsp;·&nbsp; <span class="s2">+2</span> between 5–15s<br>
@@ -149,18 +149,9 @@ function tone(freq, dur, type, vol) {
   osc.start(); osc.stop(audioCtx.currentTime + dur);
 }
 function tickSound() { tone(880, 0.08, "square", 0.12); }
+function calcPts(timeLeft) { if (timeLeft > 15) return 3; if (timeLeft >= 5) return 2; if (timeLeft > 0) return 1; return 0; }
 
-function calcPts(timeLeft) {
-  if (timeLeft > 15) return 3;
-  if (timeLeft >= 5) return 2;
-  if (timeLeft > 0) return 1;
-  return 0;
-}
-
-try {
-  firebase.initializeApp(FIREBASE_CONFIG);
-  db = firebase.database();
-} catch(e) { console.error(e); }
+try { firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database(); } catch(e) { console.error(e); }
 
 document.getElementById("name-input").addEventListener("input", function() {
   document.getElementById("reg-btn").disabled = this.value.trim().length < 2;
@@ -175,11 +166,7 @@ function register() {
   ensureAudio();
   userName = name;
   uid = "u_" + Math.random().toString(36).substr(2, 9);
-  if (db) {
-    const ref = db.ref("connected/" + uid);
-    ref.set({ name: userName, joinedAt: Date.now() });
-    ref.onDisconnect().remove();
-  }
+  if (db) { const ref = db.ref("connected/" + uid); ref.set({ name: userName, joinedAt: Date.now() }); ref.onDisconnect().remove(); }
   document.getElementById("wait-name-display").textContent = userName;
   showScreen("screen-waiting");
   listenForQuestion();
@@ -192,16 +179,8 @@ function listenForQuestion() {
     if (!data || data.idx === undefined) return;
     if (data.final) { showFinal(); return; }
     if (data.idx === -1) { showScreen("screen-waiting"); return; }
-    if (data.idx !== currentQIdx) {
-      currentQIdx = data.idx;
-      answered = false;
-      showQuestion(data);
-      return;
-    }
-    if (data.revealed && data.correct !== undefined && revealedQIdx !== currentQIdx) {
-      revealedQIdx = currentQIdx;
-      showReveal(data.correct);
-    }
+    if (data.idx !== currentQIdx) { currentQIdx = data.idx; answered = false; showQuestion(data); return; }
+    if (data.revealed && data.correct !== undefined && revealedQIdx !== currentQIdx) { revealedQIdx = currentQIdx; showReveal(data.correct); }
   });
 }
 
@@ -243,9 +222,7 @@ function answer(optIdx, btn) {
   const timeLeft = parseInt(document.getElementById("q-timer")?.textContent) || 0;
   document.querySelectorAll(".opt-btn").forEach(b => b.disabled = true);
   btn.classList.add("selected");
-  if (db) {
-    db.ref("responses/" + uid).set({ name: userName, answer: optIdx, timeLeft, answeredAt: Date.now(), qIdx: currentQIdx });
-  }
+  if (db) db.ref("responses/" + uid).set({ name: userName, answer: optIdx, timeLeft, answeredAt: Date.now(), qIdx: currentQIdx });
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
   document.getElementById("ans-icon").textContent = "⏳";
@@ -258,7 +235,7 @@ function answer(optIdx, btn) {
 
 function timeOut() {
   answered = true;
-  if (db) { db.ref("responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
+  if (db) db.ref("responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true });
   totalPts -= 1;
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
@@ -275,10 +252,7 @@ function showReveal(correctIdx) {
   db.ref("responses/" + uid).once("value", snap => {
     const r = snap.val();
     const s = document.getElementById("screen-answered");
-    if (!r || r.answer === -1 || r.timeout) {
-      document.getElementById("ans-sub").textContent = `Correct answer: ${String.fromCharCode(65 + correctIdx)}`;
-      return;
-    }
+    if (!r || r.answer === -1 || r.timeout) { document.getElementById("ans-sub").textContent = `Correct answer: ${String.fromCharCode(65 + correctIdx)}`; return; }
     const isCorrect = r.answer === correctIdx;
     const pts = isCorrect ? calcPts(r.timeLeft || 0) : -1;
     totalPts += pts;
