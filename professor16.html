@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Icing & Turbulence · Professor</title>
+<style>
+  :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; --text: #3A3A3A; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Calibri', 'Segoe UI', sans-serif; background: #fff; color: var(--text); }
+  .stage { display: flex; flex-direction: column; height: 100vh; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px; background: var(--navy); color: #fff; gap: 16px; }
+  .topbar .brand { font-size: 13px; letter-spacing: 1.2px; color: #9DB4D1; font-weight: 600; white-space: nowrap; }
+  .topbar .progress { font-size: 14px; color: #fff; font-weight: 600; }
+  .topbar .progress span { color: var(--amber); }
+  .conn { font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 700; letter-spacing: .5px; }
+  .conn.ok { background: var(--green); color: #fff; }
+  .conn.err { background: var(--red); color: #fff; }
+  .conn.wait { background: var(--steel); color: #fff; }
+  main { flex: 1; display: flex; overflow: hidden; }
+  .q-panel { flex: 1; padding: 24px 32px; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+  .cover-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; gap: 20px; }
+  .cover-center h1 { font-size: 44px; font-weight: 800; color: var(--navy); letter-spacing: -2px; }
+  .cover-center .sub { font-size: 18px; color: var(--steel); font-style: italic; }
+  .qr-link { font-size: 20px; font-weight: 800; color: var(--aviation); margin-top: 8px; }
+  .start-hint { font-size: 15px; color: var(--steel); margin-top: 12px; }
+  .start-hint kbd { background: var(--navy); color: #fff; padding: 4px 12px; border-radius: 4px; font-family: monospace; }
+  .scoring-info { background: var(--light); border: 1px solid var(--border); border-top: 3px solid var(--aviation); padding: 14px 20px; border-radius: 4px; font-size: 14px; color: var(--text); line-height: 1.8; max-width: 500px; }
+  .scoring-info b { color: var(--navy); }
+  .s1 { color: var(--green); font-weight: 700; }
+  .s2 { color: var(--amber); font-weight: 700; }
+  .s3 { color: var(--steel); font-weight: 700; }
+  .s0 { color: var(--red); font-weight: 700; }
+  .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .q-meta .eyebrow { font-size: 12px; color: var(--aviation); font-weight: 700; letter-spacing: 1.5px; }
+  .q-meta .code { font-family: monospace; font-size: 11px; color: var(--steel); margin-top: 3px; }
+  .timer { width: 96px; height: 96px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; flex-direction: column; transition: background .3s; flex-shrink: 0; }
+  .timer.warn { background: var(--amber); }
+  .timer.crit { background: var(--red); animation: pulse .5s infinite alternate; }
+  .timer.expired { background: var(--steel); }
+  .timer .n { font-size: 38px; font-weight: 800; color: #fff; line-height: 1; }
+  .timer .lbl { font-size: 9px; color: rgba(255,255,255,.85); letter-spacing: 1.5px; margin-top: 3px; }
+  @keyframes pulse { from{transform:scale(1)} to{transform:scale(1.05)} }
+  .q-text { font-size: 22px; color: var(--navy); font-weight: 700; line-height: 1.3; margin: 10px 0 16px; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt { background: var(--light); border: 2px solid var(--border); padding: 12px 16px; font-size: 15px; color: var(--text); border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; }
+  .opt .key { background: var(--aviation); color: #fff; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .opt.correct { background: #E8F5EE; border-color: var(--green); }
+  .opt.correct .key { background: var(--green); }
+  .feedback { margin-top: 12px; padding: 12px 16px; border-radius: 6px; font-size: 14px; display: none; line-height: 1.5; }
+  .feedback.show { display: block; background: var(--navy); color: #fff; }
+  .feedback .explain { font-size: 13px; opacity: .9; margin-top: 6px; }
+  .r-panel { width: 300px; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; }
+  .r-panel h3 { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: var(--steel); text-transform: uppercase; }
+  .connected-count { font-size: 13px; color: var(--steel); margin-top: -8px; }
+  .connected-count span { font-weight: 700; color: var(--navy); }
+  .response-bars { display: flex; flex-direction: column; gap: 6px; }
+  .r-bar-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .r-bar-label { display: flex; justify-content: space-between; font-size: 13px; }
+  .r-bar-label .opt-letter { font-weight: 700; color: var(--aviation); }
+  .r-bar-label .opt-count { color: var(--steel); }
+  .r-bar-track { height: 10px; background: var(--light); border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+  .r-bar-fill { height: 100%; background: var(--aviation); border-radius: 5px; transition: width .4s; }
+  .r-bar-wrap.correct .r-bar-fill { background: var(--green); }
+  .r-bar-wrap.wrong .r-bar-fill { background: var(--red); }
+  .responses-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+  .r-item { display: flex; align-items: center; gap: 8px; padding: 5px 10px; background: var(--light); border-radius: 4px; font-size: 12px; border: 1px solid var(--border); }
+  .r-item .r-name { flex: 1; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-item .r-ans { font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; background: var(--aviation); color: #fff; flex-shrink: 0; }
+  .r-item.correct .r-ans { background: var(--green); }
+  .r-item.wrong .r-ans { background: var(--red); }
+  .r-item .r-pts { font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; }
+  .r-item .r-pts.neg { color: var(--red); }
+  .scoreboard-panel { border-top: 1px solid var(--border); padding-top: 10px; }
+  .score-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border: none; }
+  .score-rank { font-size: 11px; color: var(--steel); width: 20px; text-align: center; font-weight: 700; }
+  .score-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .score-pts { font-size: 18px; font-weight: 800; color: var(--navy); min-width: 40px; text-align: right; }
+  .controls { border-top: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--light); }
+  .ctrl-btn { padding: 8px 20px; border: none; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .15s; }
+  .ctrl-btn:hover { opacity: .85; }
+  .ctrl-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .ctrl-btn.primary { background: var(--navy); color: #fff; }
+  .ctrl-btn.reveal { background: var(--amber); color: var(--navy); }
+  .ctrl-btn.danger { background: var(--red); color: #fff; }
+  .ctrl-hint { font-size: 12px; color: var(--steel); }
+  .ctrl-hint kbd { background: var(--navy); color: #fff; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 10px; }
+  .final-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 24px; text-align: center; }
+  .final-screen h1 { font-size: 52px; font-weight: 800; color: var(--navy); }
+  .podium { display: flex; gap: 20px; align-items: flex-end; }
+  .pillar { width: 150px; padding: 20px 12px; text-align: center; color: #fff; border-radius: 6px 6px 0 0; }
+  .pillar .rank { font-size: 12px; opacity: .85; letter-spacing: 2px; }
+  .pillar .name { font-size: 18px; font-weight: 700; margin: 6px 0; }
+  .pillar .pts { font-size: 44px; font-weight: 800; }
+  .pillar.gold { background: var(--amber); height: 220px; }
+  .pillar.silver { background: var(--steel); height: 185px; }
+  .pillar.bronze { background: #B87333; height: 155px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="topbar">
+    <div class="brand">ICING & TURBULENCE · 050 09 01/02 · PROFESSOR · ALL ANSWER</div>
+    <div class="progress" id="progress">Awaiting start</div>
+    <div class="conn wait" id="conn-status">Connecting...</div>
+  </div>
+  <main>
+    <div class="q-panel" id="q-panel">
+      <div class="cover-center">
+        <h1>ICING &amp; TURBULENCE</h1>
+        <div class="sub">Session 16 · 10 questions · 050 09 01/02 00</div>
+        <div class="qr-link" id="aluno-url">— loading —</div>
+        <div id="qrcode-container"></div>
+        <div class="scoring-info">
+          <b>Scoring — all answer</b><br>
+          <span class="s1">+3 pts</span> correct in first 5s &nbsp;·&nbsp;
+          <span class="s2">+2 pts</span> correct between 5–15s<br>
+          <span class="s3">+1 pt</span> correct in last 5s &nbsp;·&nbsp;
+          <span class="s0">−1 pt</span> wrong or no answer
+        </div>
+        <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
+      </div>
+    </div>
+    <div class="r-panel">
+      <h3>Connected students</h3>
+      <div class="connected-count"><span id="connected-num">0</span> devices</div>
+      <div>
+        <h3>Answers <span id="answer-count" style="color:var(--navy);font-size:14px;"></span></h3>
+        <div class="response-bars" id="response-bars"><div style="font-size:13px;color:var(--steel);">Awaiting start</div></div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:6px;">Detail</h3>
+        <div class="responses-list" id="responses-list"></div>
+      </div>
+      <div class="scoreboard-panel">
+        <h3 style="margin-bottom:8px;">Scoreboard</h3>
+        <div id="scoreboard-list"></div>
+      </div>
+    </div>
+  </main>
+  <div class="controls">
+    <div style="display:flex;gap:8px;">
+      <button class="ctrl-btn reveal" id="btn-reveal" onclick="revealAnswer()" disabled>Reveal answer</button>
+      <button class="ctrl-btn primary" id="btn-next" onclick="nextQuestion()">Start quiz</button>
+      <button class="ctrl-btn danger" onclick="resetQuiz()" style="margin-left:8px;">Restart</button>
+    </div>
+    <div class="ctrl-hint"><kbd>SPACE</kbd> next &nbsp; <kbd>R</kbd> reveal &nbsp; <kbd>ESC</kbd> restart</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",
+  authDomain: "meteorology-quiz-2b061.firebaseapp.com",
+  databaseURL: "https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meteorology-quiz-2b061",
+  storageBucket: "meteorology-quiz-2b061.firebasestorage.app",
+  messagingSenderId: "595212568307",
+  appId: "1:595212568307:web:e51bc42c187f13a6359986"
+};
+const TIME_PER_Q = 20;
+
+const QUESTIONS = [
+  {
+    eyebrow: "ICING · CONDITIONS",
+    code: "050 09 01 01",
+    q: "What are the THREE essential conditions for ice to form on an airframe in flight?",
+    options: [
+      "Temperature below −20°C, ice crystals present, high altitude",
+      "Supercooled liquid water droplets, ambient air below 0°C, airframe surface below 0°C",
+      "Freezing rain, strong winds, cloud base below 1 000 ft",
+      "Relative humidity above 80%, temperature below 0°C, precipitation"
+    ],
+    correct: 1,
+    explain: "The three essentials are: (1) water in liquid state as supercooled droplets, (2) ambient air temperature at or below 0°C, and (3) airframe surface temperature at or below 0°C. Pure ice crystals below −40°C do not normally adhere to the airframe."
+  },
+  {
+    eyebrow: "ICING · TYPES",
+    code: "050 09 01 02",
+    q: "Clear (glaze) ice is the most dangerous type of airframe icing because:",
+    options: [
+      "It only forms in cirrus clouds at very high altitude",
+      "It forms quickly from large supercooled droplets, builds unevenly and adheres strongly",
+      "It is white and opaque, making it easy to miss during pre-flight inspection",
+      "It is caused by small droplets that freeze instantly with no flowback"
+    ],
+    correct: 1,
+    explain: "Clear ice forms from large supercooled droplets (Ns, Cu, Cb, 0 to −20°C). Latent heat delays freezing and part of the droplet flows back before freezing. The result is rapid, uneven build-up that destroys aerofoil shapes and adheres strongly — making it the most hazardous type."
+  },
+  {
+    eyebrow: "ICING · TYPES",
+    code: "050 09 01 02",
+    q: "Rime ice forms from small supercooled water droplets that freeze instantly. It appears:",
+    options: [
+      "Transparent and smooth, with no trapped air",
+      "White and opaque, with a rough texture, growing from the leading edges",
+      "Dark and dense, concentrated along wing roots",
+      "Clear with ice horns that protrude 10–15 cm ahead of the leading edge"
+    ],
+    correct: 1,
+    explain: "Small droplets freeze instantly on contact — air becomes trapped between each droplet, making rime ice white and opaque. There is little or no flowback. The ice grows out from leading edges and is compacted by the airstream. Less hazardous than clear ice but can still affect air intakes."
+  },
+  {
+    eyebrow: "ICING · HOAR FROST",
+    code: "050 09 01 02",
+    q: "Hoar frost forms on an aircraft by sublimation. This means:",
+    options: [
+      "Supercooled rain freezes on contact with a cold airframe",
+      "Water vapour converts directly to ice crystals without passing through a liquid phase",
+      "Ice crystals at high altitude melt and refreeze on descent",
+      "Moisture from fuel tanks migrates through wing skin and freezes"
+    ],
+    correct: 1,
+    explain: "Hoar frost occurs in clear air when the airframe is below 0°C and the ambient temperature drops to the frost point. Water vapour sublimates — converts directly to ice crystals — without becoming liquid. It requires sublimation nuclei (dust, soil particles). Must be removed before take-off."
+  },
+  {
+    eyebrow: "ICING · SEVERITY",
+    code: "050 09 01 03",
+    q: "Which cloud types produce the MOST SEVERE airframe icing?",
+    options: [
+      "Cirrus (Ci) and Cirrostratus (Cs) — highest altitude, coldest temperatures",
+      "Altostratus (As) and Altocumulus (Ac) — mid-level, steady icing",
+      "Cumulonimbus (Cb) and Cumulus (Cu) — strong updrafts, large supercooled droplets",
+      "Stratus (St) and Stratocumulus (Sc) — persistent, widespread icing layers"
+    ],
+    correct: 2,
+    explain: "Cu and Cb produce SEVERE icing because strong updrafts create high concentrations of large supercooled water droplets. Ns is moderate to severe; Sc is light to moderate (can be severe in mountains); Ci/Cs/Cc produce little or no icing as droplets are ice crystals."
+  },
+  {
+    eyebrow: "ICING · ICE CRYSTAL ICING",
+    code: "050 09 01 04",
+    q: "Ice Crystal Icing (ICI) is most likely to occur:",
+    options: [
+      "At low level during freezing rain events near warm fronts",
+      "In and around large tropical convective systems at high altitude, often invisible to weather radar",
+      "During ground operations in sub-zero temperatures with snowfall",
+      "In stratiform cloud layers between FL100 and FL200 in winter"
+    ],
+    correct: 1,
+    explain: "ICI occurs within and around large tropical Mesoscale Convective Systems (MCS) at high altitude. Very small ice crystals (~40 microns) are invisible to the eye and do NOT appear on weather radar because temperatures are too cold for supercooled liquid water. Most events have occurred in tropical latitudes."
+  },
+  {
+    eyebrow: "ICING · CARBURETTOR",
+    code: "050 09 01 01",
+    q: "Carburettor icing is most dangerous in which temperature range?",
+    options: [
+      "−40°C to −20°C at any altitude",
+      "0°C to −10°C in clear air only",
+      "−10°C to +25°C in cloud, fog or precipitation",
+      "+25°C to +40°C on hot humid days at low altitude"
+    ],
+    correct: 2,
+    explain: "Carburettor icing is caused by the temperature drop from fuel evaporation (latent heat) and adiabatic expansion through the Venturi. It is most dangerous between −10°C and +25°C in cloud, fog or precipitation at ANY power setting — including during descent at low power."
+  },
+  {
+    eyebrow: "TURBULENCE · CAT",
+    code: "050 09 02 02",
+    q: "Clear Air Turbulence (CAT) cannot be detected by weather radar because:",
+    options: [
+      "It occurs only at night when radar returns are weaker",
+      "CAT contains no water droplets for the radar to reflect off",
+      "Radar cannot detect turbulence above FL300",
+      "CAT always occurs in clear skies below the freezing level"
+    ],
+    correct: 1,
+    explain: "Weather radar detects liquid water. CAT occurs at high altitudes (typically above FL150) in clear air at air mass boundaries — it contains no water droplets, so there is nothing to produce a radar return. Forecasts, PIREPs and turbulence forecast charts (SigWX) are the main detection tools."
+  },
+  {
+    eyebrow: "TURBULENCE · CB AVOIDANCE",
+    code: "050 09 02 01",
+    q: "When avoiding a thunderstorm cell, the recommended lateral separation is:",
+    options: [
+      "5 NM — standard IFR separation minima apply",
+      "10 NM — sufficient to avoid hail and turbulence",
+      "20 NM laterally, preferably upwind to avoid hail",
+      "50 NM — required any time CB is reported on SIGMET"
+    ],
+    correct: 2,
+    explain: "Storm cells should be avoided by at least 20 NM laterally, preferably on the upwind side to avoid hail (which can be thrown downwind from the anvil). Turbulence can extend well above the visible cloud top. Cells with tops above 25 000 ft should NOT be overflown."
+  },
+  {
+    eyebrow: "TURBULENCE · EFFECTS",
+    code: "050 09 02 01",
+    q: "Jet engine anti-icing must be selected ON when there is precipitation and the indicated OAT is at or below:",
+    options: [
+      "+25°C",
+      "+10°C",
+      "0°C",
+      "−10°C"
+    ],
+    correct: 1,
+    explain: "Jet engine intake lips and inlet guide vanes can ice up at temperatures well above freezing. Engine anti-icing must be selected ON when there is precipitation and indicated OAT is +10°C or below. This is especially critical at low forward speed with high engine power, such as during approach."
+  }
+];
+
+const DEBRIEF_TOPICS = "3 icing conditions · Clear vs rime vs hoar frost · ICI & radar blind spot · CAT detection · CB avoidance (20 NM)";
+
+let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
+let db;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
+  document.getElementById("conn-status").textContent = "Connected ✓";
+  document.getElementById("conn-status").className = "conn ok";
+} catch(e) { document.getElementById("conn-status").textContent = "Firebase error"; document.getElementById("conn-status").className = "conn err"; }
+
+window.addEventListener("load", () => {
+  const alunoUrl = window.location.origin + window.location.pathname.replace("professor16.html","") + "aluno16.html";
+  document.getElementById("aluno-url").textContent = alunoUrl;
+  try { new QRCode(document.getElementById("qrcode-container"), { text: alunoUrl, width: 130, height: 130, colorDark: "#0B2545", colorLight: "#ffffff" }); } catch(e) {}
+  listenFirebase();
+});
+
+function listenFirebase() {
+  if (!db) return;
+  db.ref("connected").on("value", snap => { state.connected = snap.val() || {}; document.getElementById("connected-num").textContent = Object.keys(state.connected).length; });
+  db.ref("responses").on("value", snap => {
+    state.responses = snap.val() || {}; renderResponses(); renderScoreboard();
+    const el = document.getElementById("answer-count");
+    if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
+  });
+}
+function calcPts(t) { return t > 15 ? 3 : t >= 5 ? 2 : t > 0 ? 1 : 0; }
+function pushQ(idx) {
+  if (!db) return; const Q = QUESTIONS[idx];
+  db.ref("currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
+  db.ref("responses").remove();
+}
+function nextQuestion() {
+  if (state.idx === -1) { state.idx = 0; }
+  else if (state.revealed) { scoreCurrentQuestion(); state.idx++; state.revealed = false; }
+  if (state.idx >= QUESTIONS.length) { renderFinal(); return; }
+  state.responses = {}; renderQuestion(); pushQ(state.idx); startTimer();
+  document.getElementById("btn-reveal").disabled = false;
+  document.getElementById("btn-next").textContent = "Next question";
+  document.getElementById("btn-next").disabled = true;
+  document.getElementById("answer-count").textContent = "";
+}
+function revealAnswer() {
+  if (state.revealed) return; state.revealed = true; stopTimer();
+  if (db) { db.ref("currentQuestion/revealed").set(true); db.ref("currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
+  showCorrectAnswer();
+  document.getElementById("btn-reveal").disabled = true; document.getElementById("btn-next").disabled = false;
+  if (state.idx >= QUESTIONS.length - 1) document.getElementById("btn-next").textContent = "View final results";
+}
+function scoreCurrentQuestion() {
+  const Q = QUESTIONS[state.idx];
+  Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
+  Object.entries(state.responses).forEach(([uid, d]) => {
+    if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
+    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : -1;
+  });
+  Object.keys(state.connected).forEach(uid => { if (!state.responses[uid]) { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; state.scores[uid].pts -= 1; } });
+}
+function resetQuiz() {
+  if (!confirm("Restart the quiz? All scores will be lost.")) return;
+  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected }; stopTimer();
+  if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
+  location.reload();
+}
+function renderQuestion() {
+  const Q = QUESTIONS[state.idx];
+  document.getElementById("progress").innerHTML = `Question <span>${state.idx + 1} / ${QUESTIONS.length}</span>`;
+  document.getElementById("q-panel").innerHTML = `
+    <div class="q-header">
+      <div class="q-meta"><div class="eyebrow">${Q.eyebrow}</div><div class="code">${Q.code}</div></div>
+      <div class="timer" id="timer"><div class="n">${TIME_PER_Q}</div><div class="lbl">SECONDS</div></div>
+    </div>
+    <div class="q-text">${Q.q}</div>
+    <div class="options">${Q.options.map((o,i)=>`<div class="opt" id="opt-${i}"><div class="key">${String.fromCharCode(65+i)}</div><div>${o}</div></div>`).join("")}</div>
+    <div class="feedback" id="feedback"></div>`;
+  renderResponseBars({});
+}
+function showCorrectAnswer() {
+  const Q = QUESTIONS[state.idx];
+  const el = document.getElementById("opt-"+Q.correct); if (el) el.classList.add("correct");
+  const fb = document.getElementById("feedback"); if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
+  renderResponses();
+}
+function renderResponses() {
+  const counts = [0,0,0,0]; Object.values(state.responses).forEach(r => { if (r.answer>=0&&r.answer<=3) counts[r.answer]++; });
+  renderResponseBars(counts, Math.max(1, Object.keys(state.responses).length));
+  const list = document.getElementById("responses-list"); if (!list) return;
+  const Q = state.idx >= 0 ? QUESTIONS[state.idx] : null;
+  list.innerHTML = Object.entries(state.responses).sort((a,b)=>(b[1].timeLeft||0)-(a[1].timeLeft||0)).map(([uid,r])=>{
+    const letter = r.answer>=0 ? String.fromCharCode(65+r.answer) : "—";
+    const isC = Q&&state.revealed ? r.answer===Q.correct : null;
+    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(r.timeLeft||0)}`:"−1") : "";
+    return `<div class="r-item ${isC===true?"correct":isC===false?"wrong":""}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans">${letter}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
+  }).join("");
+}
+function renderResponseBars(counts, total) {
+  const barsEl = document.getElementById("response-bars"); if (!barsEl) return;
+  const Q = state.idx>=0&&state.idx<QUESTIONS.length ? QUESTIONS[state.idx] : null;
+  if (!Q) { barsEl.innerHTML=`<div style="font-size:13px;color:var(--steel);">Awaiting start</div>`; return; }
+  barsEl.innerHTML = [0,1,2,3].map(i => {
+    const n=counts[i]||0, pct=Math.round((n/(total||1))*100)||0;
+    const cls=state.revealed?(i===Q.correct?"correct":n>0?"wrong":""):"";
+    return `<div class="r-bar-wrap ${cls}"><div class="r-bar-label"><span class="opt-letter">${String.fromCharCode(65+i)}</span><span class="opt-count">${n}</span></div><div class="r-bar-track"><div class="r-bar-fill" style="width:${pct}%"></div></div></div>`;
+  }).join("");
+}
+function renderScoreboard() {
+  const el = document.getElementById("scoreboard-list"); if (!el) return;
+  const sorted = Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts).slice(0,10);
+  el.innerHTML = sorted.length ? sorted.map(([,s],i)=>`<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("") : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
+}
+function renderFinal() {
+  stopTimer(); scoreCurrentQuestion(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
+  const sorted=Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts);
+  const podium=sorted.slice(0,3).map(([,s],i)=>`<div class="pillar ${["gold","silver","bronze"][i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
+  document.getElementById("q-panel").innerHTML=`<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
+  if (db) db.ref("currentQuestion").set({idx:-1,q:"END",options:[],revealed:true,final:true,mode:"all"});
+}
+function startTimer() { stopTimer(); state.timeLeft=TIME_PER_Q; updateTimer(); state.timerInterval=setInterval(()=>{state.timeLeft--;updateTimer();if(state.timeLeft<=0){stopTimer();if(!state.revealed)revealAnswer();}},1000); }
+function stopTimer() { clearInterval(state.timerInterval); }
+function updateTimer() {
+  const t=document.getElementById("timer"); if(!t)return;
+  t.querySelector(".n").textContent=state.timeLeft; t.classList.remove("warn","crit","expired");
+  if(state.timeLeft<=0)t.classList.add("expired"); else if(state.timeLeft<=5)t.classList.add("crit"); else if(state.timeLeft<=10)t.classList.add("warn");
+}
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space"){e.preventDefault();if(!document.getElementById("btn-next").disabled)nextQuestion();}
+  if(e.code==="KeyR"){e.preventDefault();revealAnswer();}
+  if(e.code==="Escape")resetQuiz();
+});
+</script>
+</body>
+</html>
