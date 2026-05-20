@@ -187,7 +187,7 @@ function listenForQuestion() {
 }
 function showQuestion(data) {
   const elapsed = Math.round((Date.now() - data.startedAt) / 1000);
-  const remaining = Math.max(0, (data.timeLimit || TIME_PER_Q) - elapsed);
+  const remaining = Math.min(TIME_PER_Q, Math.max(0, (data.timeLimit || TIME_PER_Q) - elapsed));
   document.getElementById("q-eyebrow").textContent = data.eyebrow || "METEOROLOGY";
   document.getElementById("q-num").textContent = `QUESTION ${data.idx + 1} / 10`;
   document.getElementById("q-text").textContent = data.q;
