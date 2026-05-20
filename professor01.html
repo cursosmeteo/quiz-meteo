@@ -111,12 +111,13 @@
         <h1>THE ATMOSPHERE</h1>
         <div class="sub">Session 01 · 10 questions · 050 01 00 00</div>
         <div class="qr-link" id="aluno-url">— loading —</div>
+        <div id="qrcode-container"></div>
         <div class="scoring-info">
           <b>Scoring — all answer</b><br>
           <span class="s1">+3 pts</span> correct in first 5s &nbsp;·&nbsp;
           <span class="s2">+2 pts</span> correct between 5–15s<br>
           <span class="s3">+1 pt</span> correct in last 5s &nbsp;·&nbsp;
-          <span class="s0">−1 pt</span> wrong or no answer
+          <span class="s0">−1 pt</span> wrong &nbsp;·&nbsp; <span class="s3">0 pts</span> no answer
         </div>
         <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
       </div>
@@ -126,18 +127,10 @@
       <div class="connected-count"><span id="connected-num">0</span> devices</div>
       <div>
         <h3>Answers <span id="answer-count" style="color:var(--navy);font-size:14px;"></span></h3>
-        <div class="response-bars" id="response-bars">
-          <div style="font-size:13px;color:var(--steel);">Awaiting start</div>
-        </div>
+        <div class="response-bars" id="response-bars"><div style="font-size:13px;color:var(--steel);">Awaiting start</div></div>
       </div>
-      <div>
-        <h3 style="margin-bottom:6px;">Detail</h3>
-        <div class="responses-list" id="responses-list"></div>
-      </div>
-      <div class="scoreboard-panel">
-        <h3 style="margin-bottom:8px;">Scoreboard</h3>
-        <div id="scoreboard-list"></div>
-      </div>
+      <div><h3 style="margin-bottom:6px;">Detail</h3><div class="responses-list" id="responses-list"></div></div>
+      <div class="scoreboard-panel"><h3 style="margin-bottom:8px;">Scoreboard</h3><div id="scoreboard-list"></div></div>
     </div>
   </main>
   <div class="controls">
@@ -149,7 +142,6 @@
     <div class="ctrl-hint"><kbd>SPACE</kbd> next &nbsp; <kbd>R</kbd> reveal &nbsp; <kbd>ESC</kbd> restart</div>
   </div>
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
@@ -163,373 +155,151 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "595212568307",
   appId: "1:595212568307:web:e51bc42c187f13a6359986"
 };
-
 const TIME_PER_Q = 20;
-
 const QUESTIONS = [
-  {
-    eyebrow: "ATMOSPHERE · COMPOSITION",
-    code: "050 01 01 01",
-    q: "Which two gases make up approximately 99% of the dry atmosphere by volume?",
-    options: [
-      "Oxygen (21%) and Carbon Dioxide (78%)",
-      "Nitrogen (78%) and Oxygen (21%)",
-      "Nitrogen (78%) and Argon (21%)",
-      "Oxygen (78%) and Nitrogen (21%)"
-    ],
-    correct: 1,
-    explain: "Dry air is ~78% N₂ and ~21% O₂, with Argon at ~0.93% and CO₂ at ~0.04%. Together N₂ and O₂ account for ~99% of the dry atmosphere."
-  },
-  {
-    eyebrow: "ATMOSPHERE · LAYERS",
-    code: "050 01 01 02",
-    q: "At what altitude does the ISA tropopause occur, and what is the temperature there?",
-    options: [
-      "11 km / 36 090 ft · −56.5°C",
-      "20 km / 65 617 ft · −56.5°C",
-      "11 km / 36 090 ft · −57.5°C",
-      "8 km / 26 247 ft · −50°C"
-    ],
-    correct: 0,
-    explain: "The ISA defines the tropopause at 11 km (36 090 ft) with a temperature of −56.5°C (216.65 K). These values are essential reference numbers for ATPL calculations."
-  },
-  {
-    eyebrow: "ATMOSPHERE · TROPOSPHERE",
-    code: "050 01 01 02",
-    q: "What is the ISA environmental lapse rate (ELR) in the troposphere?",
-    options: [
-      "+1.98°C / 1 000 ft (6.5°C/km)",
-      "+0.65°C / 100 m (6.5°C/km)",
-      "+0.65°C / 1 000 ft (2°C/km)",
-      "+1.00°C / 100 m (10°C/km)"
-    ],
-    correct: 1,
-    explain: "The ISA ELR is 0.65°C per 100 m, equivalent to 6.5°C/km or approximately 2°C per 1 000 ft. Temperature decreases from +15°C at MSL to −56.5°C at the tropopause."
-  },
-  {
-    eyebrow: "ATMOSPHERE · TROPOPAUSE",
-    code: "050 01 01 02",
-    q: "Where is the tropopause at its highest altitude?",
-    options: [
-      "Over the poles in winter",
-      "Over mid-latitudes in summer",
-      "Over the equator",
-      "Over the poles in summer"
-    ],
-    correct: 2,
-    explain: "Intense tropical convection pushes the tropopause to 16–18 km (54 000–57 000 ft) over the equator. At the poles it is only 8–10 km (31 000–35 000 ft)."
-  },
-  {
-    eyebrow: "ATMOSPHERE · STRATOSPHERE",
-    code: "050 01 01 03",
-    q: "In the stratosphere (11–20 km), the lapse rate is described as:",
-    options: [
-      "Positive — temperature falls with altitude",
-      "Zero — temperature is constant (isothermal)",
-      "Negative — temperature rises with altitude",
-      "Super-adiabatic — temperature rises rapidly"
-    ],
-    correct: 1,
-    explain: "From 11 to 20 km the stratosphere is isothermal: temperature remains constant at −56.5°C. Above 20 km, O₃ absorption of UV causes temperature to rise (negative lapse rate), reaching ~0°C at 50 km."
-  },
-  {
-    eyebrow: "ATMOSPHERE · OZONE",
-    code: "050 01 01 03",
-    q: "Ozone (O₃) concentrations at cruise altitude (FL300–FL410) are an aviation hazard because:",
-    options: [
-      "They cause severe CAT near the tropopause",
-      "They reduce visibility below VMC minima",
-      "Concentrations are hazardous to human health",
-      "They freeze fuel systems at −56.5°C"
-    ],
-    correct: 2,
-    explain: "At jet cruise levels the ozone layer peaks at 20–25 km. Concentrations can be hazardous to respiratory health; aircraft ECS systems include catalytic converters, and EASA sets regulatory limits."
-  },
-  {
-    eyebrow: "ATMOSPHERE · LAYERS",
-    code: "050 01 01 04",
-    q: "In which layer does temperature decrease from 0°C to approximately −90°C?",
-    options: [
-      "Stratosphere",
-      "Thermosphere",
-      "Tropopause",
-      "Mesosphere"
-    ],
-    correct: 3,
-    explain: "The mesosphere extends from ~50 to 85 km. Temperature falls from ~0°C at the stratopause to roughly −90°C at the mesopause — the coldest region in the atmosphere. Meteors burn up in this layer."
-  },
-  {
-    eyebrow: "ATMOSPHERE · TROPOSPHERE",
-    code: "050 01 01 02",
-    q: "The tropopause is lower in winter than in summer mainly because:",
-    options: [
-      "Reduced solar heating leads to less convection, limiting troposphere height",
-      "Ozone absorbs more UV radiation in winter",
-      "Earth is further from the Sun in the Northern Hemisphere winter",
-      "Jet streams push the tropopause downward in winter"
-    ],
-    correct: 0,
-    explain: "Less solar heating in winter means less convection. With weaker vertical mixing, the troposphere does not extend as high. At mid-latitudes this produces a ~1–2 km seasonal variation in tropopause height."
-  },
-  {
-    eyebrow: "ATMOSPHERE · ISA",
-    code: "050 01 02 02",
-    q: "An aircraft at FL250 (7 620 m) reports OAT of −30°C. What is the ISA deviation?",
-    options: [
-      "ISA − 10°C",
-      "ISA + 10°C",
-      "ISA − 5°C",
-      "ISA + 5°C"
-    ],
-    correct: 1,
-    explain: "ISA temp at FL250 = +15 − (0.65 × 76.2) = +15 − 49.5 ≈ −34.5°C. OAT = −30°C. Deviation = −30 − (−34.5) = +4.5°C ≈ ISA+5. More precisely using 2°C/1 000 ft: 15 − (2 × 25) = −35°C; deviation = −30 − (−35) = +5°C → ISA+5."
-  },
-  {
-    eyebrow: "ATMOSPHERE · TROPOPAUSE",
-    code: "050 01 01 02",
-    q: "Which phenomena are typically associated with the tropopause? (Select the most complete answer)",
-    options: [
-      "Jet streams, CAT, and maximum cloud tops",
-      "Jet streams, thunderstorm bases, and maximum wind",
-      "CAT, aurora borealis, and ozone peak",
-      "Maximum cloud tops, inversion layer, and ITCZ"
-    ],
-    correct: 0,
-    explain: "The tropopause is characterised by jet streams (polar and subtropical), Clear Air Turbulence (CAT), and the maximum height of clouds. It also marks the boundary where the temperature lapse rate changes."
-  }
+  { eyebrow: "ATMOSPHERE · COMPOSITION", code: "050 01 01 01", q: "Which two gases make up approximately 99% of the dry atmosphere by volume?", options: ["Oxygen (21%) and Carbon Dioxide (78%)", "Nitrogen (78%) and Oxygen (21%)", "Nitrogen (78%) and Argon (21%)", "Oxygen (78%) and Nitrogen (21%)"], correct: 1, explain: "Dry air is ~78% N₂ and ~21% O₂, with Argon at ~0.93% and CO₂ at ~0.04%. Together N₂ and O₂ account for ~99% of the dry atmosphere." },
+  { eyebrow: "ATMOSPHERE · LAYERS", code: "050 01 01 02", q: "At what altitude does the ISA tropopause occur, and what is the temperature there?", options: ["11 km / 36 090 ft · −56.5°C", "20 km / 65 617 ft · −56.5°C", "11 km / 36 090 ft · −57.5°C", "8 km / 26 247 ft · −50°C"], correct: 0, explain: "The ISA defines the tropopause at 11 km (36 090 ft) with a temperature of −56.5°C (216.65 K). These values are essential reference numbers for ATPL calculations." },
+  { eyebrow: "ATMOSPHERE · TROPOSPHERE", code: "050 01 01 02", q: "What is the ISA environmental lapse rate (ELR) in the troposphere?", options: ["+1.98°C / 1 000 ft (6.5°C/km)", "+0.65°C / 100 m (6.5°C/km)", "+0.65°C / 1 000 ft (2°C/km)", "+1.00°C / 100 m (10°C/km)"], correct: 1, explain: "The ISA ELR is 0.65°C per 100 m, equivalent to 6.5°C/km or approximately 2°C per 1 000 ft. Temperature decreases from +15°C at MSL to −56.5°C at the tropopause." },
+  { eyebrow: "ATMOSPHERE · TROPOPAUSE", code: "050 01 01 02", q: "Where is the tropopause at its highest altitude?", options: ["Over the poles in winter", "Over mid-latitudes in summer", "Over the equator", "Over the poles in summer"], correct: 2, explain: "Intense tropical convection pushes the tropopause to 16–18 km (54 000–57 000 ft) over the equator. At the poles it is only 8–10 km (31 000–35 000 ft)." },
+  { eyebrow: "ATMOSPHERE · STRATOSPHERE", code: "050 01 01 03", q: "In the stratosphere (11–20 km), the lapse rate is described as:", options: ["Positive — temperature falls with altitude", "Zero — temperature is constant (isothermal)", "Negative — temperature rises with altitude", "Super-adiabatic — temperature rises rapidly"], correct: 1, explain: "From 11 to 20 km the stratosphere is isothermal: temperature remains constant at −56.5°C. Above 20 km, O₃ absorption of UV causes temperature to rise (negative lapse rate), reaching ~0°C at 50 km." },
+  { eyebrow: "ATMOSPHERE · OZONE", code: "050 01 01 03", q: "Ozone (O₃) concentrations at cruise altitude (FL300–FL410) are an aviation hazard because:", options: ["They cause severe CAT near the tropopause", "They reduce visibility below VMC minima", "Concentrations are hazardous to human health", "They freeze fuel systems at −56.5°C"], correct: 2, explain: "At jet cruise levels the ozone layer peaks at 20–25 km. Concentrations can be hazardous to respiratory health; aircraft ECS systems include catalytic converters, and EASA sets regulatory limits." },
+  { eyebrow: "ATMOSPHERE · LAYERS", code: "050 01 01 04", q: "In which layer does temperature decrease from 0°C to approximately −90°C?", options: ["Stratosphere", "Thermosphere", "Tropopause", "Mesosphere"], correct: 3, explain: "The mesosphere extends from ~50 to 85 km. Temperature falls from ~0°C at the stratopause to roughly −90°C at the mesopause — the coldest region in the atmosphere. Meteors burn up in this layer." },
+  { eyebrow: "ATMOSPHERE · TROPOSPHERE", code: "050 01 01 02", q: "The tropopause is lower in winter than in summer mainly because:", options: ["Reduced solar heating leads to less convection, limiting troposphere height", "Ozone absorbs more UV radiation in winter", "Earth is further from the Sun in the Northern Hemisphere winter", "Jet streams push the tropopause downward in winter"], correct: 0, explain: "Less solar heating in winter means less convection. With weaker vertical mixing, the troposphere does not extend as high. At mid-latitudes this produces a ~1–2 km seasonal variation in tropopause height." },
+  { eyebrow: "ATMOSPHERE · ISA", code: "050 01 02 02", q: "An aircraft at FL250 (7 620 m) reports OAT of −30°C. What is the ISA deviation?", options: ["ISA − 10°C", "ISA + 10°C", "ISA − 5°C", "ISA + 5°C"], correct: 1, explain: "ISA temp at FL250 = +15 − (0.65 × 76.2) = +15 − 49.5 ≈ −34.5°C. OAT = −30°C. Deviation = −30 − (−34.5) = +4.5°C ≈ ISA+5. More precisely using 2°C/1 000 ft: 15 − (2 × 25) = −35°C; deviation = −30 − (−35) = +5°C → ISA+5." },
+  { eyebrow: "ATMOSPHERE · TROPOPAUSE", code: "050 01 01 02", q: "Which phenomena are typically associated with the tropopause? (Select the most complete answer)", options: ["Jet streams, CAT, and maximum cloud tops", "Jet streams, thunderstorm bases, and maximum wind", "CAT, aurora borealis, and ozone peak", "Maximum cloud tops, inversion layer, and ITCZ"], correct: 0, explain: "The tropopause is characterised by jet streams (polar and subtropical), Clear Air Turbulence (CAT), and the maximum height of clouds. It also marks the boundary where the temperature lapse rate changes." }
 ];
-
 const DEBRIEF_TOPICS = "Atmospheric layers & boundaries · ISA temperature profile · Tropopause variation · Ozone & stratosphere";
-
-let state = {
-  idx: -1, timerInterval: null, timeLeft: TIME_PER_Q,
-  revealed: false, scores: {}, responses: {}, connected: {}
-};
-
+let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
 let db;
 try {
-  firebase.initializeApp(FIREBASE_CONFIG);
-  db = firebase.database();
+  firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
   document.getElementById("conn-status").textContent = "Connected ✓";
   document.getElementById("conn-status").className = "conn ok";
-  // Auto-reset: fresh session on every professor page load
   db.ref("session01/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" });
   db.ref("session01/responses").remove();
-} catch(e) {
-  document.getElementById("conn-status").textContent = "Firebase error";
-  document.getElementById("conn-status").className = "conn err";
-}
-
+} catch(e) { document.getElementById("conn-status").textContent = "Firebase error"; document.getElementById("conn-status").className = "conn err"; }
 window.addEventListener("load", () => {
   const alunoUrl = window.location.origin + window.location.pathname.replace("professor01.html","aluno01.html");
   document.getElementById("aluno-url").textContent = alunoUrl;
+  try { new QRCode(document.getElementById("qrcode-container"), { text: alunoUrl, width: 130, height: 130, colorDark: "#0B2545", colorLight: "#ffffff" }); } catch(e) {}
   listenFirebase();
 });
-
 function listenFirebase() {
   if (!db) return;
-  db.ref("session01/connected").on("value", snap => {
-    state.connected = snap.val() || {};
-    document.getElementById("connected-num").textContent = Object.keys(state.connected).length;
-  });
+  db.ref("session01/connected").on("value", snap => { state.connected = snap.val() || {}; document.getElementById("connected-num").textContent = Object.keys(state.connected).length; });
   db.ref("session01/responses").on("value", snap => {
-    state.responses = snap.val() || {};
-    renderResponses();
-    renderScoreboard();
-    const total = Object.keys(state.connected).length;
-    const answered = Object.keys(state.responses).length;
+    state.responses = snap.val() || {}; renderResponses(); renderScoreboard();
     const el = document.getElementById("answer-count");
-    if (el && state.idx >= 0) el.textContent = `(${answered}/${total})`;
+    if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
   });
 }
-
-function calcPts(timeLeft) {
-  if (timeLeft > 15) return 3;
-  if (timeLeft >= 5) return 2;
-  if (timeLeft > 0) return 1;
-  return 0;
-}
-
-function pushQuestionToFirebase(idx) {
-  if (!db) return;
-  const Q = QUESTIONS[idx];
-  db.ref("session01/currentQuestion").set({
-    idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code,
-    timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all"
-  });
+function calcPts(t) { return t > 15 ? 3 : t >= 5 ? 2 : t > 0 ? 1 : 0; }
+function pushQ(idx) {
+  if (!db) return; const Q = QUESTIONS[idx];
+  db.ref("session01/currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
   db.ref("session01/responses").remove();
 }
-
 function nextQuestion() {
-  if (state.idx === -1) {
-    state.idx = 0;
-  } else if (state.revealed) {
-    scoreCurrentQuestion();
-    state.idx++;
-    state.revealed = false;
-  }
+  if (state.idx === -1) { state.idx = 0; }
+  else if (state.revealed) { scoreCurrentQuestion(); state.idx++; state.revealed = false; }
   if (state.idx >= QUESTIONS.length) { renderFinal(); return; }
-  state.responses = {};
-  renderQuestion();
-  pushQuestionToFirebase(state.idx);
-  startTimer();
+  state.responses = {}; renderQuestion(); pushQ(state.idx); startTimer();
   document.getElementById("btn-reveal").disabled = false;
   document.getElementById("btn-next").textContent = "Next question";
   document.getElementById("btn-next").disabled = true;
   document.getElementById("answer-count").textContent = "";
 }
-
 function revealAnswer() {
-  if (state.revealed) return;
-  state.revealed = true;
-  stopTimer();
-  if (db) {
-    db.ref("session01/currentQuestion/revealed").set(true);
-    db.ref("session01/currentQuestion/correct").set(QUESTIONS[state.idx].correct);
-  }
+  if (state.revealed) return; state.revealed = true; stopTimer();
+  if (db) { db.ref("session01/currentQuestion/revealed").set(true); db.ref("session01/currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
   showCorrectAnswer();
-  document.getElementById("btn-reveal").disabled = true;
-  document.getElementById("btn-next").disabled = false;
+  document.getElementById("btn-reveal").disabled = true; document.getElementById("btn-next").disabled = false;
   if (state.idx >= QUESTIONS.length - 1) document.getElementById("btn-next").textContent = "View final results";
 }
-
 function scoreCurrentQuestion() {
   const Q = QUESTIONS[state.idx];
-  Object.keys(state.connected).forEach(uid => {
-    if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-  });
-  Object.entries(state.responses).forEach(([uid, data]) => {
-    if (!state.scores[uid]) state.scores[uid] = { name: data.name, pts: 0 };
-    if (data.answer === Q.correct) {
-      state.scores[uid].pts += calcPts(data.timeLeft || 0);
-    } else {
-      state.scores[uid].pts -= 1;
-    }
+  Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
+  Object.entries(state.responses).forEach(([uid, d]) => {
+    if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
+    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : -1;
   });
   Object.keys(state.connected).forEach(uid => {
     if (!state.responses[uid]) {
       if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-      state.scores[uid].pts -= 1;
+      // no answer = 0 pts
     }
   });
 }
-
 function resetQuiz() {
   if (!confirm("Restart the quiz? All scores will be lost.")) return;
-  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected };
-  stopTimer();
+  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected }; stopTimer();
   if (db) { db.ref("session01/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("session01/responses").remove(); }
   location.reload();
 }
-
 function renderQuestion() {
   const Q = QUESTIONS[state.idx];
   document.getElementById("progress").innerHTML = `Question <span>${state.idx + 1} / ${QUESTIONS.length}</span>`;
-  const optsHtml = Q.options.map((o, i) => `<div class="opt" id="opt-${i}"><div class="key">${String.fromCharCode(65+i)}</div><div>${o}</div></div>`).join("");
   document.getElementById("q-panel").innerHTML = `
     <div class="q-header">
       <div class="q-meta"><div class="eyebrow">${Q.eyebrow}</div><div class="code">${Q.code}</div></div>
       <div class="timer" id="timer"><div class="n">${TIME_PER_Q}</div><div class="lbl">SECONDS</div></div>
     </div>
     <div class="q-text">${Q.q}</div>
-    <div class="options">${optsHtml}</div>
+    <div class="options">${Q.options.map((o,i)=>`<div class="opt" id="opt-${i}"><div class="key">${String.fromCharCode(65+i)}</div><div>${o}</div></div>`).join("")}</div>
     <div class="feedback" id="feedback"></div>`;
   renderResponseBars({});
 }
-
 function showCorrectAnswer() {
   const Q = QUESTIONS[state.idx];
-  const el = document.getElementById("opt-" + Q.correct);
-  if (el) el.classList.add("correct");
-  const fb = document.getElementById("feedback");
-  if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
+  const el = document.getElementById("opt-"+Q.correct); if (el) el.classList.add("correct");
+  const fb = document.getElementById("feedback"); if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
   renderResponses();
 }
-
 function renderResponses() {
-  const counts = [0,0,0,0];
-  Object.values(state.responses).forEach(r => { if (r.answer >= 0 && r.answer <= 3) counts[r.answer]++; });
-  const total = Math.max(1, Object.keys(state.responses).length);
-  renderResponseBars(counts, total);
-  const list = document.getElementById("responses-list");
-  if (!list) return;
+  const counts = [0,0,0,0]; Object.values(state.responses).forEach(r => { if (r.answer>=0&&r.answer<=3) counts[r.answer]++; });
+  renderResponseBars(counts, Math.max(1, Object.keys(state.responses).length));
+  const list = document.getElementById("responses-list"); if (!list) return;
   const Q = state.idx >= 0 ? QUESTIONS[state.idx] : null;
-  const entries = Object.entries(state.responses).sort((a,b) => (b[1].timeLeft||0) - (a[1].timeLeft||0));
-  list.innerHTML = entries.map(([uid, r]) => {
-    const letter = r.answer >= 0 ? String.fromCharCode(65+r.answer) : "—";
-    const isCorrect = Q && state.revealed ? r.answer === Q.correct : null;
-    const cls = isCorrect === true ? "correct" : isCorrect === false ? "wrong" : "";
-    const pts = state.revealed && Q ? (r.answer === Q.correct ? `+${calcPts(r.timeLeft||0)}` : "−1") : "";
-    const ptsClass = pts.startsWith("+") ? "" : "neg";
-    return `<div class="r-item ${cls}">
-      <div class="r-name">${r.name||"Student"}</div>
-      <div class="r-ans">${letter}</div>
-      <div class="r-pts ${ptsClass}">${pts}</div>
-    </div>`;
+  list.innerHTML = Object.entries(state.responses).sort((a,b)=>(b[1].timeLeft||0)-(a[1].timeLeft||0)).map(([uid,r])=>{
+    const letter = r.answer>=0 ? String.fromCharCode(65+r.answer) : "—";
+    const isC = Q&&state.revealed ? r.answer===Q.correct : null;
+    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(r.timeLeft||0)}`:(r.answer===-1?"0":"−1")) : "";
+    return `<div class="r-item ${isC===true?"correct":isC===false?"wrong":""}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans">${letter}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
   }).join("");
 }
-
 function renderResponseBars(counts, total) {
-  const barsEl = document.getElementById("response-bars");
-  if (!barsEl) return;
-  const Q = state.idx >= 0 && state.idx < QUESTIONS.length ? QUESTIONS[state.idx] : null;
-  if (!Q) { barsEl.innerHTML = `<div style="font-size:13px;color:var(--steel);">Awaiting start</div>`; return; }
-  const tot = total || 1;
+  const barsEl = document.getElementById("response-bars"); if (!barsEl) return;
+  const Q = state.idx>=0&&state.idx<QUESTIONS.length ? QUESTIONS[state.idx] : null;
+  if (!Q) { barsEl.innerHTML=`<div style="font-size:13px;color:var(--steel);">Awaiting start</div>`; return; }
   barsEl.innerHTML = [0,1,2,3].map(i => {
-    const n = counts[i] || 0;
-    const pct = Math.round((n/tot)*100) || 0;
-    const cls = state.revealed ? (Q && i === Q.correct ? "correct" : n > 0 ? "wrong" : "") : "";
-    return `<div class="r-bar-wrap ${cls}">
-      <div class="r-bar-label"><span class="opt-letter">${String.fromCharCode(65+i)}</span><span class="opt-count">${n}</span></div>
-      <div class="r-bar-track"><div class="r-bar-fill" style="width:${pct}%"></div></div>
-    </div>`;
+    const n=counts[i]||0, pct=Math.round((n/(total||1))*100)||0;
+    const cls=state.revealed?(i===Q.correct?"correct":n>0?"wrong":""):"";
+    return `<div class="r-bar-wrap ${cls}"><div class="r-bar-label"><span class="opt-letter">${String.fromCharCode(65+i)}</span><span class="opt-count">${n}</span></div><div class="r-bar-track"><div class="r-bar-fill" style="width:${pct}%"></div></div></div>`;
   }).join("");
 }
-
 function renderScoreboard() {
-  const el = document.getElementById("scoreboard-list");
-  if (!el) return;
-  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts).slice(0,10);
-  if (!sorted.length) { el.innerHTML = `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`; return; }
-  el.innerHTML = sorted.map(([uid,s],i) => `<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("");
+  const el = document.getElementById("scoreboard-list"); if (!el) return;
+  const sorted = Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts).slice(0,10);
+  el.innerHTML = sorted.length ? sorted.map(([,s],i)=>`<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("") : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
 }
-
 function renderFinal() {
-  stopTimer();
-  scoreCurrentQuestion();
-  document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
-  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts);
-  const classes = ["gold","silver","bronze"];
-  const podium = sorted.slice(0,3).map(([uid,s],i) => `<div class="pillar ${classes[i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
-  document.getElementById("q-panel").innerHTML = `
-    <div class="final-screen">
-      <h1>FINAL RESULT</h1>
-      <div class="podium">${podium||"<p>No answers recorded.</p>"}</div>
-      <div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">
-        Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b>
-      </div>
-    </div>`;
-  if (db) db.ref("session01/currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
+  stopTimer(); scoreCurrentQuestion(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
+  const sorted=Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts);
+  const podium=sorted.slice(0,3).map(([,s],i)=>`<div class="pillar ${["gold","silver","bronze"][i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
+  document.getElementById("q-panel").innerHTML=`<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
+  if (db) db.ref("session01/currentQuestion").set({idx:-1,q:"END",options:[],revealed:true,final:true,mode:"all"});
 }
-
-function startTimer() {
-  stopTimer(); state.timeLeft = TIME_PER_Q; updateTimer();
-  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
-}
+function startTimer() { stopTimer(); state.timeLeft=TIME_PER_Q; updateTimer(); state.timerInterval=setInterval(()=>{state.timeLeft--;updateTimer();if(state.timeLeft<=0){stopTimer();if(!state.revealed)revealAnswer();}},1000); }
 function stopTimer() { clearInterval(state.timerInterval); }
 function updateTimer() {
-  const t = document.getElementById("timer"); if (!t) return;
-  t.querySelector(".n").textContent = state.timeLeft;
-  t.classList.remove("warn","crit","expired");
-  if (state.timeLeft <= 0) t.classList.add("expired");
-  else if (state.timeLeft <= 5) t.classList.add("crit");
-  else if (state.timeLeft <= 10) t.classList.add("warn");
+  const t=document.getElementById("timer"); if(!t)return;
+  t.querySelector(".n").textContent=state.timeLeft; t.classList.remove("warn","crit","expired");
+  if(state.timeLeft<=0)t.classList.add("expired"); else if(state.timeLeft<=5)t.classList.add("crit"); else if(state.timeLeft<=10)t.classList.add("warn");
 }
-
-document.addEventListener("keydown", e => {
-  if (e.code === "Space") { e.preventDefault(); if (!document.getElementById("btn-next").disabled) nextQuestion(); }
-  if (e.code === "KeyR") { e.preventDefault(); revealAnswer(); }
-  if (e.code === "Escape") resetQuiz();
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space"){e.preventDefault();if(!document.getElementById("btn-next").disabled)nextQuestion();}
+  if(e.code==="KeyR"){e.preventDefault();revealAnswer();}
+  if(e.code==="Escape")resetQuiz();
 });
 </script>
 </body>
