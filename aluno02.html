@@ -129,6 +129,8 @@ const FIREBASE_CONFIG = {
 const TIME_PER_Q = 20;
 let db, uid, userName;
 let totalPts = 0, currentQIdx = -1, answered = false, revealedQIdx = -1, timerInterval;
+let serverTimeOffset = 0;
+function serverNow() { return Date.now() + serverTimeOffset; }
 let audioCtx;
 function ensureAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } }
 function tone(freq, dur, type, vol) {
@@ -179,6 +181,9 @@ function listenForQuestion() {
     const elapsed = Math.round((Date.now() - (data.startedAt || 0)) / 1000);
     const remaining = Math.max(0, (data.timeLimit || 20) - elapsed);
     if (remaining <= 0 && !data.revealed) { showScreen("screen-waiting"); return; }
+    const elapsed2 = Math.round((serverNow() - (data.startedAt||0)) / 1000);
+    const remaining2 = Math.min(TIME_PER_Q, Math.max(0, (data.timeLimit||TIME_PER_Q) - elapsed2));
+    if (remaining2 <= 0 && !data.revealed) { showScreen('screen-waiting'); return; }
     if (data.idx !== currentQIdx) { currentQIdx = data.idx; answered = false; showQuestion(data); return; }
     if (data.revealed && data.correct !== undefined && revealedQIdx !== currentQIdx) {
       revealedQIdx = currentQIdx; showReveal(data.correct);
@@ -186,7 +191,7 @@ function listenForQuestion() {
   });
 }
 function showQuestion(data) {
-  const elapsed = Math.round((Date.now() - data.startedAt) / 1000);
+  const elapsed = Math.round((serverNow() - data.startedAt) / 1000);
   const remaining = Math.min(TIME_PER_Q, Math.max(0, (data.timeLimit || TIME_PER_Q) - elapsed));
   document.getElementById("q-eyebrow").textContent = data.eyebrow || "METEOROLOGY";
   document.getElementById("q-num").textContent = `QUESTION ${data.idx + 1} / 10`;
