@@ -132,7 +132,10 @@ let totalPts = 0, currentQIdx = -1, answered = false, revealedQIdx = -1, timerIn
 let serverTimeOffset = 0;
 function serverNow() { return Date.now() + serverTimeOffset; }
 let audioCtx;
-function ensureAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } }
+function ensureAudio() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+  if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+}
 function tone(freq, dur, type, vol) {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
@@ -142,7 +145,7 @@ function tone(freq, dur, type, vol) {
   osc.connect(gain).connect(audioCtx.destination);
   osc.start(); osc.stop(audioCtx.currentTime + dur);
 }
-function tickSound() { tone(880, 0.08, "square", 0.12); }
+function tickSound() { ensureAudio(); tone(880, 0.08, "square", 0.12); }
 function calcPts(timeLeft) {
   if (timeLeft > 15) return 3;
   if (timeLeft >= 5) return 2;
@@ -221,6 +224,7 @@ function startTimer(remaining) {
 }
 function answer(optIdx, btn) {
   if (answered) return;
+  ensureAudio();
   answered = true;
   clearInterval(timerInterval);
   const timeLeft = parseInt(document.getElementById("q-timer")?.textContent) || 0;
