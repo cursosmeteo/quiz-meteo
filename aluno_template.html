@@ -1,9 +1,17 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     ALUNO TEMPLATE — HOW TO USE
+     1. Find and replace ALL instances of:
+          sessionXX       → same session number as professor file
+          SESSION TITLE   → same title as professor file
+     2. Save as aluno04.html (matching professor number)
+     Note: No questions needed here — content comes from Firebase.
+═══════════════════════════════════════════════════════════════════ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Heat Transfer &amp; Inversions · Student</title>
+<title>SESSION TITLE · Student</title>
 <style>
 :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -73,7 +81,7 @@ html, body { height: 100%; font-family: 'Segoe UI', 'Helvetica Neue', sans-serif
 <div class="screen active" id="screen-register">
   <div class="reg-logo">METEOROLOGY · HEAT TRANSFER & INVERSIONS · SESSION 02</div>
   <div class="reg-card">
-    <h2>Heat Transfer &amp; Inversions</h2>
+    <h2>SESSION TITLE</h2>
     <p>All students answer each question</p>
     <div class="scoring-rules">
       <span class="s1">+20</span> answer in 1s &nbsp;·&nbsp; <span class="s2">+11</span> in 10s<br>
@@ -161,7 +169,7 @@ function register() {
   userName = name;
   uid = "u_" + Math.random().toString(36).substr(2, 9);
   if (db) {
-    const ref = db.ref("session02/connected/" + uid);
+    const ref = db.ref("sessionXX/connected/" + uid);
     ref.set({ name: userName, joinedAt: Date.now() });
     ref.onDisconnect().remove();
   }
@@ -171,7 +179,7 @@ function register() {
 }
 function listenForQuestion() {
   if (!db) return;
-  db.ref("session02/currentQuestion").on("value", snap => {
+  db.ref("sessionXX/currentQuestion").on("value", snap => {
     const data = snap.val();
     if (!data || data.idx === undefined) return;
     if (data.final) { showFinal(); return; }
@@ -226,7 +234,7 @@ function answer(optIdx, btn) {
   document.querySelectorAll(".opt-btn").forEach(b => b.disabled = true);
   btn.classList.add("selected");
   if (db) {
-    db.ref("session02/responses/" + uid).set({ name: userName, answer: optIdx, timeLeft, answeredAt: Date.now(), qIdx: currentQIdx });
+    db.ref("sessionXX/responses/" + uid).set({ name: userName, answer: optIdx, timeLeft, answeredAt: Date.now(), qIdx: currentQIdx });
   }
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
@@ -241,7 +249,7 @@ function answer(optIdx, btn) {
 function timeOut() {
   answered = true;
   totalPts -= 1;
-  if (db) { db.ref("session02/responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
+  if (db) { db.ref("sessionXX/responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
   document.getElementById("ans-icon").textContent = "⏱";
@@ -253,7 +261,7 @@ function timeOut() {
 }
 function showReveal(correctIdx) {
   if (!db) return;
-  db.ref("session02/responses/" + uid).once("value", snap => {
+  db.ref("sessionXX/responses/" + uid).once("value", snap => {
     const r = snap.val();
     const s = document.getElementById("screen-answered");
     if (!r || r.answer === -1 || r.timeout) {

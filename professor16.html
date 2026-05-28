@@ -114,10 +114,11 @@
         <div id="qrcode-container"></div>
         <div class="scoring-info">
           <b>Scoring — all answer</b><br>
-          <span class="s1">+3 pts</span> correct in first 5s &nbsp;·&nbsp;
-          <span class="s2">+2 pts</span> correct between 5–15s<br>
-          <span class="s3">+1 pt</span> correct in last 5s &nbsp;·&nbsp;
-          <span class="s0">−1 pt</span> wrong &nbsp;·&nbsp; <span class="s3">0 pts</span> no answer
+          <span class="s1">+20 pts</span> correct in 1s &nbsp;·&nbsp;
+          <span class="s2">+11 pts</span> correct in 10s<br>
+          <span class="s3">+1 pt</span> correct in 20s &nbsp;·&nbsp;
+          <span class="s0">−2 pts</span> wrong &nbsp;·&nbsp;
+          <span class="s0">−1 pt</span> no answer
         </div>
         <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
       </div>
@@ -323,7 +324,7 @@ function listenFirebase() {
     if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
   });
 }
-function calcPts(t) { return t > 15 ? 3 : t >= 5 ? 2 : t > 0 ? 1 : 0; }
+function calcPts(t) { return Math.max(1, t + 1); }
 function pushQ(idx) {
   if (!db) return; const Q = QUESTIONS[idx];
   db.ref("currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
@@ -351,7 +352,7 @@ function scoreCurrentQuestion() {
   Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
   Object.entries(state.responses).forEach(([uid, d]) => {
     if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
-    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : -1;
+    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : (d.answer === -1 ? 0 : -2);
   });
   Object.keys(state.connected).forEach(uid => { if (!state.responses[uid]) { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; state.scores[uid].pts -= 1; } });
 }
@@ -386,10 +387,11 @@ function renderResponses() {
   const list = document.getElementById("responses-list"); if (!list) return;
   const Q = state.idx >= 0 ? QUESTIONS[state.idx] : null;
   list.innerHTML = Object.entries(state.responses).sort((a,b)=>(b[1].timeLeft||0)-(a[1].timeLeft||0)).map(([uid,r])=>{
-    const letter = r.answer>=0 ? String.fromCharCode(65+r.answer) : "—";
+    const tLeft = r.timeLeft || 0;
+    const timeLbl = r.answer === -1 ? "—" : (TIME_PER_Q - tLeft) + "s";
     const isC = Q&&state.revealed ? r.answer===Q.correct : null;
-    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(r.timeLeft||0)}`:"−1") : "";
-    return `<div class="r-item ${isC===true?"correct":isC===false?"wrong":""}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans">${letter}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
+    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(tLeft)}`:(r.answer===-1?"−1":"−2")) : "";
+    return `<div class="r-item ${isC===true?"correct":isC===false?"wrong":""}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans" style="font-size:10px">${timeLbl}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
   }).join("");
 }
 function renderResponseBars(counts, total) {

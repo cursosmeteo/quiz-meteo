@@ -76,8 +76,8 @@ html, body { height: 100%; font-family: 'Segoe UI', 'Helvetica Neue', sans-serif
     <h2>The Atmosphere</h2>
     <p>All students answer each question</p>
     <div class="scoring-rules">
-      <span class="s1">+3</span> correct in first 5s &nbsp;·&nbsp; <span class="s2">+2</span> between 5–15s<br>
-      <span class="s3">+1</span> in last 5s &nbsp;·&nbsp; <span class="s0">−1</span> wrong or no answer
+      <span class="s1">+20</span> answer in 1s &nbsp;·&nbsp; <span class="s2">+11</span> in 10s<br>
+      <span class="s3">+1</span> in 20s &nbsp;·&nbsp; <span class="s0">−2</span> wrong &nbsp;·&nbsp; <span class="s0">−1</span> no answer
     </div>
     <input class="reg-input" id="name-input" type="text" placeholder="Your name" maxlength="24" autocomplete="off" autocorrect="off" spellcheck="false">
     <button class="reg-btn" id="reg-btn" onclick="register()" disabled>Join →</button>
@@ -146,12 +146,7 @@ function tone(freq, dur, type, vol) {
   osc.start(); osc.stop(audioCtx.currentTime + dur);
 }
 function tickSound() { ensureAudio(); tone(880, 0.08, "square", 0.12); }
-function calcPts(timeLeft) {
-  if (timeLeft > 15) return 3;
-  if (timeLeft >= 5) return 2;
-  if (timeLeft > 0) return 1;
-  return 0;
-}
+function calcPts(timeLeft) { return Math.max(1, timeLeft + 1); }
 try { firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database(); } catch(e) { console.error(e); }
 document.getElementById("name-input").addEventListener("input", function() {
   document.getElementById("reg-btn").disabled = this.value.trim().length < 2;
@@ -237,19 +232,21 @@ function answer(optIdx, btn) {
   s.className = "screen waiting";
   document.getElementById("ans-icon").textContent = "⏳";
   document.getElementById("ans-title").textContent = "Answer submitted!";
-  document.getElementById("ans-pts").textContent = timeLeft > 15 ? "Very fast! 🚀" : timeLeft >= 5 ? "Good speed!" : "Just in time!";
+  const elapsed = TIME_PER_Q - timeLeft;
+  document.getElementById("ans-pts").textContent = "Answered in " + elapsed + "s";
   document.getElementById("ans-sub").textContent = "Waiting for instructor to reveal…";
   document.getElementById("ans-total").textContent = "";
   showScreen("screen-answered");
 }
 function timeOut() {
   answered = true;
+  totalPts -= 1;
   if (db) { db.ref("session01/responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
   document.getElementById("ans-icon").textContent = "⏱";
   document.getElementById("ans-title").textContent = "Time's up";
-  document.getElementById("ans-pts").textContent = "0 points";
+  document.getElementById("ans-pts").textContent = "−1 point";
   document.getElementById("ans-sub").textContent = "Awaiting next question…";
   document.getElementById("ans-total").textContent = `Total: ${totalPts} pts`;
   showScreen("screen-answered");
@@ -265,12 +262,12 @@ function showReveal(correctIdx) {
       return;
     }
     const isCorrect = r.answer === correctIdx;
-    const pts = isCorrect ? calcPts(r.timeLeft || 0) : -1;
+    const pts = isCorrect ? calcPts(r.timeLeft || 0) : -2;
     totalPts += pts;
     s.className = "screen " + (isCorrect ? "correct" : "wrong");
     document.getElementById("ans-icon").textContent = isCorrect ? "✓" : "✗";
     document.getElementById("ans-title").textContent = isCorrect ? "Correct!" : "Wrong!";
-    document.getElementById("ans-pts").textContent = isCorrect ? `+${pts} points` : "−1 point";
+    document.getElementById("ans-pts").textContent = isCorrect ? `+${pts} points` : "−2 points";
     document.getElementById("ans-sub").textContent = `Correct answer: ${String.fromCharCode(65 + correctIdx)}`;
     document.getElementById("ans-total").textContent = `Total: ${totalPts} pts`;
   });

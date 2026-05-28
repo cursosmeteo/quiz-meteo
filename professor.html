@@ -114,10 +114,11 @@
         <div id="qrcode-container"></div>
         <div class="scoring-info">
           <b>Scoring — all answer</b><br>
-          <span class="s1">+3 pts</span> correct in first 5s &nbsp;·&nbsp;
-          <span class="s2">+2 pts</span> correct between 5–15s<br>
-          <span class="s3">+1 pt</span> correct in last 5s &nbsp;·&nbsp;
-          <span class="s0">−1 pt</span> wrong or no answer
+          <span class="s1">+20 pts</span> correct in 1s &nbsp;·&nbsp;
+          <span class="s2">+11 pts</span> correct in 10s<br>
+          <span class="s3">+1 pt</span> correct in 20s &nbsp;·&nbsp;
+          <span class="s0">−2 pts</span> wrong &nbsp;·&nbsp;
+          <span class="s0">−1 pt</span> no answer
         </div>
         <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
       </div>
@@ -342,12 +343,7 @@ function listenFirebase() {
   });
 }
 
-function calcPts(timeLeft) {
-  if (timeLeft > 15) return 3;
-  if (timeLeft >= 5) return 2;
-  if (timeLeft > 0) return 1;
-  return 0;
-}
+function calcPts(timeLeft) { return Math.max(1, timeLeft + 1); }
 
 function pushQuestionToFirebase(idx) {
   if (!db) return;
@@ -438,12 +434,69 @@ function renderResponses() {
   const Q = state.idx >= 0 ? QUESTIONS[state.idx] : null;
   const entries = Object.entries(state.responses).sort((a,b) => (b[1].timeLeft||0) - (a[1].timeLeft||0));
   list.innerHTML = entries.map(([uid, r]) => {
-    const letter = r.answer >= 0 ? String.fromCharCode(65+r.answer) : "—";
+    const tLeft = r.timeLeft || 0;
+    const timeLbl = r.answer === -1 ? "—" : (TIME_PER_Q - tLeft) + "s";
     const isCorrect = Q && state.revealed ? r.answer === Q.correct : null;
     const cls = isCorrect === true ? "correct" : isCorrect === false ? "wrong" : "";
-    const pts = state.revealed && Q ? (r.answer === Q.correct ? `+${calcPts(r.timeLeft||0)}` : "−1") : "";
-    return `<div class="r-item ${cls}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans">${letter}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
+    const pts = state.revealed && Q ? (r.answer === Q.correct ? `+${calcPts(tLeft)}` : (r.answer === -1 ? "−1" : "−2")) : "";
+    return `<div class="r-item ${cls}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans" style="font-size:10px">${timeLbl}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
   }).join("");
+}
+
+function renderResponseBars(counts, total) {
+  const barsEl = document.getElementById("response-bars");
+  if (!barsEl) return;
+  const Q = state.idx >= 0 && state.idx < QUESTIONS.length ? QUESTIONS[state.idx] : null;
+  if (!Q) { barsEl.innerHTML = `<div style="font-size:13px;color:var(--steel);">Awaiting start</div>`; return; }
+  const tot = total || 1;
+  barsEl.innerHTML = [0,1,2,3].map(i => {
+    const n = counts[i] || 0;
+    const pct = Math.round((n/tot)*100) || 0;
+    const cls = state.revealed ? (i === Q.correct ? "correct" : n > 0 ? "wrong" : "") : "";
+    return `<div class="r-bar-wrap ${cls}"><div class="r-bar-label"><span class="opt-letter">${String.fromCharCode(65+i)}</span><span class="opt-count">${n}</span></div><div class="r-bar-track"><div class="r-bar-fill" style="width:${pct}%"></div></div></div>`;
+  }).join("");
+}
+
+function renderScoreboard() {
+  const el = document.getElementById("scoreboard-list");
+  if (!el) return;
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts).slice(0,10);
+  if (!sorted.length) { el.innerHTML = `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`; return; }
+  el.innerHTML = sorted.map(([uid,s],i) => `<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("");
+}
+
+function renderFinal() {
+  stopTimer(); scoreCurrentQuestion();
+  document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts);
+  const classes = ["gold","silver","bronze"];
+  const podium = sorted.slice(0,3).map(([uid,s],i) => `<div class="pillar ${classes[i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
+  document.getElementById("q-panel").innerHTML = `<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
+  if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
+}
+
+function startTimer() {
+  stopTimer(); state.timeLeft = TIME_PER_Q; updateTimer();
+  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
+}
+function stopTimer() { clearInterval(state.timerInterval); }
+function updateTimer() {
+  const t = document.getElementById("timer"); if (!t) return;
+  t.querySelector(".n").textContent = state.timeLeft;
+  t.classList.remove("warn","crit","expired");
+  if (state.timeLeft <= 0) t.classList.add("expired");
+  else if (state.timeLeft <= 5) t.classList.add("crit");
+  else if (state.timeLeft <= 10) t.classList.add("warn");
+}
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") { e.preventDefault(); if (!document.getElementById("btn-next").disabled) nextQuestion(); }
+  if (e.code === "KeyR") { e.preventDefault(); revealAnswer(); }
+  if (e.code === "Escape") resetQuiz();
+});
+</script>
+</body>
+</html>
 }
 
 function renderResponseBars(counts, total) {

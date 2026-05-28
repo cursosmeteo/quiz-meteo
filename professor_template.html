@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Heat Transfer &amp; Inversions · Professor</title>
+<title>SESSION TITLE · Professor</title>
 <style>
   :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; --text: #3A3A3A; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,15 +101,15 @@
 <body>
 <div class="stage">
   <div class="topbar">
-    <div class="brand">HEAT TRANSFER &amp; INVERSIONS · 050 01 02 00 · PROFESSOR · ALL ANSWER</div>
+    <div class="brand">SESSION TITLE · ATPL CODE · PROFESSOR · ALL ANSWER</div>
     <div class="progress" id="progress">Awaiting start</div>
     <div class="conn wait" id="conn-status">Connecting...</div>
   </div>
   <main>
     <div class="q-panel" id="q-panel">
       <div class="cover-center">
-        <h1>HEAT TRANSFER &amp; INVERSIONS</h1>
-        <div class="sub">Session 02 · 10 questions · 050 01 02 00</div>
+        <h1>SESSION TITLE</h1>
+        <div class="sub">Session XX · 10 questions · ATPL CODE</div>
         <div class="qr-link" id="aluno-url">— loading —</div>
         <div id="qrcode-container"></div>
         <div class="scoring-info">
@@ -146,6 +146,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+<!-- ═══════════════════════════════════════════════════════════════════
+     QUIZ TEMPLATE — HOW TO USE
+     1. Find and replace ALL instances of:
+          sessionXX       → session04, session05, etc.
+          SESSION TITLE   → e.g. "Altimetry"
+          ATPL CODE       → e.g. "050 01 06 00"
+     2. Fill in the 10 QUESTIONS array below
+     3. Update DEBRIEF_TOPICS
+     4. Save as professor04.html (or matching session number)
+     5. Create matching aluno04.html from aluno_template.html
+═══════════════════════════════════════════════════════════════════ -->
 <script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",
@@ -158,17 +169,26 @@ const FIREBASE_CONFIG = {
 };
 const TIME_PER_Q = 20;
 const QUESTIONS = [
-  { eyebrow: "HEAT TRANSFER · PROCESSES", code: "050 01 02 03", q: "Which process is the main source of heating for the troposphere?", options: ["Direct absorption of solar short-wave radiation", "Terrestrial long-wave radiation and convection", "Conduction from the surface upward", "Latent heat released by precipitation"], correct: 1, explain: "The troposphere is largely transparent to solar short-wave radiation. It is heated primarily by terrestrial (long-wave) radiation emitted from the surface, and by convection carrying warm air aloft." },
-  { eyebrow: "HEAT TRANSFER · RADIATION", code: "050 01 02 03", q: "What is the wavelength range of terrestrial (long-wave) radiation?", options: ["0.15 to 4 μm, peak at 0.5 μm", "4 to 80 μm, peak at 10 μm", "8 to 13 μm only (atmospheric window)", "0.4 to 0.7 μm (visible spectrum)"], correct: 1, explain: "Solar radiation is short-wave: 0.15–4 μm (peak ~0.5 μm). Terrestrial radiation is long-wave: 4–80 μm with peak at ~10 μm. The 8–13 μm atmospheric window allows some direct escape to space." },
-  { eyebrow: "HEAT TRANSFER · GREENHOUSE EFFECT", code: "050 01 02 03", q: "Without greenhouse gases, the Earth's mean surface temperature would be approximately:", options: ["+5°C", "0°C", "−18°C", "−40°C"], correct: 2, explain: "Without greenhouse gases (H₂O, CO₂, O₃, CH₄), the surface would be −18°C. The greenhouse effect adds ~+33°C, giving the observed mean of +15°C (ISA MSL value)." },
-  { eyebrow: "HEAT TRANSFER · STRATOSPHERE", code: "050 01 02 03", q: "The stratosphere is heated mainly by:", options: ["Convection rising from the troposphere", "Terrestrial radiation absorbed by CO₂", "UV absorption by ozone (O₃)", "Latent heat release from cloud tops"], correct: 2, explain: "Ozone (O₃) absorbs UV solar radiation in the 20–50 km layer. This is why stratospheric temperature increases with altitude above ~20 km — a negative lapse rate, unlike the troposphere." },
-  { eyebrow: "INVERSIONS · RADIATION", code: "050 01 02 05", q: "A radiation inversion requires which set of conditions?", options: ["Overcast skies, strong surface wind, daytime", "Clear skies, light winds, night-time", "High pressure, sinking air, mid-troposphere", "Warm air overriding cold at a frontal surface"], correct: 1, explain: "Radiation inversions form at night when the surface loses heat by IR emission. Clear skies allow maximum radiative cooling; light winds prevent turbulent mixing. Result: surface colder than air above → fog and frost risk, burns off after sunrise." },
-  { eyebrow: "INVERSIONS · SUBSIDENCE", code: "050 01 02 05", q: "A subsidence inversion found in the mid-troposphere is associated with:", options: ["A frontal surface where warm air overrides cold", "Turbulent mixing at the top of the friction layer", "An anticyclone where sinking air warms adiabatically", "Cold air draining into a valley at night"], correct: 2, explain: "In a high-pressure system (anticyclone), air subsides and warms adiabatically as it descends, creating a warm layer above cooler surface air — a mid-tropospheric inversion that traps pollutants, haze and smog below." },
-  { eyebrow: "INVERSIONS · TURBULENCE", code: "050 01 02 05", q: "A turbulence inversion forms at the top of the friction layer (~2 000 ft) because:", options: ["Solar radiation heats the air at that level preferentially", "Cold air drainage pools at the friction layer boundary", "Turbulent mixing cools the layer below, leaving warmer air above", "Ozone absorption warms the air at 2 000 ft"], correct: 2, explain: "Turbulent mixing in the friction layer cools and dries the air below. At the top of the mixing layer the turbulence ceases, leaving warmer, smoother air above — creating the turbulence inversion. Below: turbulent; above: smooth." },
-  { eyebrow: "INSOLATION · DIURNAL CYCLE", code: "050 01 02 06", q: "On a clear day over land, maximum surface temperature typically occurs at:", options: ["1200 LT — solar noon", "1500 LT — 2 to 3 hours after solar noon", "1800 LT — sunset", "0900 LT — mid-morning"], correct: 1, explain: "The Sun is highest at 1200 LT but the surface continues to receive net radiation for 2–3 more hours. T max occurs ~1500 LT. T min occurs just after sunrise when the night-time radiative loss ends. This 2–3 h lag is a key exam point." },
-  { eyebrow: "INSOLATION · SURFACE EFFECTS", code: "050 01 02 06", q: "Radiation fog never forms over the open sea because:", options: ["Sea water reflects most solar radiation (high albedo)", "The sea surface diurnal temperature variation is less than 1°C", "The sea surface is always above the dew point", "Wind over the sea always prevents fog formation"], correct: 1, explain: "Water has a high specific heat capacity, so the sea surface temperature varies less than 1°C diurnally. This tiny cooling is never sufficient to reach the dew point. Advection fog can form over the sea, but not radiation fog." },
-  { eyebrow: "INVERSIONS · AVIATION", code: "050 01 02 05", q: "Which inversion type is most associated with CAT, icing and cloud tops marking the inversion level?", options: ["Radiation inversion — clear night, light winds", "Subsidence inversion — mid-troposphere anticyclone", "Valley inversion — cold air drainage", "Frontal inversion — warm air overriding cold"], correct: 3, explain: "Frontal inversions occur where warm air overrides cold at the frontal surface. The inversion level is marked by cloud tops. Above: warm sector, smoother flight. The inversion layer itself brings CAT and icing — significant operational hazards." }
+  // ── QUESTION TEMPLATE ────────────────────────────────────────
+  // Copy and paste this block 10 times (one per question)
+  // correct: 0=A, 1=B, 2=C, 3=D
+  {
+    eyebrow: "TOPIC · SUBTOPIC",       // upper-left label on professor screen
+    code: "050 00 00 00",              // ATPL syllabus code
+    q: "Question text goes here?",
+    options: [
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D"
+    ],
+    correct: 0,                        // index of correct option (0–3)
+    explain: "Explanation shown after reveal. Keep concise but complete — 2–3 sentences max."
+  },
+  // ── ADD 9 MORE QUESTIONS BELOW ────────────────────────────────
 ];
+const DEBRIEF_TOPICS = "Topic 1 · Topic 2 · Topic 3 · Topic 4";  // shown on final screen
+const DEBRIEF_TOPICS = "Pressure definition & units · Altimetry (QFE/QNH/QFF) · Isobars & Buys Ballot's Law · Density & performance · Isohypses · Tropopause & latitude effects";
 const DEBRIEF_TOPICSconst DEBRIEF_TOPICS = "5 heat transfer processes · Solar vs terrestrial radiation · Greenhouse effect · 5 inversion types & ops · Diurnal T cycle";
 let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
 let db;
@@ -176,8 +196,8 @@ try {
   firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
   document.getElementById("conn-status").textContent = "Connected ✓";
   document.getElementById("conn-status").className = "conn ok";
-  db.ref("session02/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" });
-  db.ref("session02/responses").remove();
+  db.ref("sessionXX/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" });
+  db.ref("sessionXX/responses").remove();
 } catch(e) { document.getElementById("conn-status").textContent = "Firebase error"; document.getElementById("conn-status").className = "conn err"; }
 window.addEventListener("load", () => {
   const alunoUrl = window.location.origin + window.location.pathname.replace("professor02.html","aluno02.html");
@@ -187,8 +207,8 @@ window.addEventListener("load", () => {
 });
 function listenFirebase() {
   if (!db) return;
-  db.ref("session02/connected").on("value", snap => { state.connected = snap.val() || {}; document.getElementById("connected-num").textContent = Object.keys(state.connected).length; });
-  db.ref("session02/responses").on("value", snap => {
+  db.ref("sessionXX/connected").on("value", snap => { state.connected = snap.val() || {}; document.getElementById("connected-num").textContent = Object.keys(state.connected).length; });
+  db.ref("sessionXX/responses").on("value", snap => {
     state.responses = snap.val() || {}; renderResponses(); renderScoreboard();
     const el = document.getElementById("answer-count");
     if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
@@ -197,8 +217,8 @@ function listenFirebase() {
 function calcPts(t) { return Math.max(1, t + 1); }
 function pushQ(idx) {
   if (!db) return; const Q = QUESTIONS[idx];
-  db.ref("session02/currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
-  db.ref("session02/responses").remove();
+  db.ref("sessionXX/currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
+  db.ref("sessionXX/responses").remove();
 }
 function nextQuestion() {
   if (state.idx === -1) { state.idx = 0; }
@@ -212,7 +232,7 @@ function nextQuestion() {
 }
 function revealAnswer() {
   if (state.revealed) return; state.revealed = true; stopTimer();
-  if (db) { db.ref("session02/currentQuestion/revealed").set(true); db.ref("session02/currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
+  if (db) { db.ref("sessionXX/currentQuestion/revealed").set(true); db.ref("sessionXX/currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
   showCorrectAnswer();
   document.getElementById("btn-reveal").disabled = true; document.getElementById("btn-next").disabled = false;
   if (state.idx >= QUESTIONS.length - 1) document.getElementById("btn-next").textContent = "View final results";
@@ -234,7 +254,7 @@ function scoreCurrentQuestion() {
 function resetQuiz() {
   if (!confirm("Restart the quiz? All scores will be lost.")) return;
   state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected }; stopTimer();
-  if (db) { db.ref("session02/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("session02/responses").remove(); }
+  if (db) { db.ref("sessionXX/currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("sessionXX/responses").remove(); }
   location.reload();
 }
 function renderQuestion() {
@@ -289,7 +309,7 @@ function renderFinal() {
   const sorted=Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts);
   const podium=sorted.slice(0,3).map(([,s],i)=>`<div class="pillar ${["gold","silver","bronze"][i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
   document.getElementById("q-panel").innerHTML=`<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
-  if (db) db.ref("session02/currentQuestion").set({idx:-1,q:"END",options:[],revealed:true,final:true,mode:"all"});
+  if (db) db.ref("sessionXX/currentQuestion").set({idx:-1,q:"END",options:[],revealed:true,final:true,mode:"all"});
 }
 function startTimer() { stopTimer(); state.timeLeft=TIME_PER_Q; updateTimer(); state.timerInterval=setInterval(()=>{state.timeLeft--;updateTimer();if(state.timeLeft<=0){stopTimer();if(!state.revealed)revealAnswer();}},1000); }
 function stopTimer() { clearInterval(state.timerInterval); }
