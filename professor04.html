@@ -196,7 +196,7 @@ function listenFirebase() {
     if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
   });
 }
-function calcPts(t) { return Math.max(1, t + 1); }
+function calcPts(t) { return Math.max(1, t); }
 function pushQ(idx) {
   if (!db) return; const Q = QUESTIONS[idx];
   db.ref("session04/currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
