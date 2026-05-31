@@ -170,7 +170,6 @@ const QUESTIONS = [
   { eyebrow: "ALTIMETRY · FORECAST QNH", code: "050 01 06 02", q: "Forecast QNH is the lowest expected QNH in the Altimeter Setting Region (ASR) for the next hour. Using it ensures:", options: ["The altimeter over-reads — a built-in safety margin", "Actual altitude ≥ indicated altitude — safe for obstacle clearance", "It equals QFF at all times", "Simpler calculation than current QNH"], correct: 1, explain: "Forecast QNH = lowest expected pressure in the ASR. If actual pressure ≥ forecast QNH, altimeter reads conservatively low → actual altitude ≥ indicated → safe for terrain and obstacle clearance. QNH is always rounded DOWN for the same reason." }
 ];
 const DEBRIEF_TOPICS = "ISA (T, P, lapse rate, deviation) · QFE · QNH · Standard Altimeter Setting SAS (SPS, QNE) · Transition Altitude / Level / Layer · Lowest usable FL · Cold temperature error · Forecast QNH";
-const DEBRIEF_TOPICSconst DEBRIEF_TOPICS = "ISA (T, P, lapse rate, deviation) · QFE · QNH · Standard Altimeter Setting SAS (SPS, QNE) · Transition Altitude / Level / Layer · Lowest usable FL · Cold temperature error · Forecast QNH";
 let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
 let db;
 try {
