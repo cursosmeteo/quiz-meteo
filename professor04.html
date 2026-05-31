@@ -113,12 +113,14 @@
         <div class="qr-link" id="aluno-url">— loading —</div>
         <div id="qrcode-container"></div>
         <div class="scoring-info">
-          <b>Scoring — all answer</b><br>
+          <b>Scoring</b><br>
           <span class="s1">+20 pts</span> correct in 1s &nbsp;·&nbsp;
-          <span class="s2">+11 pts</span> correct in 10s<br>
+          <span class="s1">−20 pts</span> wrong in 1s<br>
+          <span class="s2">+11 pts</span> correct in 10s &nbsp;·&nbsp;
+          <span class="s2">−11 pts</span> wrong in 10s<br>
           <span class="s3">+1 pt</span> correct in 20s &nbsp;·&nbsp;
-          <span class="s0">−2 pts</span> wrong &nbsp;·&nbsp;
-          <span class="s0">−1 pt</span> no answer
+          <span class="s3">−1 pt</span> wrong in 20s<br>
+          <span class="s0">−5 pts</span> no answer
         </div>
         <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
       </div>
@@ -158,16 +160,16 @@ const FIREBASE_CONFIG = {
 };
 const TIME_PER_Q = 20;
 const QUESTIONS = [
-  { eyebrow: "ISA · DEFINITION", code: "050 01 05 00", q: "What is the ISA sea-level temperature and standard pressure?", options: ["+15°C · 1000.0 hPa", "+15°C · 1013.25 hPa", "+10°C · 1013.25 hPa", "0°C · 1013.25 hPa"], correct: 1, explain: "ISA MSL: temperature = +15°C, pressure = 1013.25 hPa, density = 1.225 kg/m³. The lapse rate is 2°C per 1 000 ft up to the tropopause at FL360 (36 090 ft), above which temperature is constant at −56.5°C." },
-  { eyebrow: "ISA · LAPSE RATE & DEVIATION", code: "050 01 05 00", q: "At FL60, the ISA temperature is +3°C. The OAT is +13°C. The ISA deviation is:", options: ["ISA − 10", "ISA + 10", "ISA − 3", "ISA + 3"], correct: 1, explain: "ISA at FL60 = 15 − (2×6) = +3°C. OAT = +13°C. Deviation = OAT − ISA = +13 − (+3) = +10°C = ISA +10. Positive deviation → air warmer than standard → density lower → performance degraded." },
-  { eyebrow: "ISA · PRESSURE GRADIENT", code: "050 01 05 00", q: "In the ATPL syllabus, the pressure gradient near sea level is approximately:", options: ["1 hPa per 27 ft", "1 hPa per 30 ft", "1 hPa per 33 ft", "2 hPa per 30 ft"], correct: 1, explain: "ATPL syllabus: 1 hPa ≈ 30 ft near MSL (precise value: 27 ft). This is the basis for altimeter corrections: QNH = QFE + elevation(ft)/30, and for the 1 hPa sub-scale rule — 1 hPa error → ~30 ft altitude error." },
+  { eyebrow: "ISA · DEFINITION", code: "050 01 05 00", q: "What is the ISA sea-level temperature and standard pressure?", options: ["+15°C · 1000.0 hPa", "+10°C · 1013.25 hPa", "0°C · 1013.25 hPa", "+15°C · 1013.25 hPa"], correct: 3, explain: "ISA MSL: temperature = +15°C, pressure = 1013.25 hPa, density = 1.225 kg/m³. The lapse rate is 2°C per 1 000 ft up to the tropopause at FL360 (36 090 ft), above which temperature is constant at −56.5°C." },
+  { eyebrow: "ISA · LAPSE RATE & DEVIATION", code: "050 01 05 00", q: "At FL60, the ISA temperature is +3°C. The OAT is +13°C. The ISA deviation is:", options: ["ISA + 10", "ISA − 10", "ISA − 3", "ISA + 3"], correct: 0, explain: "ISA at FL60 = 15 − (2×6) = +3°C. OAT = +13°C. Deviation = OAT − ISA = +13 − (+3) = +10°C = ISA +10. Positive deviation → air warmer than standard → density lower → performance degraded." },
+  { eyebrow: "ISA · PRESSURE GRADIENT", code: "050 01 05 00", q: "In the ATPL syllabus, the pressure gradient near sea level is approximately:", options: ["1 hPa per 27 ft", "1 hPa per 33 ft", "1 hPa per 30 ft", "2 hPa per 30 ft"], correct: 2, explain: "ATPL syllabus: 1 hPa ≈ 30 ft near MSL (precise value: 27 ft). This is the basis for altimeter corrections: QNH = QFE + elevation(ft)/30, and for the 1 hPa sub-scale rule — 1 hPa error → ~30 ft altitude error." },
   { eyebrow: "ALTIMETRY · QFE vs QNH", code: "050 01 06 02", q: "An aerodrome is 500 ft AMSL. With QFE set, the altimeter reads on the ground:", options: ["500 ft (aerodrome elevation)", "Zero (aerodrome surface)", "1013 ft", "Pressure altitude"], correct: 1, explain: "QFE = aerodrome surface pressure → altimeter reads HEIGHT above aerodrome = zero on the ground. QNH = MSL-corrected pressure → altimeter reads ALTITUDE above MSL = 500 ft on the ground at this aerodrome." },
-  { eyebrow: "ALTIMETRY · STANDARD SETTING", code: "050 01 06 02", q: "Standard Altimeter Setting — SAS (SPS, QNE) = 1013.25 hPa. When set, the altimeter reads:", options: ["Height above aerodrome (AGL)", "Altitude above MSL (QNH)", "Pressure altitude — Flight Level", "True altitude"], correct: 2, explain: "With SAS/SPS/QNE (1013.25 hPa) set, the altimeter reads PRESSURE ALTITUDE = Flight Level. All aircraft above the Transition Altitude use this common datum — guaranteeing vertical separation regardless of local pressure." },
-  { eyebrow: "ALTIMETRY · TRANSITION", code: "050 01 06 01", q: "Climbing through the Transition Altitude (TA), the pilot sets:", options: ["QNH", "QFE", "Standard — SAS (SPS, QNE) = 1013.25 hPa", "Destination QNH"], correct: 2, explain: "Climbing through TA → set Standard (1013.25 hPa). Descending through TL → revert to QNH. Below TA: altitudes (QNH). Above TL: Flight Levels (Standard). Transition Layer = transit only, no cruising allowed." },
-  { eyebrow: "ALTIMETRY · TRANSITION LAYER", code: "050 01 06 01", q: "Within the Transition Layer (between TA and TL), aircraft may:", options: ["Cruise at a constant Flight Level", "Cruise at a constant Altitude", "Transit only — no cruising", "Use either QNH or 1013.25 hPa freely"], correct: 2, explain: "No cruising in the Transition Layer — transit only. Lower QNH → higher TL → thicker layer. Climbing: set SAS at TA. Descending: set QNH at TL." },
+  { eyebrow: "ALTIMETRY · STANDARD SETTING", code: "050 01 06 02", q: "Standard Altimeter Setting — SAS (SPS, QNE) = 1013.25 hPa. When set, the altimeter reads:", options: ["Pressure altitude — Flight Level", "Height above aerodrome (AGL)", "Altitude above MSL (QNH)", "True altitude"], correct: 0, explain: "With SAS/SPS/QNE (1013.25 hPa) set, the altimeter reads PRESSURE ALTITUDE = Flight Level. All aircraft above the Transition Altitude use this common datum — guaranteeing vertical separation regardless of local pressure." },
+  { eyebrow: "ALTIMETRY · TRANSITION", code: "050 01 06 01", q: "Climbing through the Transition Altitude (TA), the pilot sets:", options: ["QNH", "QFE", "Destination QNH", "Standard — SAS (SPS, QNE) = 1013.25 hPa"], correct: 3, explain: "Climbing through TA → set Standard (1013.25 hPa). Descending through TL → revert to QNH. Below TA: altitudes (QNH). Above TL: Flight Levels (Standard). Transition Layer = transit only, no cruising allowed." },
+  { eyebrow: "ALTIMETRY · TRANSITION LAYER", code: "050 01 06 01", q: "Within the Transition Layer (between TA and TL), aircraft may:", options: ["Cruise at a constant Flight Level", "Transit only — no cruising", "Cruise at a constant Altitude", "Use either QNH or 1013.25 hPa freely"], correct: 1, explain: "No cruising in the Transition Layer — transit only. Lower QNH → higher TL → thicker layer. Climbing: set SAS at TA. Descending: set QNH at TL." },
   { eyebrow: "ALTIMETRY · LOWEST USABLE FL", code: "050 01 06 01", q: "The area QNH is 982 hPa. Compared to a standard day (1013 hPa), the lowest usable flight level is:", options: ["Lower — pressure drops with low QNH", "Unchanged — QNH does not affect FLs", "Higher — the 1013 datum is geometrically higher when QNH is low", "Lower only above the Transition Level"], correct: 2, explain: "FLs are fixed to the 1013.25 hPa surface. Low QNH → that surface sits at a higher geometric altitude → TL shifts up → lowest usable FL increases. QNH 982 hPa is ~31 hPa below standard → datum ~930 ft higher. Always verify before filing on a low-QNH day." },
   { eyebrow: "ALTIMETRY · COLD TEMPERATURE", code: "050 01 06 01", q: "Flying from a warm to a cold region at constant indicated altitude, true altitude:", options: ["Increases — cold air is denser", "Decreases — aircraft is lower than indicated", "Stays the same — altimeter corrects automatically", "Depends only on QNH"], correct: 1, explain: "'From High to Low — Watch Out Below.' Cold air is denser and compressed. The altimeter (assuming ISA) over-reads → true altitude is LOWER than indicated. Critical for terrain clearance and instrument approaches in cold-weather operations." },
-  { eyebrow: "ALTIMETRY · FORECAST QNH", code: "050 01 06 02", q: "Forecast QNH is the lowest expected QNH in the Altimeter Setting Region (ASR) for the next hour. Using it ensures:", options: ["The altimeter over-reads — a built-in safety margin", "Actual altitude ≥ indicated altitude — safe for obstacle clearance", "It equals QFF at all times", "Simpler calculation than current QNH"], correct: 1, explain: "Forecast QNH = lowest expected pressure in the ASR. If actual pressure ≥ forecast QNH, altimeter reads conservatively low → actual altitude ≥ indicated → safe for terrain and obstacle clearance. QNH is always rounded DOWN for the same reason." }
+  { eyebrow: "ALTIMETRY · FORECAST QNH", code: "050 01 06 02", q: "Forecast QNH is the lowest expected QNH in the Altimeter Setting Region (ASR) for the next hour. Using it ensures:", options: ["Actual altitude ≥ indicated altitude — safe for obstacle clearance", "The altimeter over-reads — a built-in safety margin", "It equals QFF at all times", "Simpler calculation than current QNH"], correct: 0, explain: "Forecast QNH = lowest expected pressure in the ASR. If actual pressure ≥ forecast QNH, altimeter reads conservatively low → actual altitude ≥ indicated → safe for terrain and obstacle clearance. QNH is always rounded DOWN for the same reason." }
 ];
 const DEBRIEF_TOPICS = "ISA (T, P, lapse rate, deviation) · QFE · QNH · Standard Altimeter Setting SAS (SPS, QNE) · Transition Altitude / Level / Layer · Lowest usable FL · Cold temperature error · Forecast QNH";
 let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
@@ -222,12 +224,12 @@ function scoreCurrentQuestion() {
   Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
   Object.entries(state.responses).forEach(([uid, d]) => {
     if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
-    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : (d.answer === -1 ? 0 : -2);
+    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : -calcPts(d.timeLeft || 0);
   });
   Object.keys(state.connected).forEach(uid => {
     if (!state.responses[uid]) {
       if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-      state.scores[uid].pts -= 1; // no answer = -1 pt
+      state.scores[uid].pts -= 5; // no answer = -5 pts
     }
   });
 }
@@ -285,7 +287,7 @@ function renderScoreboard() {
   el.innerHTML = sorted.length ? sorted.map(([,s],i)=>`<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("") : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
 }
 function renderFinal() {
-  stopTimer(); scoreCurrentQuestion(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
+  stopTimer(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
   const sorted=Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts);
   const podium=sorted.slice(0,3).map(([,s],i)=>`<div class="pillar ${["gold","silver","bronze"][i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
   document.getElementById("q-panel").innerHTML=`<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
