@@ -146,7 +146,7 @@ function tone(freq, dur, type, vol) {
   osc.start(); osc.stop(audioCtx.currentTime + dur);
 }
 function tickSound() { ensureAudio(); tone(880, 0.08, "square", 0.12); }
-function calcPts(timeLeft) { return Math.max(1, timeLeft + 1); }
+function calcPts(timeLeft) { return Math.max(1, timeLeft); }
 try { firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database(); } catch(e) { console.error(e); }
 document.getElementById("name-input").addEventListener("input", function() {
   document.getElementById("reg-btn").disabled = this.value.trim().length < 2;
@@ -240,13 +240,13 @@ function answer(optIdx, btn) {
 }
 function timeOut() {
   answered = true;
-  totalPts -= 1;
+  totalPts -= 5;
   if (db) { db.ref("session03/responses/" + uid).set({ name: userName, answer: -1, timeLeft: 0, answeredAt: Date.now(), qIdx: currentQIdx, timeout: true }); }
   const s = document.getElementById("screen-answered");
   s.className = "screen waiting";
   document.getElementById("ans-icon").textContent = "⏱";
   document.getElementById("ans-title").textContent = "Time's up";
-  document.getElementById("ans-pts").textContent = "−1 point";
+  document.getElementById("ans-pts").textContent = "−5 points";
   document.getElementById("ans-sub").textContent = "Awaiting next question…";
   document.getElementById("ans-total").textContent = `Total: ${totalPts} pts`;
   showScreen("screen-answered");
@@ -262,12 +262,12 @@ function showReveal(correctIdx) {
       return;
     }
     const isCorrect = r.answer === correctIdx;
-    const pts = isCorrect ? calcPts(r.timeLeft || 0) : -2;
+    const pts = isCorrect ? calcPts(r.timeLeft || 0) : -calcPts(r.timeLeft || 0);
     totalPts += pts;
     s.className = "screen " + (isCorrect ? "correct" : "wrong");
     document.getElementById("ans-icon").textContent = isCorrect ? "✓" : "✗";
     document.getElementById("ans-title").textContent = isCorrect ? "Correct!" : "Wrong!";
-    document.getElementById("ans-pts").textContent = isCorrect ? `+${pts} points` : "−2 points";
+    document.getElementById("ans-pts").textContent = isCorrect ? `+${pts} points` : `${pts} points`;
     document.getElementById("ans-sub").textContent = `Correct answer: ${String.fromCharCode(65 + correctIdx)}`;
     document.getElementById("ans-total").textContent = `Total: ${totalPts} pts`;
   });
