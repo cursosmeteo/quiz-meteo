@@ -113,12 +113,14 @@
         <div class="qr-link" id="aluno-url">— loading —</div>
         <div id="qrcode-container"></div>
         <div class="scoring-info">
-          <b>Scoring — all answer</b><br>
+          <b>Scoring</b><br>
           <span class="s1">+20 pts</span> correct in 1s &nbsp;·&nbsp;
-          <span class="s2">+11 pts</span> correct in 10s<br>
+          <span class="s1">−20 pts</span> wrong in 1s<br>
+          <span class="s2">+10 pts</span> correct in 10s &nbsp;·&nbsp;
+          <span class="s2">−10 pts</span> wrong in 10s<br>
           <span class="s3">+1 pt</span> correct in 20s &nbsp;·&nbsp;
-          <span class="s0">−2 pts</span> wrong &nbsp;·&nbsp;
-          <span class="s0">−1 pt</span> no answer
+          <span class="s3">−1 pt</span> wrong in 20s<br>
+          <span class="s0">−5 pts</span> no answer
         </div>
         <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
       </div>
@@ -158,19 +160,18 @@ const FIREBASE_CONFIG = {
 };
 const TIME_PER_Q = 20;
 const QUESTIONS = [
-  { eyebrow: "PRESSURE · DEFINITION", code: "050 01 03 00", q: "What is the standard sea-level pressure in the International Standard Atmosphere (ISA)?", options: ["1000.0 hPa / 750 mmHg / 29.53 inHg", "1013.25 hPa / 760 mmHg / 29.92 inHg", "1013.25 hPa / 760 mmHg / 29.53 inHg", "1000.0 hPa / 760 mmHg / 29.92 inHg"], correct: 1, explain: "ISA MSL pressure is 1013.25 hPa = 760 mmHg = 29.92 inHg. Temperature = +15°C, density = 1.225 kg/m³. These are the three standard reference values at sea level." },
-  { eyebrow: "PRESSURE · VARIATION WITH HEIGHT", code: "050 01 03 02", q: "Approximately how much does pressure decrease per 30 ft near sea level?", options: ["2 hPa", "1 hPa", "0.5 hPa", "3 hPa"], correct: 1, explain: "Near MSL, pressure decreases by approximately 1 hPa per 30 ft (or about 1 hPa per 9 m). This is the basis for altimeter operation and QNH/QFE calculations. The rate decreases with altitude as the air becomes less dense." },
-  { eyebrow: "PRESSURE · ALTIMETRY", code: "050 01 03 03", q: "An aircraft sets QNH on the altimeter. On the ground at the aerodrome, the altimeter reads:", options: ["Zero feet — aerodrome is at MSL by definition", "The aerodrome elevation above MSL", "QFE pressure in hPa", "Pressure altitude at FL000"], correct: 1, explain: "QNH is the MSL pressure reduced using ISA conditions. When set on the altimeter, it reads aerodrome elevation on the ground. QFE gives a reading of zero on the ground. QNH is used for en-route flight; QFE for approach and landing." },
+  { eyebrow: "PRESSURE · DEFINITION", code: "050 01 03 00", q: "What is the standard sea-level pressure in the International Standard Atmosphere (ISA)?", options: ["1000.0 hPa / 750 mmHg / 29.53 inHg", "1013.25 hPa / 760 mmHg / 29.53 inHg", "1000.0 hPa / 760 mmHg / 29.92 inHg", "1013.25 hPa / 760 mmHg / 29.92 inHg"], correct: 3, explain: "ISA MSL pressure is 1013.25 hPa = 760 mmHg = 29.92 inHg. Temperature = +15°C, density = 1.225 kg/m³. These are the three standard reference values at sea level." },
+  { eyebrow: "PRESSURE · VARIATION WITH HEIGHT", code: "050 01 03 02", q: "Approximately how much does pressure decrease per 30 ft near sea level?", options: ["1 hPa", "2 hPa", "0.5 hPa", "3 hPa"], correct: 0, explain: "Near MSL, pressure decreases by approximately 1 hPa per 30 ft (or about 1 hPa per 9 m). This is the basis for altimeter operation and QNH/QFE calculations. The rate decreases with altitude as the air becomes less dense." },
+  { eyebrow: "PRESSURE · ALTIMETRY", code: "050 01 03 03", q: "An aircraft sets QNH on the altimeter. On the ground at the aerodrome, the altimeter reads:", options: ["Zero feet — aerodrome is at MSL by definition", "QFE pressure in hPa", "The aerodrome elevation above MSL", "Pressure altitude at FL000"], correct: 2, explain: "QNH is the MSL pressure reduced using ISA conditions. When set on the altimeter, it reads aerodrome elevation on the ground. QFE gives a reading of zero on the ground. QNH is used for en-route flight; QFE for approach and landing." },
   { eyebrow: "PRESSURE · QFE / QNH / QFF", code: "050 01 03 03", q: "QFF differs from QNH because it is reduced to MSL using:", options: ["ISA temperature profile", "Actual observed temperature at the station", "A fixed lapse rate of 2°C/1000 ft", "The temperature at the tropopause"], correct: 1, explain: "QFF is the station pressure reduced to MSL using the actual temperature, not ISA. It is used on synoptic (weather) charts for isobars. QNH uses ISA temperature; QFF uses actual temperature — they differ when OAT ≠ ISA." },
-  { eyebrow: "PRESSURE · ISOBARS", code: "050 01 03 01", q: "Isobars on a surface chart are lines connecting points of equal:", options: ["Temperature", "Humidity", "Pressure reduced to MSL", "Pressure at station elevation"], correct: 2, explain: "Isobars connect points of equal pressure reduced to MSL (QFF). They cannot use raw station pressure because stations are at different elevations. The spacing of isobars indicates the pressure gradient — closer = stronger wind." },
+  { eyebrow: "PRESSURE · ISOBARS", code: "050 01 03 01", q: "Isobars on a surface chart are lines connecting points of equal:", options: ["Pressure reduced to MSL", "Temperature", "Humidity", "Pressure at station elevation"], correct: 0, explain: "Isobars connect points of equal pressure reduced to MSL (QFF). They cannot use raw station pressure because stations are at different elevations. The spacing of isobars indicates the pressure gradient — closer = stronger wind." },
   { eyebrow: "PRESSURE · BUYS BALLOT'S LAW", code: "050 01 03 01", q: "In the Northern Hemisphere, if you stand with your back to the wind, the lower pressure is:", options: ["Behind you", "In front of you", "To your right", "To your left"], correct: 3, explain: "Buys Ballot's Law (NH): stand with your back to the wind → low pressure is to your LEFT. In the Southern Hemisphere it is reversed (to the right). The wind blows parallel to isobars due to the Coriolis force, not directly from high to low." },
   { eyebrow: "DENSITY · IDEAL GAS LAW", code: "050 01 04 01", q: "Using the ideal gas law (ρ = P/RT), if temperature increases while pressure stays the same, air density:", options: ["Increases — warmer air is denser", "Decreases — warmer air expands and becomes less dense", "Stays the same — only pressure affects density", "First increases then decreases"], correct: 1, explain: "ρ = P/(R·T). With P constant, ρ is inversely proportional to T. Higher T → lower ρ. This directly affects aircraft performance: hot day = less dense air = higher density altitude = worse performance." },
-  { eyebrow: "DENSITY · ALTITUDE & PERFORMANCE", code: "050 01 04 01", q: "Density altitude is defined as the altitude in the ISA at which the air density equals the observed density. A high density altitude means:", options: ["Dense air and better engine performance", "Less dense air and degraded lift, thrust and propeller efficiency", "Dense air but reduced lift due to low temperature", "The same as pressure altitude when ISA conditions exist"], correct: 1, explain: "High DA = thin air = reduced engine power, less aerodynamic lift (wings need more speed), and less propeller efficiency. Results: longer take-off roll, reduced rate of climb, higher true airspeed for same IAS. Critical at hot, high-altitude airports." },
+  { eyebrow: "DENSITY · ALTITUDE & PERFORMANCE", code: "050 01 04 01", q: "Density altitude is defined as the altitude in the ISA at which the air density equals the observed density. A high density altitude means:", options: ["Dense air and better engine performance", "Dense air but reduced lift due to low temperature", "Less dense air and degraded lift, thrust and propeller efficiency", "The same as pressure altitude when ISA conditions exist"], correct: 2, explain: "High DA = thin air = reduced engine power, less aerodynamic lift (wings need more speed), and less propeller efficiency. Results: longer take-off roll, reduced rate of climb, higher true airspeed for same IAS. Critical at hot, high-altitude airports." },
   { eyebrow: "PRESSURE · ISOHYPSES", code: "050 01 03 02", q: "On a 500 hPa constant pressure chart, isohypses (contour lines) connect points of equal:", options: ["Pressure at flight level 180", "Height of the 500 hPa surface above MSL", "Temperature on the 500 hPa surface", "Wind speed on the 500 hPa chart"], correct: 1, explain: "Isohypses on constant-pressure charts are equivalent to isobars on surface charts. They show the height (in metres or geopotential metres) at which the 500 hPa surface is found above MSL. High values = warm air below; low values = cold air. Closely spaced = strong upper winds." },
-  { eyebrow: "DENSITY · LATITUDE & TROPOPAUSE", code: "050 01 04 01", q: "At the same altitude above ~26 000 ft, which region has the highest air density?", options: ["Polar regions — cold, denser air throughout", "Equatorial regions — high tropopause means cold air extends higher", "Mid-latitudes — where density is always standard ISA", "Density is equal at all latitudes above 26 000 ft"], correct: 1, explain: "The tropopause is ~16 km over the equator vs ~8 km over the poles. Above ~26 000 ft, the equator has colder air near its tropopause level, giving higher density. Below ~26 000 ft the relationship reverses — poles are colder and denser at the surface." }
+  { eyebrow: "DENSITY · LATITUDE & TROPOPAUSE", code: "050 01 04 01", q: "At the same altitude above ~26 000 ft, which region has the highest air density?", options: ["Equatorial regions — high tropopause means cold air extends higher", "Polar regions — cold, denser air throughout", "Mid-latitudes — where density is always standard ISA", "Density is equal at all latitudes above 26 000 ft"], correct: 0, explain: "The tropopause is ~16 km over the equator vs ~8 km over the poles. Above ~26 000 ft, the equator has colder air near its tropopause level, giving higher density. Below ~26 000 ft the relationship reverses — poles are colder and denser at the surface." }
 ];
 const DEBRIEF_TOPICS = "Pressure definition & units · Altimetry (QFE/QNH/QFF) · Isobars & Buys Ballot's Law · Density & performance · Isohypses · Tropopause & latitude effects";
-const DEBRIEF_TOPICSconst DEBRIEF_TOPICS = "5 heat transfer processes · Solar vs terrestrial radiation · Greenhouse effect · 5 inversion types & ops · Diurnal T cycle";
 let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
 let db;
 try {
@@ -195,7 +196,7 @@ function listenFirebase() {
     if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
   });
 }
-function calcPts(t) { return Math.max(1, t + 1); }
+function calcPts(t) { return Math.max(1, t); }
 function pushQ(idx) {
   if (!db) return; const Q = QUESTIONS[idx];
   db.ref("session03/currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
@@ -223,12 +224,12 @@ function scoreCurrentQuestion() {
   Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
   Object.entries(state.responses).forEach(([uid, d]) => {
     if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
-    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : (d.answer === -1 ? 0 : -2);
+    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : -calcPts(d.timeLeft || 0);
   });
   Object.keys(state.connected).forEach(uid => {
     if (!state.responses[uid]) {
       if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-      state.scores[uid].pts -= 1; // no answer = -1 pt
+      state.scores[uid].pts -= 5; // no answer = -5 pts
     }
   });
 }
@@ -286,7 +287,7 @@ function renderScoreboard() {
   el.innerHTML = sorted.length ? sorted.map(([,s],i)=>`<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("") : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
 }
 function renderFinal() {
-  stopTimer(); scoreCurrentQuestion(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
+  stopTimer(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
   const sorted=Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts);
   const podium=sorted.slice(0,3).map(([,s],i)=>`<div class="pillar ${["gold","silver","bronze"][i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
   document.getElementById("q-panel").innerHTML=`<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
