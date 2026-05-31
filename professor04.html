@@ -224,7 +224,7 @@ function scoreCurrentQuestion() {
   Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
   Object.entries(state.responses).forEach(([uid, d]) => {
     if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
-    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : -calcPts(d.timeLeft || 0);
+    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : (d.answer === -1 ? -5 : -calcPts(d.timeLeft || 0));
   });
   Object.keys(state.connected).forEach(uid => {
     if (!state.responses[uid]) {
@@ -267,7 +267,7 @@ function renderResponses() {
     const tLeft = r.timeLeft || 0;
     const timeLbl = r.answer === -1 ? "—" : (TIME_PER_Q - tLeft) + "s";
     const isC = Q&&state.revealed ? r.answer===Q.correct : null;
-    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(tLeft)}`:(r.answer===-1?"−1":"−2")) : "";
+    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(tLeft)}`:(r.answer===-1?"−5":`−${calcPts(tLeft)}`)) : "";
     return `<div class="r-item ${isC===true?"correct":isC===false?"wrong":""}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans" style="font-size:10px">${timeLbl}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
   }).join("");
 }

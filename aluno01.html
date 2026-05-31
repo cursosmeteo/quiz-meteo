@@ -257,7 +257,9 @@ function showReveal(correctIdx) {
     const r = snap.val();
     const s = document.getElementById("screen-answered");
     if (!r || r.answer === -1 || r.timeout) {
+      if (!r) { totalPts -= 5; } // no response at all = -5
       document.getElementById("ans-sub").textContent = `Correct answer: ${String.fromCharCode(65 + correctIdx)}`;
+      document.getElementById("ans-pts").textContent = !r ? "−5 points" : "−5 points";
       document.getElementById("ans-total").textContent = `Total: ${totalPts} pts`;
       return;
     }
