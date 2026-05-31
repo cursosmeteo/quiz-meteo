@@ -71,14 +71,15 @@ html, body { height: 100%; font-family: 'Segoe UI', 'Helvetica Neue', sans-serif
 </head>
 <body>
 <div class="screen active" id="screen-register">
-  <div class="reg-logo">METEOROLOGY · HEAT TRANSFER & INVERSIONS · SESSION 02</div>
+  <div class="reg-logo">METEOROLOGY · ISA &amp; ALTIMETRY · SESSION 04</div>
   <div class="reg-card">
-    <h2>Atmospheric Pressure &amp; Density</h2>
+    <h2>ISA &amp; Altimetry</h2>
     <p>All students answer each question</p>
     <div class="scoring-rules">
-      <span class="s1">+20</span> answer in 1s &nbsp;·&nbsp; <span class="s2">+11</span> in 10s<br>
-      <span class="s3">+1</span> in 20s &nbsp;·&nbsp; <span class="s0">−2</span> wrong &nbsp;·&nbsp; <span class="s0">−1</span> no answer
-    </div>
+        <span class="s-pos">+20 pts</span> correct in 1s · <span class="s-neg">−20 pts</span> wrong in 1s<br>
+        <span class="s-pos">+11 pts</span> correct in 10s · <span class="s-neg">−11 pts</span> wrong in 10s<br>
+        <span class="s-neu">−5 pts</span> no answer
+      </div>
     <input class="reg-input" id="name-input" type="text" placeholder="Your name" maxlength="24" autocomplete="off" autocorrect="off" spellcheck="false">
     <button class="reg-btn" id="reg-btn" onclick="register()" disabled>Join →</button>
   </div>
