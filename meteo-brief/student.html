@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>METEO BRIEF — Student</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+.page{max-width:660px;margin:0 auto;padding:0 16px 48px}
+.ph-bar{display:flex;gap:4px;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.pb{flex-shrink:0;padding:4px 10px;border-radius:99px;font-size:.7rem;font-weight:700;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.pb.active{background:var(--blue-d);color:var(--blue);border-color:var(--blue)}
+.pb.done{background:var(--green-d);color:var(--green);border-color:var(--green)}
+.login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px;width:100%;max-width:360px;text-align:center}
+.sev-grp{display:flex;gap:6px}
+.sev-btn{flex:1;padding:10px 6px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text3);font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.sev-btn:hover{background:var(--bg4);color:var(--text)}
+.sev-btn.L{background:var(--green-d);color:var(--green);border-color:var(--green)}
+.sev-btn.M{background:var(--amber-d);color:var(--amber);border-color:var(--amber)}
+.sev-btn.H{background:var(--red-d);color:var(--red);border-color:var(--red)}
+.wc{font-size:.7rem;color:var(--text3);margin-top:3px}
+.wc.ok{color:var(--green)}.wc.bad{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-shell" class="login-shell">
+  <div class="login-card">
+    <div style="font-size:1.3rem;font-weight:900;margin-bottom:4px">METEO <em style="font-style:normal;color:var(--blue)">BRIEF</em></div>
+    <div style="color:var(--text3);font-size:.82rem;margin-bottom:22px">ATPL Meteorology KSA</div>
+    <div class="fg" style="text-align:left">
+      <label>Your Name</label>
+      <input type="text" id="ln-name" placeholder="e.g. João Silva" autocomplete="off">
+    </div>
+    <button class="btn btn-primary btn-full btn-lg mt-12" onclick="joinSession()">Join →</button>
+    <div id="ln-err" style="color:var(--red);font-size:.82rem;margin-top:10px;display:none"></div>
+    <div style="margin-top:14px;font-size:.68rem;color:var(--text3)" id="ln-conn"><span class="dot amber"></span> Connecting…</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar__logo">METEO <em>BRIEF</em></div>
+    <div class="sep"></div>
+    <span class="text-sm text-muted font-bold" id="top-name">—</span>
+    <div class="sep"></div>
+    <span class="tag" id="top-group" style="display:none"></span>
+    <div class="ml-auto fc gap-8">
+      <span class="text-xs text-dim" id="top-phase">—</span>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="ph-bar">
+      <div class="pb" id="pb0">Pre-Test</div>
+      <div class="pb" id="pb1">Analysis</div>
+      <div class="pb" id="pb2">Group Decision</div>
+      <div class="pb" id="pb3">Challenge</div>
+      <div class="pb" id="pb4">Key MCQ</div>
+      <div class="pb" id="pb5">Oral</div>
+      <div class="pb" id="pb6">Results</div>
+    </div>
+
+    <!-- KSA TRACKER -->
+    <div class="ksa-panel" id="ksa-panel" style="display:none">
+      <div class="ksa-panel__title">KSA Tracker</div>
+      <div class="ksa-row">
+        <div class="ksa-letter ksa-k">K</div>
+        <div class="ksa-label">Knowledge</div>
+        <div class="ksa-bar-track"><div class="ksa-bar-fill" id="ksa-k-bar" style="width:0%;background:var(--blue)"></div></div>
+        <div class="ksa-val ksa-k" id="ksa-k-val">0 / 40</div>
+      </div>
+      <div class="ksa-sub" id="ksa-k-sub">Pre-test + Group hazard analysis</div>
+      <div class="ksa-row">
+        <div class="ksa-letter ksa-s">S</div>
+        <div class="ksa-label">Skills</div>
+        <div class="ksa-bar-track"><div class="ksa-bar-fill" id="ksa-s-bar" style="width:0%;background:var(--green)"></div></div>
+        <div class="ksa-val ksa-s" id="ksa-s-val">0 / 35</div>
+      </div>
+      <div class="ksa-sub" id="ksa-s-sub">Decision quality + Challenge response + Oral</div>
+      <div class="ksa-row">
+        <div class="ksa-letter ksa-a">A</div>
+        <div class="ksa-label">Attitudes</div>
+        <div class="ksa-bar-track"><div class="ksa-bar-fill" id="ksa-a-bar" style="width:0%;background:var(--purple)"></div></div>
+        <div class="ksa-val ksa-a" id="ksa-a-val">0 / 25</div>
+      </div>
+      <div class="ksa-sub" id="ksa-a-sub">Participation + Challenge response + Oral</div>
+    </div>
+
+    <!-- SCREEN: WAIT -->
+    <div class="screen active" id="sc-wait">
+      <div class="wait-box">
+        <div class="wait-icon">⏳</div>
+        <div style="font-weight:700;font-size:1rem" id="wait-msg">Waiting for session…</div>
+        <div class="text-muted text-sm mt-8" id="wait-sub">Your instructor will begin shortly.</div>
+        <div class="pulse-ring"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: PRE-TEST -->
+    <div class="screen" id="sc-test">
+      <div class="card" style="padding:24px;text-align:center">
+        <div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" id="sq-num">Question 1 / 10</div>
+        <div style="font-size:1rem;font-weight:600;line-height:1.6;margin-bottom:18px;max-width:560px;margin-left:auto;margin-right:auto" id="sq-text">—</div>
+        <div style="font-family:var(--mono);font-size:3rem;font-weight:900;color:var(--blue);margin-bottom:16px;line-height:1" id="sq-clock">20</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:500px;margin:0 auto 14px" id="sq-opts"></div>
+        <div style="font-size:.88rem;font-weight:600;min-height:24px;margin-top:4px" id="sq-fb"></div>
+      </div>
+      <div class="card mt-12" id="running-card" style="display:none">
+        <div class="card__title">Running Score</div>
+        <div id="running-score" class="text-sm text-muted"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: TEST DONE -->
+    <div class="screen" id="sc-test-done">
+      <div class="wait-box">
+        <div class="score-circle" id="fsc">
+          <div class="score-circle__val" id="fsc-val">0</div>
+          <div class="score-circle__lbl">pts</div>
+        </div>
+        <h2 class="mb-8">Pre-Test Complete</h2>
+        <div class="text-muted text-sm mb-12" id="test-summary"></div>
+        <div class="card card--blue" id="answer-review" style="text-align:left;margin-bottom:12px"></div>
+        <div class="text-xs text-dim mt-12">Waiting for group formation…</div>
+        <div class="pulse-ring"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: GROUP ASSIGNED -->
+    <div class="screen" id="sc-group">
+      <div class="wait-box">
+        <div style="font-size:2.5rem;margin-bottom:12px">👥</div>
+        <h2 class="mb-8">You are in <span id="my-grp-name" style="color:var(--cyan)">—</span></h2>
+        <div class="card card--cyan" id="my-grp-detail" style="text-align:left;max-width:360px;margin:0 auto 20px"></div>
+        <div class="text-xs text-dim">Waiting for mission briefing…</div>
+        <div class="pulse-ring"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: BRIEFING -->
+    <div class="screen" id="sc-briefing">
+      <h2 class="mb-12">📋 Mission Briefing</h2>
+      <div class="card card--blue" id="st-brief"></div>
+      <div class="card mt-12">
+        <div class="card__title">🌐 Live Met Sources</div>
+        <div id="st-links" style="display:flex;flex-direction:column;gap:7px"></div>
+      </div>
+      <div class="card card--amber mt-12">
+        <div class="card__title">📁 Archive Data (always available as fallback)</div>
+        <div id="st-archive" class="met-block mt-4">—</div>
+      </div>
+      <div class="text-xs text-dim text-center mt-12">Instructor will open the analysis phase shortly.</div>
+    </div>
+
+    <!-- SCREEN: ANALYSIS -->
+    <div class="screen" id="sc-analysis">
+      <h2 class="mb-4">Individual Met Analysis</h2>
+      <div class="text-muted text-sm mb-14">Analyse the meteorological situation for your route independently. All fields required.</div>
+
+      <div class="card mb-12">
+        <div class="card__title">📊 Primary Hazard <span class="ksa-letter ksa-k" style="font-size:.68rem">[K]</span></div>
+        <div class="fg">
+          <label>Main hazard identified (min 30 words)</label>
+          <textarea id="a-hazard" style="min-height:90px" placeholder="Describe the primary meteorological hazard for this route — type, location, altitude, intensity, source…" oninput="wc(this,'wc-h',30)"></textarea>
+          <div class="wc bad" id="wc-h">0 / 30 words minimum</div>
+        </div>
+        <div class="fg">
+          <label>Severity</label>
+          <div class="sev-grp" id="sev-grp">
+            <button class="sev-btn" onclick="setSev('LOW',this)">🟢 LOW</button>
+            <button class="sev-btn" onclick="setSev('MODERATE',this)">🟡 MODERATE</button>
+            <button class="sev-btn" onclick="setSev('HIGH',this)">🔴 HIGH</button>
+          </div>
+        </div>
+        <div class="fg mt-8">
+          <label>Sources consulted</label>
+          <textarea id="a-src" style="min-height:50px" placeholder="List sources: AVWX METAR EGLL / NOAA SIGMET / Wetterzentrale surface chart…"></textarea>
+        </div>
+      </div>
+
+      <div class="card mb-12">
+        <div class="card__title">✈️ Operational Impact <span class="ksa-letter ksa-s" style="font-size:.68rem">[S]</span></div>
+        <div class="fg">
+          <label>Impact on this flight (min 25 words)</label>
+          <textarea id="a-impact" style="min-height:80px" placeholder="How does this hazard affect the route, altitude, timing, destination, or alternate?" oninput="wc(this,'wc-i',25)"></textarea>
+          <div class="wc bad" id="wc-i">0 / 25 words minimum</div>
+        </div>
+        <div class="fg">
+          <label>Your preliminary assessment</label>
+          <div class="dec-group">
+            <button class="dec-btn go" onclick="setPreDec('GO',this)">GO</button>
+            <button class="dec-btn delay" onclick="setPreDec('DELAY',this)">DELAY</button>
+            <button class="dec-btn nogo" onclick="setPreDec('NO-GO',this)">NO-GO</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-green btn-full btn-lg" id="btn-sub-analysis" onclick="submitAnalysis()">✓ Submit My Analysis</button>
+      <div id="analysis-sent" style="display:none;text-align:center;padding:20px;color:var(--green);font-weight:700" class="mt-8">
+        ✅ Analysis submitted! Join your group for the decision phase.
+      </div>
+    </div>
+
+    <!-- SCREEN: WAITING FOR GROUP -->
+    <div class="screen" id="sc-wait-group">
+      <div class="wait-box">
+        <div class="wait-icon">🤝</div>
+        <div style="font-weight:700">Analysis submitted!</div>
+        <div class="text-muted text-sm mt-4 mb-16">
+          Go to the group screen and discuss with your team.<br>
+          Open <strong id="grp-url-txt" style="color:var(--cyan)">group.html</strong> on the shared screen.
+        </div>
+        <div class="pulse-ring"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: CHALLENGE -->
+    <div class="screen" id="sc-challenge">
+      <h2 class="mb-12">⚡ New Information</h2>
+      <div class="challenge-banner mb-14">
+        <div class="challenge-banner__hdr">Challenge from Instructor</div>
+        <div class="challenge-banner__txt" id="st-ch-txt">—</div>
+      </div>
+      <div class="card card--blue">
+        <div class="card__title">Action Required <span class="ksa-letter ksa-s" style="font-size:.68rem">[S+A]</span></div>
+        <div class="text-sm text-muted">Go to the group screen. Discuss and revise your decision in light of this new information.</div>
+      </div>
+    </div>
+
+    <!-- SCREEN: KEY MCQ -->
+    <div class="screen" id="sc-key">
+      <div class="wait-box">
+        <div style="font-size:2.5rem;margin-bottom:10px">🔑</div>
+        <div style="font-weight:700;font-size:1rem">Briefing Access Key</div>
+        <div class="text-muted text-sm mt-4 mb-14">
+          Your group answers 3 questions on the group screen.<br>
+          Wrong answers = point penalty for all members.
+        </div>
+        <div class="card card--purple" id="key-penalty-display" style="max-width:360px;margin:0 auto;display:none">
+          <div class="card__title">Key Result</div>
+          <div id="key-penalty-txt" class="text-sm"></div>
+        </div>
+        <div class="pulse-ring"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: ORAL -->
+    <div class="screen" id="sc-oral">
+      <div class="wait-box">
+        <div style="font-size:2.5rem;margin-bottom:10px">🎙️</div>
+        <div style="font-weight:700;font-size:1rem">Oral Briefing</div>
+        <div class="text-muted text-sm mt-4 mb-14">
+          Your group has <strong>2 minutes</strong> to present.<br><br>
+          <strong>Structure:</strong><br>
+          1. Current synoptic situation — 1 sentence<br>
+          2. Main hazard + operational significance<br>
+          3. Decision: GO / DELAY / NO-GO + justification<br>
+          4. Confidence + one mitigation
+        </div>
+        <div class="card card--blue" id="oral-ref-st" style="text-align:left;max-width:420px;margin:0 auto"></div>
+        <div class="text-xs text-dim mt-12">
+          <span class="ksa-letter ksa-s">S</span> + <span class="ksa-letter ksa-a">A</span>
+          scored individually by the jury after your briefing.
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: RESULTS -->
+    <div class="screen" id="sc-results">
+      <div class="wait-box">
+        <div style="font-size:2.5rem;margin-bottom:14px">🏆</div>
+        <h2 class="mb-12">Session Complete</h2>
+        <div class="score-circle" id="res-circle" style="background:var(--green-d);border-color:var(--green);margin-bottom:20px">
+          <div class="score-circle__val" style="color:var(--green)" id="res-total">—</div>
+          <div class="score-circle__lbl">total</div>
+        </div>
+        <div class="card" style="text-align:left;max-width:380px;margin:0 auto 16px">
+          <div class="card__title">Score Breakdown</div>
+          <div id="res-breakdown" class="text-sm" style="line-height:2.2"></div>
+        </div>
+        <!-- Final KSA panel -->
+        <div class="ksa-panel" id="res-ksa" style="max-width:380px;margin:0 auto;display:none">
+          <div class="ksa-panel__title">Final KSA</div>
+          <div id="res-ksa-detail"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+</div><!-- /app -->
+
+<script src="firebase-config.js"></script>
+<script src="data.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════════════════
+let myId=null, myName='', myGroupId=null;
+let questions=[], curQIdx=0, selOpt=null, qStart=0, myScore=0, answered=[];
+let severity=null, preDec=null;
+const PH_LABELS={0:'Waiting',1:'Pre-Test',2:'Groups',3:'Briefing',4:'Analysis',5:'Decision',6:'Challenge',7:'Key MCQ',8:'Oral',9:'Results'};
+
+// ════════════════════════════════════════════════════════════════════════════
+// CONNECTION
+// ════════════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  onConnectionChange(on=>{
+    const el=document.getElementById('ln-conn');
+    if(el)el.innerHTML=on?'<span class="dot"></span> Connected':'<span class="dot red"></span> Offline';
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════════════════════════════════════════════
+async function joinSession(){
+  const name=document.getElementById('ln-name').value.trim();
+  const errEl=document.getElementById('ln-err');
+  if(!name){errEl.textContent='Enter your name.';errEl.style.display='block';return;}
+
+  const sess=await dbGet('session/config');
+  if(!sess){errEl.textContent='No active session. Ask your instructor.';errEl.style.display='block';return;}
+
+  // Match by name in student list
+  const stuData=await dbGet('students');
+  if(stuData){
+    const entry=Object.entries(stuData).find(([k,v])=>v.name.toLowerCase()===name.toLowerCase());
+    if(entry){myId=entry[0];myName=entry[1].name;}
+  }
+  if(!myId){
+    // Auto-register
+    myId='S-'+name.replace(/\s+/g,'').substring(0,6)+'-'+Math.random().toString(36).substr(2,3);
+    myName=name;
+    await dbSet(`students/${myId}`,{name,preScore:0,groupId:null,groupScore:0,oralScore:0,analysisSubmitted:false,answers:{},ksa:{K:0,S:0,A:0}});
+  }
+
+  questions=(await dbGet('session/questions'))||[];
+
+  document.getElementById('login-shell').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('top-name').textContent=myName;
+  document.getElementById('ksa-panel').style.display='block';
+
+  startListeners();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// LISTENERS
+// ════════════════════════════════════════════════════════════════════════════
+function startListeners(){
+  // Phase
+  dbOn('session/phase',ph=>{if(ph!==null)handlePhase(parseInt(ph));});
+  // Current question
+  dbOn('session/currentQuestion',qd=>{
+    if(!qd||qd.done)return;
+    if(qd.index!==curQIdx||qd.showAnswer)renderStuQ(qd);
+    if(qd.showAnswer)showFeedback(qd.correctIndex);
+  });
+  // Group assignment
+  dbOn(`students/${myId}/groupId`,gid=>{
+    if(!gid)return;myGroupId=gid;
+    document.getElementById('top-group').textContent=gid;
+    document.getElementById('top-group').className='tag tag-cyan';
+    document.getElementById('top-group').style.display='inline-flex';
+    document.getElementById('grp-url-txt').textContent=`group.html?g=${gid}`;
+    loadGroupInfo(gid);
+  });
+  // Challenge
+  dbOn('session/challenge',ch=>{
+    if(!ch?.text)return;
+    if(ch.target==='all'||ch.target===myGroupId)
+      document.getElementById('st-ch-txt').textContent=ch.text;
+  });
+  // My scores (live KSA update)
+  dbOn(`students/${myId}`,d=>{if(d)updateKSA(d);});
+  // Group key result
+  dbOn(`groups/${myGroupId||'G1'}/keyCorrect`,correct=>{
+    if(correct===undefined||correct===null)return;
+    const penalty=correct===3?0:correct===2?10:correct===1?20:30;
+    const col=penalty===0?'var(--green)':penalty<=10?'var(--amber)':'var(--red)';
+    const el=document.getElementById('key-penalty-display');
+    if(el){el.style.display='block';document.getElementById('key-penalty-txt').innerHTML=
+      `${correct}/3 correct — <strong style="color:${col}">${penalty===0?'✓ No penalty':`−${penalty} pts applied`}</strong>`;}
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE HANDLER
+// ════════════════════════════════════════════════════════════════════════════
+function handlePhase(ph){
+  document.getElementById('top-phase').textContent=PH_LABELS[ph]||'—';
+  // Phase bar
+  const phToPB={1:'pb0',4:'pb1',5:'pb2',6:'pb3',7:'pb4',8:'pb5',9:'pb6'};
+  Object.entries(phToPB).forEach(([phNum,pbId])=>{
+    const el=document.getElementById(pbId);if(!el)return;
+    el.className='pb'+(ph>phNum?' done':ph==phNum?' active':'');
+  });
+
+  if(ph<=0){showSc('sc-wait');return;}
+  if(ph===1){showSc('sc-test');dbGet('session/currentQuestion').then(q=>{if(q&&!q.done)renderStuQ(q);});return;}
+  if(ph===2){showSc('sc-group');if(myGroupId)loadGroupInfo(myGroupId);return;}
+  if(ph===3){showSc('sc-briefing');renderBriefing();return;}
+  if(ph===4){
+    dbGet(`students/${myId}/analysisSubmitted`).then(done=>showSc(done?'sc-wait-group':'sc-analysis'));return;}
+  if(ph===5){showSc('sc-wait-group');return;}
+  if(ph===6){showSc('sc-challenge');dbGet('session/challenge').then(ch=>{if(ch?.text)document.getElementById('st-ch-txt').textContent=ch.text;});return;}
+  if(ph===7){showSc('sc-key');return;}
+  if(ph===8){showSc('sc-oral');loadOralRef();return;}
+  if(ph===9){showSc('sc-results');loadResults();return;}
+  showSc('sc-wait');
+}
+
+function showSc(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// PRE-TEST
+// ════════════════════════════════════════════════════════════════════════════
+let qTickInterval=null;
+
+function renderStuQ(qd){
+  if(!qd||qd.done)return;
+  curQIdx=qd.index||0;selOpt=null;qStart=qd.startedAt||now();
+  document.getElementById('sq-num').textContent=`Question ${curQIdx+1} / ${questions.length||10}`;
+  document.getElementById('sq-text').textContent=qd.text||'—';
+  const clk=document.getElementById('sq-clock');clk.textContent='20';clk.style.color='var(--blue)';
+  document.getElementById('sq-fb').textContent='';document.getElementById('sq-fb').style.color='';
+
+  const opts=document.getElementById('sq-opts');opts.innerHTML='';
+  (qd.options||[]).forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.style.cssText='padding:11px 13px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.88rem;font-family:var(--font);text-align:left;cursor:pointer;transition:all .15s';
+    b.textContent=`${['A','B','C','D'][i]}. ${opt}`;
+    b.onmouseenter=()=>{if(selOpt===null)b.style.borderColor='var(--blue)';};
+    b.onmouseleave=()=>{if(selOpt===null)b.style.borderColor='var(--border)';};
+    b.onclick=()=>selectOpt(i,b);
+    b.id=`sqb-${i}`;opts.appendChild(b);
+  });
+
+  // Client countdown
+  clearInterval(qTickInterval);
+  let elapsed=Math.round((now()-qStart)/1000);
+  let secs=Math.max(0,20-elapsed);
+  qTickInterval=setInterval(()=>{
+    secs=Math.max(0,secs-1);
+    const c=document.getElementById('sq-clock');if(!c)return;
+    c.textContent=secs;c.style.color=secs<=5?'var(--red)':secs<=10?'var(--amber)':'var(--blue)';
+    if(secs<=0){clearInterval(qTickInterval);if(selOpt===null)autoNoAnswer();}
+  },1000);
+}
+
+function selectOpt(idx,btn){
+  if(selOpt!==null)return;selOpt=idx;
+  clearInterval(qTickInterval);
+  document.querySelectorAll('#sq-opts button').forEach(b=>{b.style.cursor='default';});
+  btn.style.background='var(--blue-d)';btn.style.borderColor='var(--blue)';btn.style.color='var(--blue)';
+  const elapsed=Math.round((now()-qStart)/1000);
+  const tl=Math.max(0,20-elapsed);
+  dbSet(`students/${myId}/answers/q${curQIdx}`,{selected:idx,timeLeft:tl,ts:now()});
+  document.getElementById('sq-fb').textContent='Answer recorded ✓';
+  document.getElementById('sq-fb').style.color='var(--blue)';
+}
+
+function autoNoAnswer(){dbSet(`students/${myId}/answers/q${curQIdx}`,{selected:null,timeLeft:0,ts:now()});}
+
+function showFeedback(correctIdx){
+  clearInterval(qTickInterval);
+  const elapsed=Math.round((now()-qStart)/1000);
+  const tl=Math.max(0,20-elapsed);
+  document.querySelectorAll('#sq-opts button').forEach((b,i)=>{
+    if(i===correctIdx){b.style.background='var(--green-d)';b.style.borderColor='var(--green)';b.style.color='var(--green)';}
+    else if(i===selOpt&&selOpt!==correctIdx){b.style.background='var(--red-d)';b.style.borderColor='var(--red)';b.style.color='var(--red)';}
+  });
+  const fb=document.getElementById('sq-fb');
+  if(selOpt===correctIdx){
+    // +20 at 1s, -1/s, min 1 at 20s
+    const pts=selOpt!==null?Math.max(1,20-Math.max(0,20-tl-1)):0;
+    myScore+=pts;answered.push({idx:curQIdx,correct:true,pts});
+    fb.textContent=`+${pts} pts`;fb.style.color='var(--green)';
+    dbSet(`students/${myId}/preScore`,myScore);
+    dbSet(`students/${myId}/ksa/K`,myScore);
+  } else if(selOpt!==null){
+    myScore=Math.max(0,myScore-2);answered.push({idx:curQIdx,correct:false,pts:-2});
+    fb.textContent='−2 pts (wrong)';fb.style.color='var(--red)';
+    dbSet(`students/${myId}/preScore`,myScore);
+  } else {
+    myScore=Math.max(0,myScore-1);answered.push({idx:curQIdx,correct:false,pts:-1});
+    fb.textContent='−1 pt (no answer)';fb.style.color='var(--amber)';
+    dbSet(`students/${myId}/preScore`,myScore);
+  }
+  // Running score visible
+  document.getElementById('running-card').style.display='block';
+  document.getElementById('running-score').innerHTML=`Score so far: <strong style="color:var(--blue)">${myScore} pts</strong>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// GROUP INFO
+// ════════════════════════════════════════════════════════════════════════════
+async function loadGroupInfo(gid){
+  const gd=await dbGet(`groups/${gid}`);if(!gd)return;
+  const leader=gd.leaderId?await dbGet(`students/${gd.leaderId}`):null;
+  const names=await Promise.all((gd.members||[]).map(id=>dbGet(`students/${id}`).then(s=>s?.name||id)));
+  document.getElementById('my-grp-name').textContent=gd.name||gid;
+  document.getElementById('my-grp-detail').innerHTML=`
+    <div class="card__title">${gid}</div>
+    <div class="text-sm" style="line-height:1.9">
+      <strong>★ Leader:</strong> ${leader?.name||'—'}<br>
+      <strong>Members:</strong> ${names.join(', ')}
+    </div>`;
+  // Update oral reference
+  const oralRef=document.getElementById('oral-ref-st');
+  if(oralRef){oralRef.innerHTML=`<div class="card__title">${gid} — Your Group's Position</div>
+    <div class="text-muted text-sm">Check the group screen for your decision and justification to reference during the briefing.</div>`;}
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// BRIEFING
+// ════════════════════════════════════════════════════════════════════════════
+async function renderBriefing(){
+  const gsc=await dbGet('session/groupScenarios');
+  const globalArchive=await dbGet('session/globalArchive');
+  const myScene=gsc?.[myGroupId]||{};
+  const r=myScene.route||{};
+
+  document.getElementById('st-brief').innerHTML=`
+    <div class="card__title">📋 Your Route</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.92rem;line-height:2">
+      <div><span class="text-dim">Aircraft:</span> <strong>${r.aircraft||'—'}</strong></div>
+      <div><span class="text-dim">Dep Time:</span> <strong>${r.depTime||'—'}</strong></div>
+      <div><span class="text-dim">From:</span> <strong style="color:var(--cyan);font-size:1.05rem">${r.dep||'—'}</strong></div>
+      <div><span class="text-dim">To:</span>   <strong style="color:var(--cyan);font-size:1.05rem">${r.dest||'—'}</strong></div>
+      <div><span class="text-dim">ALT 1:</span> <strong>${r.alt1||'—'}</strong></div>
+      <div><span class="text-dim">ALT 2:</span> <strong>${r.alt2||'—'}</strong></div>
+    </div>
+    ${myScene.synopsis?`<div class="text-xs text-dim mt-8 text-italic">${myScene.synopsis}</div>`:''}`;
+
+  // Live links
+  const linksEl=document.getElementById('st-links');
+  linksEl.innerHTML=MET_SOURCES.map(s=>`
+    <a class="met-link" href="${s.url}" target="_blank">
+      <span class="met-link__icon">${s.icon}</span>
+      <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
+    </a>`).join('');
+
+  // Archive (group-specific first, then global fallback)
+  const ad=myScene.archive||{};
+  const globalAd=globalArchive||{};
+  const archText=[
+    ad.metar||globalAd.metar,ad.taf||globalAd.taf,
+    ad.sigmet||globalAd.sigmet,ad.remarks||globalAd.remarks
+  ].filter(Boolean).join('\n\n');
+  document.getElementById('st-archive').textContent=archText||'No archive data for this session.';
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ANALYSIS FORM
+// ════════════════════════════════════════════════════════════════════════════
+function setSev(val,btn){
+  severity=val;
+  document.querySelectorAll('#sev-grp .sev-btn').forEach(b=>b.className='sev-btn');
+  btn.className=`sev-btn ${val[0]}`;
+}
+function setPreDec(val,btn){
+  preDec=val;
+  document.querySelectorAll('.sc-analysis .dec-btn').forEach(b=>{b.className=`dec-btn ${b.classList[1]}`;});
+  btn.className=`dec-btn ${btn.classList[1]} sel`;
+}
+function wc(el,hintId,min){
+  const n=(el.value.trim().match(/\S+/g)||[]).length;
+  const h=document.getElementById(hintId);
+  h.textContent=`${n} / ${min} words minimum`;h.className=n>=min?'wc ok':'wc bad';
+}
+
+async function submitAnalysis(){
+  const hazard=document.getElementById('a-hazard').value.trim();
+  const impact=document.getElementById('a-impact').value.trim();
+  const src=document.getElementById('a-src').value.trim();
+  if((hazard.match(/\S+/g)||[]).length<30){alert('Hazard description: minimum 30 words.');return;}
+  if(!severity){alert('Select a severity level.');return;}
+  if((impact.match(/\S+/g)||[]).length<25){alert('Operational impact: minimum 25 words.');return;}
+  if(!preDec){alert('Select your preliminary assessment.');return;}
+
+  await dbSet(`students/${myId}/analysis`,{hazard,severity,impact,src,preDec,ts:now()});
+  await dbSet(`students/${myId}/analysisSubmitted`,true);
+  // Attitude: submitted = participation point
+  await dbSet(`students/${myId}/ksa/A`,5);
+
+  document.getElementById('btn-sub-analysis').disabled=true;
+  document.getElementById('analysis-sent').style.display='block';
+  setTimeout(()=>showSc('sc-wait-group'),1800);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ORAL REFERENCE
+// ════════════════════════════════════════════════════════════════════════════
+async function loadOralRef(){
+  if(!myGroupId)return;
+  const gd=await dbGet(`groups/${myGroupId}`);
+  const el=document.getElementById('oral-ref-st');if(!gd||!el)return;
+  const dec=gd.decision||'—';
+  const col=dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
+  el.innerHTML=`<div class="card__title">${myGroupId} — Briefing Reference</div>
+    <div class="text-sm" style="line-height:1.9">
+      <strong>Decision:</strong> <strong style="color:${col}">${dec}</strong><br>
+      <strong>Justification:</strong> ${(gd.justification||'').substring(0,300)||'—'}
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// KSA TRACKER
+// ════════════════════════════════════════════════════════════════════════════
+function updateKSA(d){
+  const K=Math.min(40,(d.preScore||0)+(d.groupKScore||0));
+  const S=Math.min(35,(d.groupScore||0)+(d.oralScore?Math.round(d.oralScore*0.5):0));
+  const A=Math.min(25,(d.ksa?.A||0)+(d.oralScore?Math.round(d.oralScore*0.5):0));
+  document.getElementById('ksa-k-bar').style.width=`${(K/40)*100}%`;
+  document.getElementById('ksa-k-val').textContent=`${K} / 40`;
+  document.getElementById('ksa-s-bar').style.width=`${(S/35)*100}%`;
+  document.getElementById('ksa-s-val').textContent=`${S} / 35`;
+  document.getElementById('ksa-a-bar').style.width=`${(A/25)*100}%`;
+  document.getElementById('ksa-a-val').textContent=`${A} / 25`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// RESULTS
+// ════════════════════════════════════════════════════════════════════════════
+async function loadResults(){
+  const d=await dbGet(`students/${myId}`);if(!d)return;
+  const pre=d.preScore||0;
+  const grpK=d.groupKScore||0;
+  const grpS=d.groupScore||0;
+  const grpA=d.ksa?.A||0;
+  const oral=d.oralScore||0;
+  const pen=d.penalty||0;
+  const oralBreak=d.oralScoreBreakdown||{};
+  const total=Math.max(0,pre+grpK+grpS+grpA+oral-pen);
+
+  document.getElementById('res-total').textContent=total;
+  const col=total>=75?'var(--green)':total>=50?'var(--amber)':'var(--red)';
+  document.getElementById('res-circle').style.background=total>=75?'var(--green-d)':total>=50?'var(--amber-d)':'var(--red-d)';
+  document.getElementById('res-circle').style.borderColor=col;
+  document.getElementById('res-total').style.color=col;
+
+  document.getElementById('res-breakdown').innerHTML=`
+    <span style="color:var(--blue)">K</span> Pre-test: <strong>${pre}</strong><br>
+    <span style="color:var(--blue)">K</span> Group hazard analysis: <strong>${grpK}</strong><br>
+    <span style="color:var(--green)">S</span> Group decision quality: <strong>${grpS}</strong><br>
+    <span style="color:var(--purple)">A</span> Participation: <strong>${grpA}</strong><br>
+    🎙️ Oral (S+A individual): <strong>${oral}</strong>
+    ${oralBreak.acc!==undefined?` <span class="text-xs text-dim">(Acc:${oralBreak.acc} Dec:${oralBreak.dec} Cla:${oralBreak.cla})</span>`:''}
+    ${pen>0?`<br><span style="color:var(--red)">Key penalty: −${pen}</span>`:''}
+    <hr style="border:none;border-top:1px solid var(--border);margin:6px 0">
+    <strong>Total: ${total}</strong>`;
+
+  // Final KSA
+  const K=Math.min(40,pre+grpK),S=Math.min(35,grpS+Math.round(oral*0.5)),A=Math.min(25,grpA+Math.round(oral*0.5));
+  document.getElementById('res-ksa').style.display='block';
+  document.getElementById('res-ksa-detail').innerHTML=`
+    <div class="ksa-row"><div class="ksa-letter ksa-k">K</div><div class="ksa-label">Knowledge</div>
+      <div class="ksa-bar-track"><div class="ksa-bar-fill" style="width:${(K/40)*100}%;background:var(--blue)"></div></div>
+      <div class="ksa-val ksa-k">${K}/40</div></div>
+    <div class="ksa-row"><div class="ksa-letter ksa-s">S</div><div class="ksa-label">Skills</div>
+      <div class="ksa-bar-track"><div class="ksa-bar-fill" style="width:${(S/35)*100}%;background:var(--green)"></div></div>
+      <div class="ksa-val ksa-s">${S}/35</div></div>
+    <div class="ksa-row"><div class="ksa-letter ksa-a">A</div><div class="ksa-label">Attitudes</div>
+      <div class="ksa-bar-track"><div class="ksa-bar-fill" style="width:${(A/25)*100}%;background:var(--purple)"></div></div>
+      <div class="ksa-val ksa-a">${A}/25</div></div>`;
+}
+</script>
+</body>
+</html>
