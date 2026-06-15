@@ -100,7 +100,6 @@ const SESSION_GUIDE = [
       'Enter additional briefing notes if needed.',
       'Select exactly 10 pre-test questions from the question bank.',
       'Select exactly 3 briefing key questions.',
-      'Load archive data (METAR, TAF, SIGMET, charts) as fallback in case of network failure.',
       'Click ✓ Launch Session.',
       'Show QR codes (📱 button in topbar) — project or print for students.',
     ]

@@ -167,10 +167,6 @@
         <div class="card__title">🌐 Live Met Sources</div>
         <div id="st-links" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
-      <div class="card card--amber">
-        <div class="card__title">📁 Archive Data (fallback — always available)</div>
-        <div class="met-block mt-4" id="st-archive">—</div>
-      </div>
       <div class="text-xs text-dim text-center mt-12">Instructor will open the analysis phase shortly.</div>
     </div>
 
@@ -647,10 +643,6 @@ async function renderBriefing() {
       <span class="met-link__icon">${s.icon}</span>
       <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
     </a>`).join('');
-
-  const ad=cfg.archive||{};
-  const archText=[ad.metarDest,ad.metarAlt,ad.tafDest,ad.tafAlt,ad.sigmet,ad.remarks].filter(Boolean).join('\n\n');
-  document.getElementById('st-archive').textContent=archText||'No archive data for this session.';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

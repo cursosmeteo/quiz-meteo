@@ -162,24 +162,6 @@
         <div id="stu-roster" style="max-height:280px;overflow-y:auto;margin-top:4px"></div>
       </div>
 
-      <!-- Archive fallback -->
-      <div class="card card--amber" style="grid-column:span 2">
-        <div class="card__title">📁 Archive Data — Fallback when no internet</div>
-        <div class="text-xs text-dim mb-8">Pre-load met data here. Visible to students and groups at all times as a fallback.</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div class="fg"><label>METAR — Destination</label><textarea id="a-metar-dest" placeholder="EGLL 151200Z…"></textarea></div>
-          <div class="fg"><label>METAR — Alternates</label><textarea id="a-metar-alt" placeholder="LIRA / LIML…"></textarea></div>
-          <div class="fg"><label>TAF — Destination</label><textarea id="a-taf-dest" placeholder="TAF EGLL…"></textarea></div>
-          <div class="fg"><label>TAF — Alternates</label><textarea id="a-taf-alt" placeholder="TAF LIRA…"></textarea></div>
-          <div class="fg"><label>SIGMETs active</label><textarea id="a-sigmet" placeholder="SIGMET…"></textarea></div>
-          <div class="fg"><label>PIREPs / Remarks</label><textarea id="a-remarks" placeholder="UA /OV…"></textarea></div>
-          <div class="fg"><label>Surface chart (URL or description)</label>
-            <input id="a-chart" type="text" placeholder="https://… or describe synoptic pattern"></div>
-          <div class="fg"><label>SIGWX / Upper wind (URL or description)</label>
-            <input id="a-sigwx" type="text" placeholder="https://…"></div>
-        </div>
-      </div>
-
       <!-- Pre-test questions -->
       <div class="card" style="grid-column:span 2">
         <div class="card__title">Pre-Test Questions — select exactly 10 &nbsp;<span id="q-cnt" style="color:var(--blue)">0/10</span></div>
@@ -661,16 +643,6 @@ function launch() {
     aircraft:  document.getElementById('c-ac').value.toUpperCase(),
     notes:     document.getElementById('c-notes').value,
     numGroups: ng, perGroup: spg, startedAt: now(),
-    archive: {
-      metarDest: document.getElementById('a-metar-dest').value,
-      metarAlt:  document.getElementById('a-metar-alt').value,
-      tafDest:   document.getElementById('a-taf-dest').value,
-      tafAlt:    document.getElementById('a-taf-alt').value,
-      sigmet:    document.getElementById('a-sigmet').value,
-      remarks:   document.getElementById('a-remarks').value,
-      chart:     document.getElementById('a-chart').value,
-      sigwx:     document.getElementById('a-sigwx').value,
-    }
   };
 
   const stuData = {};

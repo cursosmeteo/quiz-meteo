@@ -111,13 +111,11 @@
     <div class="card card--blue mb-12" id="g-brief-card"></div>
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('tab-live',this)">🌐 Live Sources</button>
-      <button class="tab-btn" onclick="switchTab('tab-archive',this)">📁 Archive Fallback</button>
+      
     </div>
     <div class="tab-panel active" id="tab-live">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="g-met-links"></div>
     </div>
-    <div class="tab-panel" id="tab-archive">
-      <div class="met-block" id="g-archive">No archive data.</div>
     </div>
   </div>
 
@@ -128,13 +126,11 @@
     <div class="card mb-12"><div class="card__title">Member Status</div><div id="member-status"></div></div>
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('tab-live-2',this)">🌐 Live Sources</button>
-      <button class="tab-btn" onclick="switchTab('tab-archive-2',this)">📁 Archive</button>
+      
     </div>
     <div class="tab-panel active" id="tab-live-2">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px" id="g-met-links-2"></div>
     </div>
-    <div class="tab-panel" id="tab-archive-2">
-      <div class="met-block" id="g-archive-2">—</div>
     </div>
   </div>
 
@@ -630,10 +626,6 @@ async function renderBriefing() {
       <span class="met-link__icon">${s.icon}</span>
       <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
     </a>`).join('');
-
-  const ad = cfg.archive || {};
-  const archText = [ad.metarDest,ad.metarAlt,ad.tafDest,ad.tafAlt,ad.sigmet,ad.remarks].filter(Boolean).join('\n\n');
-  document.getElementById('g-archive').textContent = archText || 'No archive data.';
   updateLabels(cfg);
 }
 
@@ -643,12 +635,6 @@ function renderMetLinks2() {
       <span class="met-link__icon">${s.icon}</span>
       <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
     </a>`).join('');
-  dbGet('session/config').then(cfg => {
-    if (!cfg) return;
-    const ad = cfg.archive || {};
-    const archText = [ad.metarDest,ad.metarAlt,ad.tafDest,ad.tafAlt,ad.sigmet,ad.remarks].filter(Boolean).join('\n\n');
-    document.getElementById('g-archive-2').textContent = archText || 'No archive data.';
-  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
