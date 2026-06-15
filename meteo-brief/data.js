@@ -1,6 +1,7 @@
 /**
- * METEO BRIEF v2 — data.js
- * Question bank (50 MCQ), 12 preset scenarios, hazard taxonomy, met sources.
+ * METEO BRIEF v3 — data.js
+ * Question bank (50 MCQ) + Met sources.
+ * No preset scenarios — professor defines route freely.
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -60,260 +61,188 @@ const QUESTION_BANK = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 12 PRESET SCENARIOS
-// ═══════════════════════════════════════════════════════════════════════════
-const PRESET_SCENARIOS = [
-  // ── FAMILY 1: LOW VISIBILITY ───────────────────────────────────────────
-  {
-    id:'SC01', family:'Visibility', difficulty:1,
-    title:'Radiation Fog — Lisbon Arrival',
-    route:{dep:'EGLL',dest:'LPPT',alt1:'LPPR',alt2:'LEBB',depTime:'0600Z',aircraft:'A320'},
-    synopsis:'High pressure over the Azores. Clear sky overnight. Radiation fog formed at LPPT. RVR 400 m. TAF indicates improvement after 1000Z. ETA 0730Z.',
-    archive:{
-      metar:'LPPT 150700Z 02004KT 0400 R21/0400N FG VV/// 08/08 Q1032 NOSIG\nLPPR 150700Z 03006KT 9999 FEW015 SCT040 10/06 Q1031 NOSIG',
-      taf:'TAF LPPT 150500Z 1506/1612 02005KT 0400 FG VV/// BECMG 1509/1511 0800 BR BECMG 1511/1513 4000 BR SCT005 BECMG 1513/1515 9999 FEW010\nTAF LPPR 150500Z 1506/1612 03006KT 9999 FEW015 SCT040 NOSIG',
-      sigmet:'NIL',
-      remarks:'PIREP: FL040 A320 OTP LPPT — FOG TOPS 800FT RVR AROUND 400M'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'Radiation fog below CAT I. TAF improvement after ETA. Delay or hold for dissipation.'
-  },
-  {
-    id:'SC02', family:'Visibility', difficulty:2,
-    title:'Advection Fog + Alternate Risk — Paris CDG',
-    route:{dep:'LEMD',dest:'LFPG',alt1:'EBBR',alt2:'LFMN',depTime:'0500Z',aircraft:'A321'},
-    synopsis:'Warm moist SW flow over northern France. Advection fog affecting LFPG and EBBR. LFMN clear. TAFs show slow improvement. Both destination and alternate 1 below minima.',
-    archive:{
-      metar:'LFPG 050500Z 21008KT 0200 FG VV001 10/10 Q1008 NOSIG\nEBBR 050500Z 20006KT 0400 FG VV002 09/09 Q1007 NOSIG\nLFMN 050500Z 28012KT 9999 FEW025 SCT060 15/08 Q1014 NOSIG',
-      taf:'TAF LFPG 050400Z 0505/0611 21008KT 0200 FG VV001 BECMG 0509/0511 0800 BR SCT004 BECMG 0511/0513 4000 BKN010\nTAF EBBR 050400Z 0505/0611 19006KT 0300 FG VV002 BECMG 0510/0512 1500 BR BKN005',
-      sigmet:'NIL',
-      remarks:'Both LFPG and EBBR below company alternate minima. Only LFMN valid alternate — check fuel.'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'Destination and alternate 1 below minima. LFMN valid but extra fuel required. Delay departure.'
-  },
-  {
-    id:'SC03', family:'Visibility', difficulty:3,
-    title:'Freezing Drizzle + Null TAF — Faro',
-    route:{dep:'GCFV',dest:'LPPT',alt1:'LPFR',alt2:'LEBB',depTime:'0300Z',aircraft:'B737'},
-    synopsis:'Warm front approaching. Freezing drizzle at LPPT. LPFR TAF unavailable (system outage). Severe icing SIGMET active. PIREP contradicts TAF.',
-    archive:{
-      metar:'LPPT 220300Z 20004KT 0800 FZDZ FG VV001 03/03 Q1020 NOSIG\nLPFR 220300Z 21008KT 4000 BR FEW006 BKN012 08/07 Q1022 NOSIG',
-      taf:'TAF LPPT 220200Z 2203/2309 20005KT 0600 FZDZ FG VV001 BECMG 2207/2209 1500 BR BKN004\nTAF LPFR — NOT AVAILABLE (NOTAM: TAF system outage)',
-      sigmet:'LPPC SIGMET 3 VALID 220200/220600Z — SEV ICE FZRA SFC-FL080 MOV NE INTSF',
-      remarks:'PIREP FL025 A320: SEV FZRA IC SEV below 3000ft. Alternate TAF unavailable.'
-    },
-    expectedDecision:'NO-GO',
-    teacherNote:'FZDZ at dest below all minima. SEV icing SIGMET. Alternate TAF unavailable. NO-GO.'
-  },
-
-  // ── FAMILY 2: CONVECTIVE ───────────────────────────────────────────────
-  {
-    id:'SC04', family:'Convective', difficulty:1,
-    title:'Embedded CB on Route — Lisbon to Madrid',
-    route:{dep:'LPPT',dest:'LEMD',alt1:'LEZL',alt2:'LEPA',depTime:'1200Z',aircraft:'A320'},
-    synopsis:'Atlantic trough. Area of embedded CB FL280-FL350 along route. Destination clear. SIGMET active.',
-    archive:{
-      metar:'LPPT 151200Z 23015KT 8000 SCT020 BKN045 20/15 Q1012 NOSIG\nLEMD 151200Z 22018KT 9999 FEW025 BKN060 22/12 Q1010 NOSIG',
-      taf:'TAF LEMD 151100Z 1512/1618 22015KT 9999 FEW025 BKN060 TEMPO 1514/1518 22020G35KT 3000 TSRA SCT020CB',
-      sigmet:'LECB SIGMET 5 VALID 151200/151600Z — EMBD CB TOP FL350 MOV E 20KT NC',
-      remarks:'PIREP FL310 A321: TB SEV, CB tops FL350 going around to avoid.'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'CB tops above FL310 cruise. Severe turbulence band. TAF shows TSRA at arrival. Delay or reroute.'
-  },
-  {
-    id:'SC05', family:'Convective', difficulty:2,
-    title:'Cold Front CB + Severe Icing — Paris to Madrid',
-    route:{dep:'LFPG',dest:'LEMD',alt1:'LEZL',alt2:'LEBL',depTime:'1100Z',aircraft:'A321'},
-    synopsis:'Active cold front crossing Pyrenees. Occasional embedded CB tops FL380. Severe icing FL060-FL160. PIREP conflicts with SIGMET.',
-    archive:{
-      metar:'LEMD 101200Z 22022KT 5000 -TSRA BKN015CB OVC040 14/11 Q1004 NOSIG\nLEZL 101200Z 21015KT 9999 SCT025 BKN060 17/10 Q1008 NOSIG',
-      taf:'TAF LEMD 101100Z 1012/1118 22020KT 4000 TSRA BKN015CB OVC040 TEMPO 1012/1016 22030G45KT 1500 +TSRA SCT010CB BECMG 1016/1018 23015KT 9999 BKN025',
-      sigmet:'LECB SIGMET 8 VALID 101100/101500Z — SEV ICE FL060-FL160 NC\nLECB SIGMET 9 VALID 101100/101500Z — OCNL EMBD CB TOP FL380 MOV E NC',
-      remarks:'PIREP FL120 A320: IC MOD FL080-FL120 — less severe than SIGMET suggests.'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'Destination active TSRA+CB. SEV icing on climb/descent. PIREP conflicts with SIGMET — ambiguity. Delay.'
-  },
-  {
-    id:'SC06', family:'Convective', difficulty:3,
-    title:'MCS + Hail + Destination Closed — London to Paris',
-    route:{dep:'EGLL',dest:'LFPG',alt1:'LFMN',alt2:'EHAM',depTime:'1400Z',aircraft:'B777'},
-    synopsis:'MCS over northern France. Frequent embedded CB tops FL420, hail. Destination below minima. Alternate TAF partially corrupted. SIGMET gap.',
-    archive:{
-      metar:'LFPG 201500Z 19028G45KT 1500 +TSRA SCT010CB OVC025 17/15 Q0978 NOSIG\nLFMN 201500Z 28022KT 9999 FEW025 SCT060 24/12 Q1014 NOSIG',
-      taf:'TAF LFPG 201400Z 2015/2121 19025G40KT 2000 +TSRA SCT010CB OVC030 TEMPO 2015/2019 VRB10KT 0500 +TSRA FG OVC006\nTAF LFMN 201400Z 2015/2121 28020KT 9999 FEW025 SCT060 [DATA CORRUPTED]',
-      sigmet:'LFFF SIGMET 12 VALID 201400/201800Z — FRQ EMBD CB TOP FL420 HAIL MOV NE 35KT NC',
-      remarks:'PIREP FL350 B777: TB SEV, HAIL confirmed FL350. LFMN TAF data gap. SIGMET gap 1200-1400Z noted.'
-    },
-    expectedDecision:'NO-GO',
-    teacherNote:'Dest below minima. CB at cruise FL. LFMN TAF incomplete. NO-GO.'
-  },
-
-  // ── FAMILY 3: ICING & TURBULENCE ──────────────────────────────────────
-  {
-    id:'SC07', family:'Icing', difficulty:1,
-    title:'Moderate Icing on Climb — Rome to Amsterdam',
-    route:{dep:'LIRF',dest:'EHAM',alt1:'EBBR',alt2:'EDDL',depTime:'0800Z',aircraft:'A320'},
-    synopsis:'Post-frontal westerly flow. Moderate icing FL060-FL140 on climb-out. CAT FL260-FL340 near jet stream. Destination clear.',
-    archive:{
-      metar:'LIRF 080800Z 24022KT 9999 FEW025 BKN060 12/05 Q1016 NOSIG\nEHAM 080800Z 23025KT 9999 SCT025 BKN060 09/04 Q0998 NOSIG',
-      taf:'TAF EHAM 080700Z 0808/0914 23022G35KT 9999 SCT025 BKN060 TEMPO 0810/0814 23030G48KT BKN018',
-      sigmet:'LMMM SIGMET 4 VALID 080800/081200Z — MOD ICE FL060-FL140 NC\nEHAA SIGMET 6 VALID 080800/081200Z — SEV CAT FL260-FL340 NC',
-      remarks:'PIREP FL320 B738: TB SEV adjacent to jet stream core at FL300.'
-    },
-    expectedDecision:'GO',
-    teacherNote:'Icing manageable on climb. CAT above FL260 — request FL240 or FL350. Destination clear. GO with awareness.'
-  },
-  {
-    id:'SC08', family:'Icing', difficulty:2,
-    title:'Severe Icing + Mountain Wave — Zurich to Madrid',
-    route:{dep:'LSZH',dest:'LEMD',alt1:'LEZL',alt2:'LEBL',depTime:'0900Z',aircraft:'A319'},
-    synopsis:'Deep winter cyclone. Severe icing FL040-FL180 Pyrenees area. Mountain wave turbulence. Wind shear on approach LEMD.',
-    archive:{
-      metar:'LSZH 090900Z 24018KT 9999 FEW030 BKN080 02/−05 Q1002 NOSIG\nLEMD 090900Z 26030G48KT 9999 FEW020 SCT050 08/−02 Q1022 NOSIG',
-      taf:'TAF LEMD 090800Z 0909/1015 26025G40KT 9999 FEW020 SCT050 TEMPO 0910/0914 27035G55KT 8000 -SHRA BKN018',
-      sigmet:'LSAS SIGMET 7 VALID 090800/091200Z — SEV ICE FL040-FL180 PYRENEES AREA NC\nLECB SIGMET 8 VALID 090800/091200Z — SEV MTW FL060-FL180 PYRENEES NC',
-      remarks:'PIREP FL080 A320: IC SEV over Pyrenees, MTW SEV below FL120. Wind shear alert LEMD.'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'SEV icing and mountain wave on route. Gusts at LEMD approaching limits. Delay for frontal passage.'
-  },
-
-  // ── FAMILY 4: WIND & RUNWAY ────────────────────────────────────────────
-  {
-    id:'SC09', family:'Wind', difficulty:1,
-    title:'Strong Crosswind — Madrid Landing',
-    route:{dep:'LPPT',dest:'LEMD',alt1:'LEZL',alt2:'LEBL',depTime:'0900Z',aircraft:'A320'},
-    synopsis:'Post-frontal westerly flow. Surface wind at LEMD 270°/32G48KT. A320 crosswind limit 38KT. TAF shows TEMPO gusts 55KT. Alternate LEZL wind within limits.',
-    archive:{
-      metar:'LEMD 201000Z 27032G48KT 9999 FEW020 SCT045 12/02 Q1028 NOSIG\nLEZL 201000Z 27025G38KT 9999 FEW025 SCT060 15/04 Q1026 NOSIG',
-      taf:'TAF LEMD 200800Z 2009/2115 27030G45KT 9999 FEW020 SCT045 TEMPO 2010/2014 27038G55KT 9999 BKN020 BECMG 2014/2016 26025KT NOSIG',
-      sigmet:'NIL',
-      remarks:'RWY 32R: crosswind ≈29KT mean. TEMPO gusts 55KT exceed A320 demonstrated limit. Wind shear PIREP.'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'TEMPO gusts exceed demonstrated crosswind limit. Delay for TEMPO period. Alternate wind within limits.'
-  },
-  {
-    id:'SC10', family:'Wind', difficulty:2,
-    title:'Microburst Alert + Runway State — London Heathrow',
-    route:{dep:'KEWR',dest:'EGLL',alt1:'EGKK',alt2:'EIDW',depTime:'0200Z',aircraft:'A330'},
-    synopsis:'Post-thunderstorm environment. Microburst alert active RWY 27L. Runway state reports incomplete. PIREP reports standing water not in SNOWTAM.',
-    archive:{
-      metar:'EGLL 140700Z 22018KT 6000 -SHRA SCT015 BKN040 15/12 Q0995 NOSIG\nEGKK 140700Z 21015KT 8000 FEW020 BKN045 14/11 Q0996 NOSIG',
-      taf:'TAF EGLL 140600Z 1406/1512 22015KT 6000 -SHRA FEW015 BKN040 TEMPO 1407/1410 22025G40KT 2000 +SHRA BKN010 BECMG 1410/1412 22012KT 9999 SCT025',
-      sigmet:'NIL',
-      remarks:'MICROBURST ALERT EGLL RWY27L. PIREP: standing water RWY09R, braking action POOR — not in SNOWTAM (2h old).'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'Microburst on main arrival runway. SNOWTAM outdated. Delay until alert cleared and updated SNOWTAM received.'
-  },
-
-  // ── FAMILY 5: SYNOPTIC / FRONTAL ──────────────────────────────────────
-  {
-    id:'SC11', family:'Frontal', difficulty:2,
-    title:'Cold Front Crossing — London to Rome',
-    route:{dep:'EGLL',dest:'LIRF',alt1:'LIRA',alt2:'LIML',depTime:'1200Z',aircraft:'A330'},
-    synopsis:'Deep Atlantic low approaching UK. Cold front will cross route during flight. Pre-frontal warm sector at departure. Jet stream 140KT at FL330. Severe CAT FL250-FL380.',
-    archive:{
-      metar:'EGLL 121200Z 22030G45KT 9000 -SHRA FEW020 BKN040 12/08 Q0994 NOSIG\nLIRF 121200Z 24022KT 9999 FEW025 BKN060 16/08 Q1016 NOSIG',
-      taf:'TAF LIRF 121100Z 1212/1318 24020KT 9999 FEW025 BKN060 TEMPO 1215/1219 25030G50KT 3000 -TSRA SCT015CB OVC040 BECMG 1218/1220 27025KT 9999',
-      sigmet:'LMMM SIGMET 14 VALID 121200/121600Z — SEV TURB FL250-FL380 MOV E 40KT NC',
-      remarks:'PIREP FL350 A340: TB MOD/SEV, IC MOD FL080-FL160. Windshear alert LIRF during frontal passage.'
-    },
-    expectedDecision:'DELAY',
-    teacherNote:'SEV CAT at cruise level. Frontal passage at dest during arrival window. Delay for frontal clearance.'
-  },
-  {
-    id:'SC12', family:'Frontal', difficulty:3,
-    title:'Explosive Cyclogenesis — London to Rome',
-    route:{dep:'EGLL',dest:'LIRF',alt1:'LMML',alt2:'LICJ',depTime:'1600Z',aircraft:'B787'},
-    synopsis:'Secondary low bombing over Biscay (>24 hPa/24h). SIGWX chart 6h old. CB tops FL420 hail. SEV turbulence FL280-FL400. PIREP confirms hail at FL360.',
-    archive:{
-      metar:'LIRF 031800Z 23030G55KT 4000 -TSRA SCT010CB OVC035 14/10 Q0988 NOSIG\nLMML 031800Z 26018KT 9999 FEW025 BKN060 18/10 Q1012 NOSIG',
-      taf:'TAF LIRF 031700Z 0318/0424 23028G45KT 3000 TSRA SCT010CB OVC035 TEMPO 0318/0322 23040G60KT 0800 +TSRA OVC006',
-      sigmet:'LMMM SIGMET 18 VALID 031600/032000Z — SEV TURB FL280-FL400 INTSF\nLMMM SIGMET 19 VALID 031600/032000Z — FRQ EMBD CB TOP FL420 HAIL NC',
-      remarks:'NOTE: SIGWX chart validity 031200Z — 6h old. PIREP FL360 B777: HAIL confirmed, TB SEV. Low now 948 hPa.'
-    },
-    expectedDecision:'NO-GO',
-    teacherNote:'Explosive deepening. Outdated SIGWX. Hail at cruise FL. Dest active TSRA gusts 55KT. NO-GO.'
-  },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// HAZARD TAXONOMY (Decision Table)
-// ═══════════════════════════════════════════════════════════════════════════
-const HAZARD_TYPES = [
-  // Visibility
-  { id:'FOG',     label:'Fog',                      category:'Visibility',   icon:'🌫️' },
-  { id:'BR',      label:'Mist / Haze (BR/HZ)',       category:'Visibility',   icon:'🌁' },
-  { id:'LOWVIS',  label:'Low Visibility (< 1500m)',  category:'Visibility',   icon:'👁️' },
-  { id:'LOWCLD',  label:'Low Cloud / Low Ceiling',   category:'Visibility',   icon:'☁️' },
-  // Precipitation
-  { id:'RA',      label:'Rain',                      category:'Precipitation',icon:'🌧️' },
-  { id:'SN',      label:'Snow / Sleet',              category:'Precipitation',icon:'❄️' },
-  { id:'FZDZ',    label:'Freezing Drizzle (FZDZ)',   category:'Precipitation',icon:'🧊' },
-  { id:'FZRA',    label:'Freezing Rain (FZRA)',      category:'Precipitation',icon:'🧊' },
-  { id:'GR',      label:'Hail (GR)',                 category:'Precipitation',icon:'🟡' },
-  // Convective
-  { id:'CB',      label:'CB / Cumulonimbus',         category:'Convective',   icon:'⛈️' },
-  { id:'TS',      label:'Thunderstorm (TS)',          category:'Convective',   icon:'⚡' },
-  { id:'EMBD',    label:'Embedded CB',               category:'Convective',   icon:'⛈️' },
-  { id:'SQUALL',  label:'Squall Line',               category:'Convective',   icon:'🌩️' },
-  // Icing
-  { id:'ICE_LGT', label:'Light Icing',               category:'Icing',        icon:'🔵' },
-  { id:'ICE_MOD', label:'Moderate Icing',            category:'Icing',        icon:'🟡' },
-  { id:'ICE_SEV', label:'Severe Icing',              category:'Icing',        icon:'🔴' },
-  // Turbulence
-  { id:'TURB_LGT',label:'Light Turbulence',          category:'Turbulence',   icon:'〰️' },
-  { id:'TURB_MOD',label:'Moderate Turbulence',       category:'Turbulence',   icon:'〰️' },
-  { id:'TURB_SEV',label:'Severe Turbulence',         category:'Turbulence',   icon:'⚠️' },
-  { id:'CAT',     label:'Clear Air Turbulence (CAT)',category:'Turbulence',   icon:'🌀' },
-  { id:'MTW',     label:'Mountain Wave',             category:'Turbulence',   icon:'🏔️' },
-  // Wind
-  { id:'WS',      label:'Wind Shear (LLWS)',         category:'Wind',         icon:'💨' },
-  { id:'MICROBURST',label:'Microburst',              category:'Wind',         icon:'💨' },
-  { id:'CROSSWIND',label:'Crosswind at Limits',      category:'Wind',         icon:'↔️' },
-  { id:'JET',     label:'Jet Stream',                category:'Wind',         icon:'🌬️' },
-  // Runway
-  { id:'RWYSTATE',label:'Runway Contamination',      category:'Runway',       icon:'🛬' },
-  { id:'RWYCLOSE',label:'Runway Closure / NOTAM',    category:'Runway',       icon:'🚫' },
-  // Synoptic
-  { id:'FRONT',   label:'Active Front on Route',     category:'Synoptic',     icon:'🗺️' },
-  { id:'TROUGH',  label:'Trough / Unstable Air',     category:'Synoptic',     icon:'📉' },
-  { id:'CYCLONE', label:'Rapid Cyclogenesis',        category:'Synoptic',     icon:'🌀' },
-  // Other
-  { id:'VA',      label:'Volcanic Ash',              category:'Other',        icon:'🌋' },
-  { id:'OTHER',   label:'Other (specify)',            category:'Other',        icon:'❓' },
-];
-
-const INTENSITY_OPTS = ['—', 'NIL', 'Light', 'Moderate', 'Severe', 'Extreme'];
-
-const FL_RANGE_OPTS  = [
-  '—', 'SFC only', 'SFC – FL050', 'FL050 – FL100',
-  'FL100 – FL180', 'FL180 – FL280', 'FL280 – FL390', 'Above FL390', 'All levels'
-];
-
-const FLIGHT_PHASE_OPTS = ['Departure', 'Climb', 'Cruise', 'Descent', 'Approach', 'Landing', 'Alternate'];
-
-const PARTIAL_DEC_OPTS  = ['—', 'GO', 'DELAY', 'NO-GO', 'Monitor'];
-
-// ═══════════════════════════════════════════════════════════════════════════
 // LIVE MET SOURCES
 // ═══════════════════════════════════════════════════════════════════════════
 const MET_SOURCES = [
-  { icon:'🌡️', label:'METAR / TAF',       desc:'IPMA Self-Briefing (PT)',   url:'https://www.ipma.pt/pt/aeronautica/selfbriefing/' },
-  { icon:'📡', label:'METAR / TAF',       desc:'AVWX (global)',             url:'https://avwx.rest' },
-  { icon:'⚠️', label:'SIGMETs',           desc:'NOAA AWC International',    url:'https://aviationweather.gov/sigmet/intl' },
-  { icon:'🗺️', label:'Surface Chart',     desc:'Wetterzentrale',            url:'https://www.wetterzentrale.de/en/archive.php' },
-  { icon:'🗺️', label:'Surface Chart',     desc:'Met Office',                url:'https://www.metoffice.gov.uk/weather/maps-and-charts/surface-pressure' },
-  { icon:'✈️', label:'SIGWX Chart',       desc:'WAFC Washington (NOAA)',    url:'https://aviationweather.gov/products/progs/progchart.php' },
-  { icon:'💨', label:'Upper Wind / Temp', desc:'Met Office Upper Air',      url:'https://www.metoffice.gov.uk/weather/maps-and-charts/upper-air-charts' },
-  { icon:'💨', label:'Upper Wind / Temp', desc:'ECMWF Charts',              url:'https://charts.ecmwf.int' },
-  { icon:'🛰️', label:'Satellite',         desc:'EUMETSAT Viewer',           url:'https://view.eumetsat.int/productviewer?v=default' },
-  { icon:'🌧️', label:'Radar',             desc:'RainViewer',                url:'https://www.rainviewer.com/map.html' },
-  { icon:'🌬️', label:'All Layers',        desc:'Windy',                     url:'https://www.windy.com' },
-  { icon:'📊', label:'Sounding / Skew-T', desc:'Wyoming Upper Air',         url:'https://weather.uwyo.edu/upperair/sounding.html' },
+  {icon:'🌡️',label:'METAR / TAF',      desc:'IPMA Self-Briefing (PT)',    url:'https://www.ipma.pt/pt/aeronautica/selfbriefing/'},
+  {icon:'📡',label:'METAR / TAF',      desc:'AVWX (global)',              url:'https://avwx.rest'},
+  {icon:'⚠️',label:'SIGMETs',          desc:'NOAA AWC International',     url:'https://aviationweather.gov/sigmet/intl'},
+  {icon:'🗺️',label:'Surface Chart',    desc:'Wetterzentrale',             url:'https://www.wetterzentrale.de/en/archive.php'},
+  {icon:'🗺️',label:'Surface Chart',    desc:'Met Office',                 url:'https://www.metoffice.gov.uk/weather/maps-and-charts/surface-pressure'},
+  {icon:'✈️',label:'SIGWX Chart',      desc:'WAFC Washington (NOAA)',     url:'https://aviationweather.gov/products/progs/progchart.php'},
+  {icon:'💨',label:'Upper Wind / Temp',desc:'Met Office Upper Air',       url:'https://www.metoffice.gov.uk/weather/maps-and-charts/upper-air-charts'},
+  {icon:'💨',label:'Upper Wind / Temp',desc:'ECMWF Charts',               url:'https://charts.ecmwf.int'},
+  {icon:'🛰️',label:'Satellite',        desc:'EUMETSAT Viewer',            url:'https://view.eumetsat.int/productviewer?v=default'},
+  {icon:'🌧️',label:'Radar',            desc:'RainViewer',                 url:'https://www.rainviewer.com/map.html'},
+  {icon:'🌬️',label:'All Layers',       desc:'Windy',                      url:'https://www.windy.com'},
+  {icon:'📊',label:'Sounding / Skew-T',desc:'Wyoming Upper Air',          url:'https://weather.uwyo.edu/upperair/sounding.html'},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLOUD TYPES FOR DECISION TABLE
+// ═══════════════════════════════════════════════════════════════════════════
+const CLOUD_TYPES = ['SKC','FEW','SCT','BKN','OVC','VV///'];
+const INTENSITY   = ['NIL','Light','Moderate','Severe','Extreme'];
+const VIS_RANGE   = ['≥ 10 km','5–10 km','1.5–5 km','800 m–1.5 km','< 800 m'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SESSION GUIDE CONTENT
+// ═══════════════════════════════════════════════════════════════════════════
+const SESSION_GUIDE = [
+  {
+    phase: 'PRE-SESSION',
+    who: 'Instructor',
+    duration: 'Before students arrive',
+    color: '#64748b',
+    steps: [
+      'Open teacher.html on the projected screen.',
+      'Fill in route: DEP / DEST / ALT1 / ALT2 / ETD / ETA / FL / Aircraft.',
+      'Enter additional briefing notes if needed.',
+      'Select exactly 10 pre-test questions from the question bank.',
+      'Select exactly 3 briefing key questions.',
+      'Load archive data (METAR, TAF, SIGMET, charts) as fallback in case of network failure.',
+      'Click ✓ Launch Session.',
+      'Show QR codes (📱 button in topbar) — project or print for students.',
+    ]
+  },
+  {
+    phase: 'PHASE 1 — Pre-Test',
+    who: 'Individual',
+    duration: '8 min',
+    color: '#3b82f6',
+    steps: [
+      'INSTRUCTOR: Click "Next →" to advance each question. Click "Show Answer" before moving on.',
+      'STUDENTS: Open student.html (scan QR code). Enter your name and join.',
+      'STUDENTS: Answer each question before the 20-second timer expires.',
+      'SCORING: Correct answer → +20 pts at 1s, −1 pt/sec (min +1 at 20s). Wrong → −2 pts. No answer → −1 pt.',
+      'INSTRUCTOR: Monitor submission progress on the right panel.',
+      '⚠️ Sound alert at 10% remaining (48 sec). 🔴 Sound alert at 5% remaining (24 sec).',
+    ]
+  },
+  {
+    phase: 'PHASE 2 — Group Formation',
+    who: 'Automatic',
+    duration: '3–5 min',
+    color: '#06b6d4',
+    steps: [
+      'INSTRUCTOR: Click "Confirm & Broadcast Groups".',
+      'Groups are formed automatically by snake distribution (ranked by pre-test score).',
+      'Highest scorer in each group = Leader (coordinator role only).',
+      'STUDENTS: Note your group assignment on student.html.',
+      'GROUPS: Each group scans their specific QR code to open group.html?g=G1 (G2, G3…).',
+    ]
+  },
+  {
+    phase: 'PHASE 3 — Mission Briefing',
+    who: 'Instructor presents',
+    duration: '5 min',
+    color: '#f59e0b',
+    steps: [
+      'INSTRUCTOR: Present the route and task verbally to the class.',
+      'ALL: Route details visible on student.html and group.html.',
+      'GROUPS: Open the Met Sources tab on group.html.',
+      'Remind students: all groups have the same route. Analysis is individual, decision is collective.',
+      'Remind students: sources consulted must be recorded — required for oral briefing.',
+    ]
+  },
+  {
+    phase: 'PHASE 4 — Individual Analysis',
+    who: 'Individual',
+    duration: '25 min',
+    color: '#3b82f6',
+    steps: [
+      'STUDENTS: Access live met sources on student.html (or archive if no internet).',
+      'STUDENTS: Complete the analysis form:',
+      '  · Primary hazard description (minimum 30 words)',
+      '  · Severity: LOW / MODERATE / HIGH',
+      '  · Operational impact (minimum 25 words)',
+      '  · Preliminary assessment: GO / DELAY / NO-GO',
+      '  · Sources consulted (list all URLs/references used)',
+      'STUDENTS: Click ✓ Submit My Analysis when complete.',
+      'INSTRUCTOR: Monitor submission progress per group on the dashboard.',
+      '⚠️ Sound alert at 10% remaining (2:30). 🔴 Sound alert at 5% remaining (1:15).',
+    ]
+  },
+  {
+    phase: 'PHASE 5 — Decision Table + Group Decision',
+    who: 'Group',
+    duration: '20 min',
+    color: '#22c55e',
+    steps: [
+      'GROUPS: Discuss individual analyses. Leader coordinates.',
+      'GROUPS: Complete the structured Decision Table on group.html:',
+      '  · DEPARTURE: wind, visibility, clouds, significant weather',
+      '  · EN-ROUTE: wind, temperature, turbulence, CAT, icing, CB, jet stream',
+      '  · ARRIVAL: wind, visibility, clouds, significant weather',
+      '  · Add additional hazard rows as needed (free rows)',
+      'GROUPS: Submit group decision — GO / DELAY / NO-GO.',
+      '  · If DELAY: specify alternative ETD.',
+      '  · Alternative FL optional.',
+      '  · Justification minimum 60 words.',
+      '  · List all sources consulted (required for oral briefing).',
+      'INSTRUCTOR: Monitor decision table and decisions in real time.',
+      '⚠️ Sound alert at 10% remaining (2 min). 🔴 Sound alert at 5% remaining (1 min).',
+    ]
+  },
+  {
+    phase: 'PHASE 6 — Challenge',
+    who: 'Group',
+    duration: '10 min',
+    color: '#ef4444',
+    steps: [
+      'INSTRUCTOR: Click ⚡ Challenge in the topbar. Select type and enter text. Click Inject Now.',
+      'Challenge types: New Met Information / Route Change / Time Pressure / Direct Question.',
+      'GROUPS: Read the challenge on group.html. Discuss impact.',
+      'GROUPS: Revise or confirm decision. Update Decision Table if needed.',
+      'GROUPS: Submit revised decision with justification.',
+      '⚠️ Sound alert at 10% remaining (1 min). 🔴 Sound alert at 5% remaining (30 sec).',
+    ]
+  },
+  {
+    phase: 'PHASE 7 — Briefing Key MCQ',
+    who: 'Group',
+    duration: '5 min',
+    color: '#a855f7',
+    steps: [
+      'GROUPS: Answer 3 multiple-choice questions on group.html.',
+      'All group members should discuss before submitting.',
+      'SCORING: 3/3 correct → free access. 2/3 → −10 pts/member. 1/3 → −20 pts/member. 0/3 → −30 pts/member.',
+      'All groups present the oral briefing regardless of key result.',
+      'INSTRUCTOR: View key results on dashboard.',
+    ]
+  },
+  {
+    phase: 'PHASE 8 — Oral Briefing',
+    who: 'Jury evaluation',
+    duration: '~2 min per group',
+    color: '#a855f7',
+    steps: [
+      'INSTRUCTOR: Select presenting group in the Oral Briefing panel.',
+      'GROUP presents (~2 minutes):',
+      '  1. Current synoptic situation — one sentence',
+      '  2. Main hazard identified + operational significance',
+      '  3. Group decision: GO / DELAY / NO-GO + justification',
+      '  4. All sources consulted (mandatory)',
+      '  5. Confidence level + one mitigation or contingency',
+      'INSTRUCTOR: Score each student individually (1–3 per dimension):',
+      '  · Meteorological Accuracy',
+      '  · Decision Justified by Met Data',
+      '  · Communication Clarity',
+      'INSTRUCTOR: Click Save All Oral Scores before selecting next group.',
+    ]
+  },
+  {
+    phase: 'PHASE 9 — Results & Debrief',
+    who: 'All',
+    duration: '10 min',
+    color: '#22c55e',
+    steps: [
+      'INSTRUCTOR: Final scores displayed automatically.',
+      'Review KSA breakdown per student and per group.',
+      'Click ⬇ Export JSON to save the full session report.',
+      'Debrief: compare group decisions, discuss hazard identification quality.',
+      'Highlight differences between individual analyses and group decisions.',
+      'Discuss sources consulted — were the right sources used?',
+    ]
+  },
 ];

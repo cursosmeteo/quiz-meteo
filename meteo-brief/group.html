@@ -8,51 +8,45 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-.page{max-width:900px;margin:0 auto;padding:0 16px 48px}
-
-/* Tabs */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px}
-.tab-btn{padding:9px 16px;font-size:.82rem;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font);transition:all .15s}
-.tab-btn:hover{color:var(--text2)}
-.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.page{max-width:920px;margin:0 auto;padding:0 14px 48px}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{padding:8px 14px;font-size:.8rem;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--text2)}.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
 .tab-panel{display:none}.tab-panel.active{display:block;animation:fadeIn .2s}
-
-/* Decision Table */
-.dt-wrap{overflow-x:auto}
-.dt{width:100%;border-collapse:collapse;font-size:.78rem;min-width:940px}
-.dt th{background:var(--bg3);color:var(--text3);font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:7px 7px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
-.dt td{padding:4px 5px;border-bottom:1px solid rgba(42,54,80,.4);vertical-align:middle}
-.dt tr:hover td{background:rgba(30,42,65,.5)}
-.dt select,.dt input[type=text]{font-size:.78rem;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--font);width:100%}
-.dt select:focus,.dt input:focus{border-color:var(--blue);outline:none}
-.dt textarea{font-size:.75rem;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--font);width:100%;min-height:46px;resize:vertical}
-.dt-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.85rem;padding:3px 6px;border-radius:4px}
-.dt-del:hover{background:var(--red-d);color:var(--red)}
-.phase-checkbox{display:flex;flex-wrap:wrap;gap:3px}
-.phase-cb{display:flex;align-items:center;gap:2px;font-size:.68rem;color:var(--text2);white-space:nowrap}
-.phase-cb input{accent-color:var(--blue)}
-
-/* Hazard category headers in dropdown */
-.haz-cat{font-size:.7rem;color:var(--text3);padding:4px 8px;background:var(--bg4)}
-
-/* Member analysis cards */
-.member-analysis{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px}
-.member-analysis__name{font-weight:700;font-size:.85rem;margin-bottom:4px}
-.member-analysis__sev{font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:99px}
-
-/* Wait */
 .wait-box{text-align:center;padding:60px 20px}
 .pulse-ring{width:48px;height:48px;border:3px solid var(--blue);border-radius:50%;margin:20px auto 0;animation:pulse-r 1.5s infinite}
 @keyframes pulse-r{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.45}}
+.sub-banner{background:var(--green-d);border:2px solid var(--green);border-radius:var(--r-lg);padding:16px;text-align:center}
+
+/* Structured table */
+.struct-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px}
+.struct-section__title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.struct-grid{display:grid;gap:8px}
+.struct-grid-2{grid-template-columns:1fr 1fr}
+.struct-grid-3{grid-template-columns:1fr 1fr 1fr}
+.struct-grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:640px){.struct-grid-2,.struct-grid-3,.struct-grid-4{grid-template-columns:1fr 1fr}}
+
+/* Free rows table */
+.dt{width:100%;border-collapse:collapse;font-size:.77rem;min-width:700px}
+.dt th{background:var(--bg3);color:var(--text3);font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:6px 7px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.dt td{padding:4px 5px;border-bottom:1px solid rgba(42,54,80,.4);vertical-align:middle}
+.dt select,.dt input{font-size:.77rem;padding:4px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--font);width:100%}
+.dt-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.85rem;padding:2px 5px;border-radius:4px}
+.dt-del:hover{background:var(--red-d);color:var(--red)}
 
 /* Key MCQ */
-.key-q-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:12px}
-.key-result{padding:14px;border-radius:var(--r);text-align:center;font-size:1rem;font-weight:700;margin-top:14px}
+.key-q-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:10px}
+.key-result{padding:14px;border-radius:var(--r);text-align:center;font-size:1rem;font-weight:700;margin-top:12px}
 .key-result.pass{background:var(--green-d);color:var(--green);border:1px solid var(--green)}
 .key-result.fail{background:var(--red-d);color:var(--red);border:1px solid var(--red)}
 
-/* Submitted banner */
-.sub-banner{background:var(--green-d);border:2px solid var(--green);border-radius:var(--r-lg);padding:18px;text-align:center}
+/* Timer bar */
+.phase-timer-bar{
+  position:fixed;top:52px;left:0;right:0;height:4px;
+  background:var(--bg4);z-index:100;
+}
+.phase-timer-fill{height:100%;background:var(--blue);transition:width 1s linear}
 </style>
 </head>
 <body>
@@ -65,39 +59,41 @@
   <div class="sep"></div>
   <span class="text-xs text-muted" id="phase-lbl">Waiting</span>
   <div class="ml-auto fc gap-8">
+    <div style="text-align:center">
+      <div style="font-size:.56rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Phase</div>
+      <div class="timer-md" id="g-phase-timer">—:——</div>
+    </div>
     <span id="conn-g" class="tag tag-amber"><span class="dot amber"></span>Connecting</span>
   </div>
 </div>
 
-<div class="page">
+<!-- PHASE TIMER BAR -->
+<div class="phase-timer-bar"><div class="phase-timer-fill" id="timer-bar-fill" style="width:100%"></div></div>
 
-  <!-- KSA PANEL (always visible after phase 3) -->
+<div class="page" style="margin-top:4px">
+
+  <!-- KSA PANEL -->
   <div class="ksa-panel" id="ksa-panel" style="display:none;margin-top:14px">
     <div class="ksa-panel__title">Group KSA Tracker</div>
     <div class="ksa-row">
-      <div class="ksa-letter ksa-k">K</div>
-      <div class="ksa-label">Knowledge</div>
-      <div class="ksa-bar-track"><div class="ksa-bar-fill" id="g-ksa-k-bar" style="width:0%;background:var(--blue)"></div></div>
-      <div class="ksa-val ksa-k" id="g-ksa-k-val">0 / 40</div>
+      <div class="ksa-letter ksa-k">K</div><div class="ksa-label">Knowledge</div>
+      <div class="ksa-bar-track"><div class="ksa-bar-fill" id="g-k-bar" style="width:0%;background:var(--blue)"></div></div>
+      <div class="ksa-val ksa-k" id="g-k-val">0/40</div>
     </div>
-    <div class="ksa-sub">Pre-test avg + Hazard identification quality</div>
+    <div class="ksa-sub">Pre-test avg · Hazard identification</div>
     <div class="ksa-row">
-      <div class="ksa-letter ksa-s">S</div>
-      <div class="ksa-label">Skills</div>
-      <div class="ksa-bar-track"><div class="ksa-bar-fill" id="g-ksa-s-bar" style="width:0%;background:var(--green)"></div></div>
-      <div class="ksa-val ksa-s" id="g-ksa-s-val">0 / 35</div>
+      <div class="ksa-letter ksa-s">S</div><div class="ksa-label">Skills</div>
+      <div class="ksa-bar-track"><div class="ksa-bar-fill" id="g-s-bar" style="width:0%;background:var(--green)"></div></div>
+      <div class="ksa-val ksa-s" id="g-s-val">0/35</div>
     </div>
-    <div class="ksa-sub">Decision quality + Challenge response + Oral</div>
+    <div class="ksa-sub">Decision quality · Challenge · Oral</div>
     <div class="ksa-row">
-      <div class="ksa-letter ksa-a">A</div>
-      <div class="ksa-label">Attitudes</div>
-      <div class="ksa-bar-track"><div class="ksa-bar-fill" id="g-ksa-a-bar" style="width:0%;background:var(--purple)"></div></div>
-      <div class="ksa-val ksa-a" id="g-ksa-a-val">0 / 25</div>
+      <div class="ksa-letter ksa-a">A</div><div class="ksa-label">Attitudes</div>
+      <div class="ksa-bar-track"><div class="ksa-bar-fill" id="g-a-bar" style="width:0%;background:var(--purple)"></div></div>
+      <div class="ksa-val ksa-a" id="g-a-val">0/25</div>
     </div>
-    <div class="ksa-sub">Participation + Challenge response + Oral</div>
+    <div class="ksa-sub">Participation · Challenge response · Oral</div>
   </div>
-
-  <!-- SCREENS -->
 
   <!-- WAIT -->
   <div class="screen active" id="sc-wait">
@@ -113,8 +109,6 @@
   <div class="screen" id="sc-briefing">
     <h2 style="margin-bottom:12px">📋 Mission Briefing</h2>
     <div class="card card--blue mb-12" id="g-brief-card"></div>
-
-    <!-- Tabs: Live Sources / Archive -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('tab-live',this)">🌐 Live Sources</button>
       <button class="tab-btn" onclick="switchTab('tab-archive',this)">📁 Archive Fallback</button>
@@ -127,32 +121,33 @@
     </div>
   </div>
 
-  <!-- ANALYSIS WAITING (phase 4) -->
+  <!-- ANALYSIS WAITING -->
   <div class="screen" id="sc-analysis-wait">
     <h2 style="margin-bottom:12px">Phase 4 — Individual Analysis</h2>
-    <div class="text-muted text-sm mb-14">Each student is completing their individual analysis. Once all submit, the group moves to the decision table.</div>
-    <div class="card mb-12"><div class="card__title">Submission Status</div><div id="member-status"></div></div>
-    <div class="card card--blue mb-12">
-      <div class="card__title">🌐 Live Sources — keep open while researching</div>
+    <div class="text-muted text-sm mb-14">Each student completes their individual analysis on student.html. Use this screen to access met sources.</div>
+    <div class="card mb-12"><div class="card__title">Member Status</div><div id="member-status"></div></div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-live-2',this)">🌐 Live Sources</button>
+      <button class="tab-btn" onclick="switchTab('tab-archive-2',this)">📁 Archive</button>
+    </div>
+    <div class="tab-panel active" id="tab-live-2">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px" id="g-met-links-2"></div>
     </div>
-    <div class="card card--amber">
-      <div class="card__title">📁 Archive Fallback</div>
-      <div class="met-block mt-4" id="g-archive-2">—</div>
+    <div class="tab-panel" id="tab-archive-2">
+      <div class="met-block" id="g-archive-2">—</div>
     </div>
   </div>
 
   <!-- DECISION TABLE (phase 5) -->
   <div class="screen" id="sc-decision">
     <h2 style="margin-bottom:4px">Phase 5 — Decision Table &amp; Group Decision</h2>
-    <div class="text-muted text-sm mb-14">Build the hazard table collectively. Then reach a GO / DELAY / NO-GO decision.</div>
+    <div class="text-muted text-sm mb-14">Complete all sections. Instructor sees this table in real time.</div>
 
-    <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('tab-analyses',this)">👤 Individual Analyses</button>
-      <button class="tab-btn" onclick="switchTab('tab-dt',this)">📊 Decision Table</button>
-      <button class="tab-btn" onclick="switchTab('tab-decision',this)">🛫 Group Decision</button>
-      <button class="tab-btn" onclick="switchTab('tab-history',this)">📋 History</button>
+      <button class="tab-btn" onclick="switchTab('tab-structured',this)">📊 Decision Table</button>
+      <button class="tab-btn" onclick="switchTab('tab-group-dec',this)">🛫 Decision</button>
+      <button class="tab-btn" onclick="switchTab('tab-hist',this)">📋 History</button>
     </div>
 
     <!-- Individual analyses -->
@@ -160,41 +155,166 @@
       <div id="analyses-list"></div>
     </div>
 
-    <!-- Decision Table -->
-    <div class="tab-panel" id="tab-dt">
-      <div class="card mb-10">
-        <div class="card__title">
-          Hazard Decision Table
-          <span class="text-xs text-dim" style="float:right">Updated live · shared with instructor</span>
+    <!-- Structured decision table -->
+    <div class="tab-panel" id="tab-structured">
+
+      <!-- DEPARTURE -->
+      <div class="struct-section">
+        <div class="struct-section__title" style="color:var(--blue)">✈️ Departure Airport — <span id="dep-label">DEP</span></div>
+        <div class="struct-grid struct-grid-2">
+          <div class="fg"><label>Wind direction & speed</label>
+            <input type="text" id="dep-wind" placeholder="e.g. 240°/18KT G28KT" oninput="saveStructured()"></div>
+          <div class="fg"><label>Visibility</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <select id="dep-vis-range" onchange="saveStructured()">
+                <option>≥ 10 km</option><option>5–10 km</option><option>1.5–5 km</option>
+                <option>800 m–1.5 km</option><option>< 800 m</option>
+              </select>
+              <input type="text" id="dep-vis-val" placeholder="exact value" oninput="saveStructured()">
+            </div>
+          </div>
+          <div class="fg"><label>Clouds</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+              <select id="dep-cloud-type" onchange="saveStructured()">
+                <option>SKC</option><option>FEW</option><option>SCT</option>
+                <option>BKN</option><option>OVC</option><option>VV///</option>
+              </select>
+              <input type="text" id="dep-cloud-level" placeholder="level ft" oninput="saveStructured()">
+              <input type="text" id="dep-cloud-cb" placeholder="CB/TCU?" oninput="saveStructured()">
+            </div>
+          </div>
+          <div class="fg"><label>Significant Weather / NSW</label>
+            <input type="text" id="dep-sigwx" placeholder="e.g. -RA BR / NSW" oninput="saveStructured()"></div>
         </div>
-        <div class="dt-wrap">
+      </div>
+
+      <!-- EN-ROUTE -->
+      <div class="struct-section">
+        <div class="struct-section__title" style="color:var(--green)">🗺️ En-Route</div>
+        <div class="struct-grid struct-grid-2">
+          <div class="fg"><label>Wind (avg direction/speed)</label>
+            <input type="text" id="er-wind" placeholder="e.g. 270°/55KT at FL310" oninput="saveStructured()"></div>
+          <div class="fg"><label>Average temperature</label>
+            <input type="text" id="er-temp" placeholder="e.g. ISA+5 / −52°C" oninput="saveStructured()"></div>
+        </div>
+        <div class="struct-grid struct-grid-4">
+          <div class="fg"><label>Turbulence</label>
+            <select id="er-turb" onchange="saveStructured()">
+              <option>NIL</option><option>Light</option><option>Moderate</option><option>Severe</option>
+            </select>
+          </div>
+          <div class="fg"><label>CAT</label>
+            <select id="er-cat" onchange="saveStructured()">
+              <option>NIL</option><option>Light</option><option>Moderate</option><option>Severe</option>
+            </select>
+          </div>
+          <div class="fg"><label>Icing</label>
+            <select id="er-ice" onchange="saveStructured()">
+              <option>NIL</option><option>Light</option><option>Moderate</option><option>Severe</option>
+            </select>
+          </div>
+          <div class="fg"><label>Icing FL range</label>
+            <input type="text" id="er-ice-fl" placeholder="e.g. FL060–FL160" oninput="saveStructured()"></div>
+        </div>
+        <div class="struct-grid struct-grid-2">
+          <div class="fg"><label>CB areas</label>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center">
+              <select id="er-cb" onchange="saveStructured()">
+                <option>No</option><option>Yes</option>
+              </select>
+              <input type="text" id="er-cb-detail" placeholder="location / FL tops" oninput="saveStructured()">
+            </div>
+          </div>
+          <div class="fg"><label>Jet Stream</label>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center">
+              <select id="er-jet" onchange="saveStructured()">
+                <option>No</option><option>Yes</option>
+              </select>
+              <input type="text" id="er-jet-detail" placeholder="direction / speed / FL" oninput="saveStructured()">
+            </div>
+          </div>
+        </div>
+        <div class="fg mt-4"><label>Other en-route remarks</label>
+          <input type="text" id="er-remarks" placeholder="SIGMET, PIREP, volcanic ash, other…" oninput="saveStructured()">
+        </div>
+      </div>
+
+      <!-- ARRIVAL -->
+      <div class="struct-section">
+        <div class="struct-section__title" style="color:var(--amber)">🛬 Arrival Airport — <span id="arr-label">DEST</span></div>
+        <div class="struct-grid struct-grid-2">
+          <div class="fg"><label>Wind direction & speed</label>
+            <input type="text" id="arr-wind" placeholder="e.g. 190°/22KT G35KT" oninput="saveStructured()"></div>
+          <div class="fg"><label>Visibility</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <select id="arr-vis-range" onchange="saveStructured()">
+                <option>≥ 10 km</option><option>5–10 km</option><option>1.5–5 km</option>
+                <option>800 m–1.5 km</option><option>< 800 m</option>
+              </select>
+              <input type="text" id="arr-vis-val" placeholder="exact value" oninput="saveStructured()">
+            </div>
+          </div>
+          <div class="fg"><label>Clouds</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+              <select id="arr-cloud-type" onchange="saveStructured()">
+                <option>SKC</option><option>FEW</option><option>SCT</option>
+                <option>BKN</option><option>OVC</option><option>VV///</option>
+              </select>
+              <input type="text" id="arr-cloud-level" placeholder="level ft" oninput="saveStructured()">
+              <input type="text" id="arr-cloud-cb" placeholder="CB/TCU?" oninput="saveStructured()">
+            </div>
+          </div>
+          <div class="fg"><label>Significant Weather / NSW</label>
+            <input type="text" id="arr-sigwx" placeholder="e.g. TSRA / NSW" oninput="saveStructured()"></div>
+        </div>
+        <!-- Alternates -->
+        <div class="struct-grid struct-grid-2 mt-8" style="border-top:1px solid var(--border);padding-top:10px">
+          <div class="fg"><label>Alternate 1 — <span id="alt1-label">ALT1</span> conditions</label>
+            <input type="text" id="alt1-cond" placeholder="Brief conditions…" oninput="saveStructured()"></div>
+          <div class="fg"><label>Alternate 2 — <span id="alt2-label">ALT2</span> conditions</label>
+            <input type="text" id="alt2-cond" placeholder="Brief conditions…" oninput="saveStructured()"></div>
+        </div>
+      </div>
+
+      <!-- Additional free rows -->
+      <div class="card mb-10">
+        <div class="card__title">Additional Hazards (free rows)</div>
+        <div style="overflow-x:auto">
           <table class="dt">
             <thead>
               <tr>
-                <th style="width:24px"></th>
-                <th style="min-width:160px">Hazard Type</th>
-                <th style="min-width:100px">Source</th>
-                <th style="min-width:100px">Intensity</th>
-                <th style="min-width:130px">FL Range</th>
-                <th style="min-width:200px">Flight Phase(s)</th>
-                <th style="min-width:200px">Operational Implication</th>
-                <th style="min-width:90px">Partial Decision</th>
+                <th style="width:22px"></th>
+                <th style="min-width:160px">Hazard</th>
+                <th style="min-width:90px">Intensity</th>
+                <th style="min-width:120px">FL Range</th>
+                <th style="min-width:160px">Flight Phase(s)</th>
+                <th style="min-width:180px">Implication</th>
+                <th style="min-width:80px">Decision</th>
               </tr>
             </thead>
-            <tbody id="dt-body"></tbody>
+            <tbody id="dt-free-body"></tbody>
           </table>
         </div>
-        <button class="btn btn-ghost dt-add mt-8" onclick="addDTRow()">+ Add Hazard</button>
+        <button class="btn btn-ghost btn-sm mt-8" onclick="addFreeRow()">+ Add Row</button>
       </div>
-      <div class="text-xs text-dim text-center">
-        Each row is saved to Firebase automatically when you change any field.
-        Instructor sees this table in real time.
+
+      <!-- Sources -->
+      <div class="card card--cyan mb-10">
+        <div class="card__title">📡 Sources Consulted (required for oral briefing)</div>
+        <div class="fg">
+          <label>List all sources used — name and URL if applicable</label>
+          <textarea id="dt-sources" style="min-height:80px"
+            placeholder="1. AVWX — https://avwx.rest — METAR/TAF EGLL&#10;2. NOAA AWC — https://aviationweather.gov/sigmet — SIGMET H15&#10;3. Windy — https://windy.com — Upper wind FL300&#10;4. EUMETSAT — https://view.eumetsat.int — Satellite IR&#10;…"
+            oninput="saveSources()"></textarea>
+        </div>
       </div>
+
+      <button class="btn btn-primary btn-full" onclick="switchToDecisionTab()">→ Go to Decision</button>
     </div>
 
     <!-- Group Decision -->
-    <div class="tab-panel" id="tab-decision">
-      <div id="decision-form-wrap">
+    <div class="tab-panel" id="tab-group-dec">
+      <div id="dec-form-wrap">
         <div class="card card--blue mb-12">
           <div class="card__title">🛫 Group Decision <span class="ksa-letter ksa-s" style="font-size:.68rem">[S]</span></div>
           <div class="dec-group mb-12">
@@ -202,28 +322,46 @@
             <button class="dec-btn delay" onclick="selDec('DELAY',this)">DELAY</button>
             <button class="dec-btn nogo"  onclick="selDec('NO-GO',this)">NO-GO</button>
           </div>
+
+          <!-- Delay fields (hidden until DELAY selected) -->
+          <div id="delay-fields" style="display:none">
+            <div class="struct-grid struct-grid-2 mb-10">
+              <div class="fg"><label>⏱ Alternative ETD (required if DELAY)</label>
+                <input type="text" id="alt-etd" placeholder="e.g. 1630Z" oninput="saveAltFields()"></div>
+              <div class="fg"><label>Alternative FL (optional)</label>
+                <input type="text" id="alt-fl" placeholder="e.g. FL280" oninput="saveAltFields()"></div>
+            </div>
+          </div>
+
           <div class="fg">
+            <label>Other relevant information (optional)</label>
+            <input type="text" id="dec-other" placeholder="e.g. Request deviation 50nm left of track / Request FL250">
+          </div>
+
+          <div class="fg mt-8">
             <label>Justification — reference specific met data (min 60 words) <span class="ksa-letter ksa-s" style="font-size:.66rem">[S]</span></label>
-            <textarea id="g-just" style="min-height:120px" placeholder="e.g. CB tops at FL350 (above our FL310 cruise) confirmed by SIGMET LECB 5 and PIREP. Destination TAF shows TEMPO TSRA with 1500m visibility during arrival window. Alternate LIRA is clear and valid. Decision: DELAY until CB area clears east of the route per updated SIGMET." oninput="wcG()"></textarea>
+            <textarea id="g-just" style="min-height:120px"
+              placeholder="e.g. CB tops FL350 above cruise FL310 confirmed by SIGMET and PIREP at N5100 W00300. Destination TAF shows TEMPO TSRA 1500m visibility during arrival window. Alternate conditions within limits. Decision: DELAY to 1630Z — forecast shows CB area clearing east of route by 1800Z."
+              oninput="wcG()"></textarea>
             <div class="wc bad" id="g-wc">0 / 60 words minimum</div>
           </div>
         </div>
         <button class="btn btn-green btn-full btn-lg" onclick="submitDecision()">✓ Submit Group Decision</button>
       </div>
-      <div id="decision-submitted-banner" style="display:none" class="sub-banner mt-12">
+
+      <div id="dec-submitted" style="display:none" class="sub-banner mt-12">
         <div style="font-size:2rem;margin-bottom:8px">✅</div>
         <div style="font-weight:800;font-size:1.1rem;color:var(--green)">Decision Submitted</div>
-        <div style="color:var(--green-d);margin-top:4px;font-size:.88rem" id="dec-submitted-val">—</div>
-        <div class="text-xs text-dim mt-8">Waiting for instructor to advance to next phase.</div>
+        <div style="color:var(--green-d);font-size:.88rem;margin-top:4px" id="dec-sub-val">—</div>
+        <div class="text-xs text-dim mt-8">Waiting for instructor to advance.</div>
       </div>
     </div>
 
     <!-- History -->
-    <div class="tab-panel" id="tab-history">
-      <div class="card"><div class="card__title">📋 Group History</div><div id="hist-list"></div></div>
+    <div class="tab-panel" id="tab-hist">
+      <div class="card"><div class="card__title">Group History</div><div id="hist-list"></div></div>
     </div>
-
-  </div><!-- /sc-decision -->
+  </div>
 
   <!-- CHALLENGE (phase 6) -->
   <div class="screen" id="sc-challenge">
@@ -243,21 +381,22 @@
       <div id="rev-form-wrap">
         <div class="card card--red mb-12">
           <div class="card__title">Revised Decision <span class="ksa-letter ksa-s" style="font-size:.68rem">[S+A]</span></div>
-          <div class="text-muted text-sm mb-12">In light of the new information, revise or confirm your decision.</div>
-          <div class="dec-group mb-12">
+          <div class="text-muted text-sm mb-10">Revise or confirm your decision in light of the new information.</div>
+          <div class="dec-group mb-10">
             <button class="dec-btn go"    onclick="selRevDec('GO',this)">GO</button>
             <button class="dec-btn delay" onclick="selRevDec('DELAY',this)">DELAY</button>
             <button class="dec-btn nogo"  onclick="selRevDec('NO-GO',this)">NO-GO</button>
           </div>
           <div class="fg">
             <label>Why has this changed (or why are you confirming)?</label>
-            <textarea id="g-rev-just" style="min-height:80px" placeholder="The updated SIGMET indicates the CB area has expanded to cover our route…"></textarea>
+            <textarea id="g-rev-just" style="min-height:80px"
+              placeholder="The updated SIGMET indicates the CB area has expanded to cover our destination…"></textarea>
           </div>
-          <button class="btn btn-red btn-full" onclick="submitRevDecision()">Submit Revised Decision</button>
+          <button class="btn btn-red btn-full mt-8" onclick="submitRevDecision()">Submit Revised Decision</button>
         </div>
       </div>
       <div id="rev-submitted" style="display:none" class="sub-banner">
-        <div style="font-size:2rem;margin-bottom:8px">✅</div>
+        <div style="font-size:1.8rem;margin-bottom:8px">✅</div>
         <div style="font-weight:800;color:var(--green)">Revised decision submitted</div>
         <div style="font-size:.85rem;color:var(--green-d);margin-top:4px" id="rev-dec-val">—</div>
       </div>
@@ -265,20 +404,12 @@
 
     <div class="tab-panel" id="tab-rev-dt">
       <div class="card">
-        <div class="card__title">Update Decision Table with new information</div>
-        <div class="dt-wrap">
-          <table class="dt">
-            <thead>
-              <tr>
-                <th style="width:24px"></th>
-                <th>Hazard</th><th>Source</th><th>Intensity</th>
-                <th>FL Range</th><th>Phases</th><th>Implication</th><th>Decision</th>
-              </tr>
-            </thead>
-            <tbody id="dt-body-2"></tbody>
-          </table>
+        <div class="card__title">Update table with new information</div>
+        <div class="fg"><label>Additional notes / updated data</label>
+          <textarea id="ch-update-notes" style="min-height:100px"
+            placeholder="Add any new information from the challenge to the relevant table fields above, or note it here…"
+            oninput="saveChallengeNotes()"></textarea>
         </div>
-        <button class="btn btn-ghost dt-add mt-8" onclick="addDTRow2()">+ Add Row</button>
       </div>
     </div>
 
@@ -291,62 +422,58 @@
   <div class="screen" id="sc-key">
     <h2 style="margin-bottom:4px">🔑 Briefing Access Key</h2>
     <div class="text-muted text-sm mb-14">
-      Answer all 3 questions correctly for free access to the oral briefing.<br>
-      Each wrong answer costs <strong>−10 pts per member</strong> (max −30).
+      Answer 3 questions to unlock the oral briefing at no cost.<br>
+      Incorrect answers: <strong>−10 pts per member</strong> each (max −30 total).
     </div>
     <div id="key-qs"></div>
-    <button class="btn btn-purple btn-full btn-lg mt-12" id="btn-key-sub" onclick="submitKey()" style="display:none">Submit Key Answers</button>
+    <button class="btn btn-purple btn-full btn-lg mt-10" id="btn-key-sub" onclick="submitKey()" style="display:none">
+      Submit Key Answers
+    </button>
     <div id="key-result-wrap"></div>
   </div>
 
   <!-- ORAL (phase 8) -->
   <div class="screen" id="sc-oral">
-    <h2 style="margin-bottom:12px">🎙️ Oral Briefing</h2>
+    <h2 style="margin-bottom:12px">🎙️ Oral Briefing — <span id="oral-grp-lbl">—</span></h2>
     <div class="card card--blue mb-14" id="oral-ref-g"></div>
-    <div class="card card--purple">
-      <div class="card__title">Briefing Structure — 2 minutes</div>
+    <div class="card card--purple mb-14">
+      <div class="card__title">Briefing Structure — 2 minutes per group</div>
       <div class="text-sm" style="line-height:2.4">
         <strong>1.</strong> Current synoptic situation — <em>one sentence</em><br>
         <strong>2.</strong> Main hazard &amp; operational significance<br>
-        <strong>3.</strong> Group decision: <strong>GO / DELAY / NO-GO</strong> + justification<br>
-        <strong>4.</strong> Confidence level + one mitigation or contingency
+        <strong>3.</strong> Decision: <strong>GO / DELAY / NO-GO</strong> + justification<br>
+        <strong>4.</strong> All sources consulted <span class="tag tag-red" style="font-size:.65rem">mandatory</span><br>
+        <strong>5.</strong> Confidence level + one mitigation / contingency
       </div>
     </div>
-    <div class="text-xs text-dim text-center mt-12">
-      Each student is scored individually by the jury on:<br>
-      Meteorological Accuracy · Decision Justified · Communication Clarity
+    <div class="text-xs text-dim text-center">
+      Each student is scored individually by the jury.<br>
+      Meteorological Accuracy · Decision Justified · Communication Clarity (1–3 each)
     </div>
   </div>
 
   <!-- RESULTS (phase 9) -->
   <div class="screen" id="sc-results">
-    <h2 style="margin-bottom:14px">🏆 Group Results</h2>
-
+    <h2 style="margin-bottom:14px">🏆 Results</h2>
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('tab-res-scores',this)">Scores</button>
       <button class="tab-btn" onclick="switchTab('tab-res-ksa',this)">KSA</button>
       <button class="tab-btn" onclick="switchTab('tab-res-hist',this)">Full History</button>
     </div>
-
     <div class="tab-panel active" id="tab-res-scores">
       <div class="card card--blue">
         <div class="card__title">Individual Scores</div>
         <table class="tbl" id="res-tbl">
-          <thead><tr><th>Student</th><th>Pre-Test K</th><th>Group K</th><th>Group S</th><th>Group A</th><th>Oral</th><th>Penalty</th><th>Total</th></tr></thead>
+          <thead><tr><th>Student</th><th>Pre-Test</th><th>Group K</th><th>Group S</th><th>Group A</th><th>Oral</th><th>Penalty</th><th>Total</th></tr></thead>
           <tbody id="res-tbody"></tbody>
         </table>
       </div>
     </div>
-
     <div class="tab-panel" id="tab-res-ksa">
-      <div class="card">
-        <div class="card__title">KSA Summary</div>
-        <div id="res-ksa-detail"></div>
-      </div>
+      <div class="card"><div class="card__title">KSA Summary</div><div id="res-ksa-detail"></div></div>
     </div>
-
     <div class="tab-panel" id="tab-res-hist">
-      <div class="card"><div class="card__title">Complete Session History</div><div id="res-hist-full"></div></div>
+      <div class="card"><div class="card__title">Complete History</div><div id="res-hist-full"></div></div>
     </div>
   </div>
 
@@ -355,17 +482,35 @@
 <script src="firebase-config.js"></script>
 <script src="data.js"></script>
 <script>
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDIO
+// ═══════════════════════════════════════════════════════════════════════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+function beep(freq, dur, vol) {
+  try {
+    const ctx=getAudio(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+dur);
+  } catch(e){}
+}
+function alertWarn()   { beep(660,.15,.3); setTimeout(()=>beep(660,.15,.3),200); }
+function alertDanger() { beep(880,.15,.5); setTimeout(()=>beep(880,.15,.5),200); setTimeout(()=>beep(880,.15,.5),400); }
+function alertEnd()    { beep(440,.6,.5); }
+
+// ═══════════════════════════════════════════════════════════════════════════
 // INIT
-// ════════════════════════════════════════════════════════════════════════════
-const params   = new URLSearchParams(location.search);
-const groupId  = params.get('g') || 'G1';
-let groupData  = null;
-let dtRows     = {};     // local copy of decision table rows
-let decVal     = null;
-let revDecVal  = null;
-let keyAnswers = {};
-let members    = [];
+// ═══════════════════════════════════════════════════════════════════════════
+const params  = new URLSearchParams(location.search);
+const groupId = params.get('g') || 'G1';
+let groupData = null, members = [];
+let decVal = null, revDecVal = null;
+let keyQData = [], keyAnswers = {};
+let freeRowCounter = 1;
+let phaseDur = 0, phaseSecs = 0, phTimer = null;
+let warned10 = false, warned5 = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('grp-badge').textContent = groupId;
@@ -377,54 +522,64 @@ document.addEventListener('DOMContentLoaded', () => {
     el.className = on ? 'tag tag-green' : 'tag tag-red';
   });
 
-  // Phase changes
   dbOn('session/phase', ph => { if (ph !== null) handlePhase(parseInt(ph)); });
-
-  // Challenge
+  dbOn('session/config', cfg => { if (cfg) updateLabels(cfg); });
   dbOn('session/challenge', ch => {
     if (!ch?.text) return;
     if (ch.target === 'all' || ch.target === groupId)
       document.getElementById('g-ch-txt').textContent = ch.text;
   });
-
-  // Group data
   dbOn(`groups/${groupId}`, gd => {
-    groupData = gd;
-    members = gd?.members || [];
-    if (gd?.ksa) updateKSAPanel(gd.ksa);
-    if (gd?.decisionTable) syncDTFromFirebase(gd.decisionTable);
-    if (gd?.history) renderHistory(gd.history);
+    groupData = gd; members = gd?.members || [];
+    if (gd?.ksa) updateKSA(gd.ksa);
+    if (gd?.history) renderHistory(gd.history, 'hist-list');
   });
-
-  // Member submissions (phase 4)
-  dbOn('students', stuData => {
-    if (!stuData) return;
-    renderMemberStatus(stuData);
-    if (document.getElementById('sc-decision').classList.contains('active'))
-      renderAnalyses(stuData);
-  });
+  dbOn('students', d => { if (d) renderMemberStatus(d); });
 });
 
-// ════════════════════════════════════════════════════════════════════════════
+function updateLabels(cfg) {
+  const setTxt = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val||'—'; };
+  setTxt('dep-label', cfg.dep); setTxt('arr-label', cfg.dest);
+  setTxt('alt1-label', cfg.alt1); setTxt('alt2-label', cfg.alt2);
+  setTxt('oral-grp-lbl', groupId);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PHASE TIMER (client-side, synced on phase change)
+// ═══════════════════════════════════════════════════════════════════════════
+const PH_MINS = [0,8,5,5,25,20,10,5,15,10];
+const PH_NAMES = ['Setup','Pre-Test','Groups','Briefing','Analysis','Decision Table','Challenge','Key MCQ','Oral','Results'];
+
+function startPhaseTimer(n) {
+  phaseDur = (PH_MINS[n] || 5) * 60;
+  phaseSecs = phaseDur;
+  warned10 = false; warned5 = false;
+  clearInterval(phTimer);
+  const el = document.getElementById('g-phase-timer');
+  const bar = document.getElementById('timer-bar-fill');
+  phTimer = setInterval(() => {
+    phaseSecs = Math.max(0, phaseSecs - 1);
+    if (el) { el.textContent = formatTime(phaseSecs); el.className = phaseSecs<=60?'timer-md t-danger':phaseSecs<=phaseDur*0.1?'timer-md t-warn':'timer-md'; }
+    if (bar) bar.style.width = `${(phaseSecs/phaseDur)*100}%`;
+    const pct = phaseSecs / phaseDur;
+    if (!warned10 && pct <= 0.10 && pct > 0.05) { warned10 = true; alertWarn(); }
+    if (!warned5  && pct <= 0.05 && phaseSecs > 0) { warned5 = true; alertDanger(); }
+    if (phaseSecs === 0) { clearInterval(phTimer); alertEnd(); }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PHASE HANDLER
-// ════════════════════════════════════════════════════════════════════════════
-const PH_LBL = {0:'Waiting',1:'Pre-Test',2:'Groups',3:'Briefing',4:'Analysis',
-                5:'Decision',6:'Challenge',7:'Key MCQ',8:'Oral',9:'Results'};
-
+// ═══════════════════════════════════════════════════════════════════════════
 function handlePhase(ph) {
-  document.getElementById('phase-lbl').textContent = PH_LBL[ph] || '—';
+  document.getElementById('phase-lbl').textContent = `Phase ${ph} — ${PH_NAMES[ph]||'—'}`;
+  startPhaseTimer(ph);
 
-  if (ph <= 2) { showSc('sc-wait'); document.getElementById('wait-msg').textContent = ph === 1 ? 'Pre-test in progress…' : 'Waiting for group assignment…'; return; }
-  if (ph === 3) { showSc('sc-briefing'); renderBriefing(); document.getElementById('ksa-panel').style.display = 'block'; return; }
-  if (ph === 4) { showSc('sc-analysis-wait'); renderMetLinks2(); document.getElementById('ksa-panel').style.display = 'block'; return; }
+  if (ph <= 2) { showSc('sc-wait'); document.getElementById('wait-msg').textContent = ph===1?'Pre-test in progress…':'Waiting for group assignment…'; return; }
+  if (ph === 3) { showSc('sc-briefing'); renderBriefing(); document.getElementById('ksa-panel').style.display='block'; return; }
+  if (ph === 4) { showSc('sc-analysis-wait'); renderMetLinks2(); document.getElementById('ksa-panel').style.display='block'; return; }
   if (ph === 5) { showSc('sc-decision'); loadAnalyses(); return; }
-  if (ph === 6) {
-    showSc('sc-challenge');
-    dbGet('session/challenge').then(ch => { if (ch?.text) document.getElementById('g-ch-txt').textContent = ch.text; });
-    // Mirror DT rows to second table
-    syncDTBody2();
-    return;
-  }
+  if (ph === 6) { showSc('sc-challenge'); dbGet('session/challenge').then(ch=>{if(ch?.text)document.getElementById('g-ch-txt').textContent=ch.text;}); return; }
   if (ph === 7) { showSc('sc-key'); loadKeyQs(); return; }
   if (ph === 8) { showSc('sc-oral'); loadOralRef(); return; }
   if (ph === 9) { showSc('sc-results'); loadResults(); return; }
@@ -436,537 +591,414 @@ function showSc(id) {
   document.getElementById(id)?.classList.add('active');
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// TABS
-// ════════════════════════════════════════════════════════════════════════════
 function switchTab(panelId, btn) {
-  const parent = btn.closest('.screen') || document.body;
-  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  parent.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const sc = btn.closest('.screen') || document.body;
+  sc.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  sc.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(panelId)?.classList.add('active');
-  if (panelId === 'tab-dt') syncDTBody();
-  if (panelId === 'tab-history' || panelId === 'tab-ch-hist' || panelId === 'tab-res-hist') renderHistoryFromFirebase();
+  if (panelId === 'tab-hist' || panelId === 'tab-ch-hist' || panelId === 'tab-res-hist') renderHistoryFromDb();
 }
 
-// ════════════════════════════════════════════════════════════════════════════
+function switchToDecisionTab() {
+  const btn = document.querySelector('#tab-structured ~ * .tab-btn, .tabs .tab-btn:nth-child(3)');
+  const allBtns = document.querySelectorAll('#sc-decision .tab-btn');
+  allBtns.forEach((b,i) => { if(i===2) { switchTab('tab-group-dec', b); } });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // BRIEFING
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 async function renderBriefing() {
-  const gsc    = await dbGet('session/groupScenarios');
-  const global = await dbGet('session/globalArchive');
-  const myScene = gsc?.[groupId] || {};
-  const r       = myScene.route || {};
-
+  const cfg = await dbGet('session/config'); if (!cfg) return;
   document.getElementById('g-brief-card').innerHTML = `
-    <div class="card__title">📋 ${groupId} — Route</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.95rem;line-height:2.2">
-      <div><span class="text-dim">Aircraft:</span> <strong>${r.aircraft||'—'}</strong></div>
-      <div><span class="text-dim">Dep Time:</span> <strong>${r.depTime||'—'}</strong></div>
-      <div><span class="text-dim">From:</span> <strong style="color:var(--cyan);font-size:1.1rem">${r.dep||'—'}</strong></div>
-      <div><span class="text-dim">To:</span>   <strong style="color:var(--cyan);font-size:1.1rem">${r.dest||'—'}</strong></div>
-      <div><span class="text-dim">ALT 1:</span> <strong>${r.alt1||'—'}</strong></div>
-      <div><span class="text-dim">ALT 2:</span> <strong>${r.alt2||'—'}</strong></div>
+    <div class="card__title">📋 Route — ${groupId}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:.92rem;line-height:2.2">
+      <div><span class="text-dim">Aircraft:</span> <strong>${cfg.aircraft||'—'}</strong></div>
+      <div><span class="text-dim">FL:</span> <strong>${cfg.fl||'—'}</strong></div>
+      <div><span class="text-dim">ETD:</span> <strong>${cfg.etd||'—'}</strong></div>
+      <div><span class="text-dim">ETA:</span> <strong>${cfg.eta||'—'}</strong></div>
+      <div><span class="text-dim">From:</span> <strong style="color:var(--cyan);font-size:1.05rem">${cfg.dep||'—'}</strong></div>
+      <div><span class="text-dim">To:</span>   <strong style="color:var(--cyan);font-size:1.05rem">${cfg.dest||'—'}</strong></div>
+      <div><span class="text-dim">ALT 1:</span> <strong>${cfg.alt1||'—'}</strong></div>
+      <div><span class="text-dim">ALT 2:</span> <strong>${cfg.alt2||'—'}</strong></div>
     </div>
-    ${myScene.synopsis ? `<div class="text-xs text-dim mt-8">${myScene.synopsis}</div>` : ''}`;
+    ${cfg.notes?`<div class="text-sm text-muted mt-8" style="line-height:1.7;border-top:1px solid var(--border);padding-top:8px">${cfg.notes}</div>`:''}`;
 
-  // Live links
-  const ml = document.getElementById('g-met-links');
-  ml.innerHTML = MET_SOURCES.map(s => `
-    <a class="met-link" href="${s.url}" target="_blank">
+  document.getElementById('g-met-links').innerHTML =
+    MET_SOURCES.map(s=>`<a class="met-link" href="${s.url}" target="_blank">
       <span class="met-link__icon">${s.icon}</span>
       <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
     </a>`).join('');
 
-  // Archive
-  const ad = myScene.archive || {};
-  const archText = [
-    ad.metar || global?.metar, ad.taf || global?.taf,
-    ad.sigmet || global?.sigmet, ad.remarks || global?.remarks
-  ].filter(Boolean).join('\n\n');
+  const ad = cfg.archive || {};
+  const archText = [ad.metarDest,ad.metarAlt,ad.tafDest,ad.tafAlt,ad.sigmet,ad.remarks].filter(Boolean).join('\n\n');
   document.getElementById('g-archive').textContent = archText || 'No archive data.';
+  updateLabels(cfg);
 }
 
 function renderMetLinks2() {
-  const ml = document.getElementById('g-met-links-2');
-  if (!ml) return;
-  ml.innerHTML = MET_SOURCES.slice(0, 8).map(s => `
-    <a class="met-link" href="${s.url}" target="_blank">
+  document.getElementById('g-met-links-2').innerHTML =
+    MET_SOURCES.slice(0,8).map(s=>`<a class="met-link" href="${s.url}" target="_blank">
       <span class="met-link__icon">${s.icon}</span>
       <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
     </a>`).join('');
-  // Archive
-  dbGet('session/groupScenarios').then(gsc => {
-    dbGet('session/globalArchive').then(global => {
-      const ad = gsc?.[groupId]?.archive || {};
-      const text = [ad.metar||global?.metar,ad.taf||global?.taf,ad.sigmet||global?.sigmet,ad.remarks||global?.remarks].filter(Boolean).join('\n\n');
-      document.getElementById('g-archive-2').textContent = text || 'No archive data.';
-    });
+  dbGet('session/config').then(cfg => {
+    if (!cfg) return;
+    const ad = cfg.archive || {};
+    const archText = [ad.metarDest,ad.metarAlt,ad.tafDest,ad.tafAlt,ad.sigmet,ad.remarks].filter(Boolean).join('\n\n');
+    document.getElementById('g-archive-2').textContent = archText || 'No archive data.';
   });
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// MEMBER STATUS (phase 4)
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// MEMBER STATUS
+// ═══════════════════════════════════════════════════════════════════════════
 function renderMemberStatus(stuData) {
   const el = document.getElementById('member-status'); if (!el) return;
-  if (!members.length && groupData?.members) members = groupData.members;
-  el.innerHTML = (members.length ? members : Object.keys(stuData || {})).map(id => {
-    const s    = stuData[id] || {};
+  const mems = members.length ? members : Object.keys(stuData);
+  el.innerHTML = mems.map(id => {
+    const s = stuData[id] || {};
     const done = s.analysisSubmitted || false;
     return `<div style="display:flex;align-items:center;gap:8px;padding:7px;background:var(--bg3);border-radius:6px;margin-bottom:5px">
-      <div style="width:8px;height:8px;border-radius:50%;background:${done?'var(--green)':'var(--amber)'};flex-shrink:0"></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:${done?'var(--green)':'var(--amber)'}"></div>
       <strong class="text-sm">${s.name||id}</strong>
       <span class="text-xs text-dim ml-auto">${done?'✓ Submitted':'In progress…'}</span>
     </div>`;
   }).join('');
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// DECISION TABLE
-// ════════════════════════════════════════════════════════════════════════════
-let dtRowIdCounter = 1;
-
-function hazardOptions() {
-  // Group by category
-  const cats = {};
-  HAZARD_TYPES.forEach(h => {
-    if (!cats[h.category]) cats[h.category] = [];
-    cats[h.category].push(h);
-  });
-  return Object.entries(cats).map(([cat, items]) =>
-    `<optgroup label="${cat}">${items.map(h => `<option value="${h.id}">${h.icon} ${h.label}</option>`).join('')}</optgroup>`
-  ).join('');
-}
-
-function phaseCheckboxes(rowId, savedPhases) {
-  return FLIGHT_PHASE_OPTS.map(ph => `
-    <label class="phase-cb">
-      <input type="checkbox" data-row="${rowId}" data-ph="${ph}"
-        ${(savedPhases||[]).includes(ph)?'checked':''}
-        onchange="saveDTRow('${rowId}')">
-      ${ph}
-    </label>`).join('');
-}
-
-function buildDTRow(rowId, data = {}) {
-  const tr = document.createElement('tr');
-  tr.id = `dtr-${rowId}`;
-  tr.innerHTML = `
-    <td><button class="dt-del" onclick="delDTRow('${rowId}')">✕</button></td>
-    <td>
-      <select id="dt-haz-${rowId}" onchange="saveDTRow('${rowId}')">
-        <option value="">— select —</option>
-        ${hazardOptions()}
-      </select>
-      <input type="text" id="dt-haz-other-${rowId}" placeholder="Specify…"
-        style="margin-top:3px;display:${data.hazard==='OTHER'?'block':'none'}"
-        onchange="saveDTRow('${rowId}')" value="${data.hazardOther||''}">
-    </td>
-    <td><input type="text" id="dt-src-${rowId}" placeholder="METAR / TAF / SIGMET / PIREP…" value="${data.source||''}" onchange="saveDTRow('${rowId}')"></td>
-    <td>
-      <select id="dt-int-${rowId}" onchange="saveDTRow('${rowId}')">
-        ${INTENSITY_OPTS.map(o=>`<option ${data.intensity===o?'selected':''}>${o}</option>`).join('')}
-      </select>
-    </td>
-    <td>
-      <select id="dt-fl-${rowId}" onchange="saveDTRow('${rowId}')">
-        ${FL_RANGE_OPTS.map(o=>`<option ${data.flRange===o?'selected':''}>${o}</option>`).join('')}
-      </select>
-    </td>
-    <td>
-      <div class="phase-checkbox" id="dt-ph-${rowId}">
-        ${phaseCheckboxes(rowId, data.flightPhases)}
+// ═══════════════════════════════════════════════════════════════════════════
+// ANALYSES SUMMARY
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadAnalyses() {
+  const stuData = await dbGet('students'); if (!stuData) return;
+  const el = document.getElementById('analyses-list'); if (!el) return;
+  const mems = members.length ? members : Object.keys(stuData);
+  el.innerHTML = mems.map(id => {
+    const s = stuData[id] || {}, a = s.analysis || {};
+    const col = a.severity==='HIGH'?'var(--red)':a.severity==='MODERATE'?'var(--amber)':a.severity==='LOW'?'var(--green)':'var(--text3)';
+    return `<div style="padding:10px;border-bottom:1px solid var(--border)">
+      <div class="fc gap-8 mb-4">
+        <strong>${s.name||id}</strong>
+        ${a.severity?`<span class="tag" style="background:transparent;color:${col};border:1px solid ${col}">${a.severity}</span>`:''}
+        ${a.preDec?`<span class="tag ${a.preDec==='GO'?'tag-green':a.preDec==='NO-GO'?'tag-red':'tag-amber'}">${a.preDec}</span>`:''}
       </div>
-    </td>
-    <td><textarea id="dt-impl-${rowId}" placeholder="Operational implication…" onchange="saveDTRow('${rowId}')">${data.implication||''}</textarea></td>
-    <td>
-      <select id="dt-dec-${rowId}" onchange="saveDTRow('${rowId}')">
-        ${PARTIAL_DEC_OPTS.map(o=>`<option ${data.partialDec===o?'selected':''}>${o}</option>`).join('')}
-      </select>
-    </td>`;
-
-  // Set hazard select value after insertion
-  setTimeout(() => {
-    const hsel = document.getElementById(`dt-haz-${rowId}`);
-    if (hsel && data.hazard) hsel.value = data.hazard;
-    // Show OTHER input
-    if (hsel) hsel.onchange = () => {
-      document.getElementById(`dt-haz-other-${rowId}`).style.display = hsel.value === 'OTHER' ? 'block' : 'none';
-      saveDTRow(rowId);
-    };
-  }, 0);
-  return tr;
+      ${a.hazard?`<div class="text-sm text-muted" style="line-height:1.6">${a.hazard}</div>`:'<div class="text-xs text-dim">Not submitted yet</div>'}
+      ${a.impact?`<div class="text-xs text-dim mt-4">${a.impact.substring(0,180)}…</div>`:''}
+      ${a.src?`<div class="text-xs text-dim mt-4">Sources: ${a.src}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
-function addDTRow() {
-  const rowId = `r${dtRowIdCounter++}`;
-  dtRows[rowId] = {};
-  const tbody = document.getElementById('dt-body');
-  tbody.appendChild(buildDTRow(rowId));
-  logEvent(groupId, 'dt_row_add', { rowId });
+// ═══════════════════════════════════════════════════════════════════════════
+// STRUCTURED TABLE — save on every change
+// ═══════════════════════════════════════════════════════════════════════════
+function val(id) { return document.getElementById(id)?.value || ''; }
+
+function saveStructured() {
+  const structured = {
+    dep: {
+      wind:   val('dep-wind'), visRange: val('dep-vis-range'), visVal: val('dep-vis-val'),
+      clouds: `${val('dep-cloud-type')} ${val('dep-cloud-level')} ${val('dep-cloud-cb')}`.trim(),
+      sigwx:  val('dep-sigwx')
+    },
+    enroute: {
+      wind:    val('er-wind'), temp: val('er-temp'),
+      turb:    val('er-turb'), cat: val('er-cat'),
+      ice:     val('er-ice'),  iceFl: val('er-ice-fl'),
+      cb:      val('er-cb'),   cbDetail: val('er-cb-detail'),
+      jet:     val('er-jet'),  jetDetail: val('er-jet-detail'),
+      remarks: val('er-remarks')
+    },
+    arr: {
+      wind:   val('arr-wind'), visRange: val('arr-vis-range'), visVal: val('arr-vis-val'),
+      clouds: `${val('arr-cloud-type')} ${val('arr-cloud-level')} ${val('arr-cloud-cb')}`.trim(),
+      sigwx:  val('arr-sigwx'),
+      alt1:   val('alt1-cond'), alt2: val('alt2-cond')
+    }
+  };
+  dbSet(`groups/${groupId}/decisionTable/structured`, structured);
 }
 
-function delDTRow(rowId) {
-  delete dtRows[rowId];
-  document.getElementById(`dtr-${rowId}`)?.remove();
+function saveSources() {
+  dbSet(`groups/${groupId}/decisionTable/sources`, val('dt-sources'));
+}
+
+function saveChallengeNotes() {
+  dbSet(`groups/${groupId}/challengeNotes`, val('ch-update-notes'));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FREE ROWS
+// ═══════════════════════════════════════════════════════════════════════════
+const INT_OPTS = ['—','NIL','Light','Moderate','Severe','Extreme'];
+const FL_OPTS  = ['—','SFC only','SFC–FL050','FL050–FL100','FL100–FL180','FL180–FL280','FL280–FL390','Above FL390','All levels'];
+const PH_OPTS  = ['Departure','Climb','Cruise','Descent','Approach','Landing','Alternate'];
+const DEC_OPTS = ['—','GO','DELAY','NO-GO','Monitor'];
+
+function addFreeRow() {
+  const rowId = `fr${freeRowCounter++}`;
+  const tbody = document.getElementById('dt-free-body');
+  const tr = document.createElement('tr');
+  tr.id = `ftr-${rowId}`;
+  tr.innerHTML = `
+    <td><button class="dt-del" onclick="delFreeRow('${rowId}')">✕</button></td>
+    <td><input type="text" id="fr-haz-${rowId}" placeholder="Hazard description…" onchange="saveFreeRow('${rowId}')"></td>
+    <td><select id="fr-int-${rowId}" onchange="saveFreeRow('${rowId}')">${INT_OPTS.map(o=>`<option>${o}</option>`).join('')}</select></td>
+    <td><select id="fr-fl-${rowId}" onchange="saveFreeRow('${rowId}')">${FL_OPTS.map(o=>`<option>${o}</option>`).join('')}</select></td>
+    <td><input type="text" id="fr-ph-${rowId}" placeholder="e.g. Cruise,Descent" onchange="saveFreeRow('${rowId}')"></td>
+    <td><input type="text" id="fr-impl-${rowId}" placeholder="Implication…" onchange="saveFreeRow('${rowId}')"></td>
+    <td><select id="fr-dec-${rowId}" onchange="saveFreeRow('${rowId}')">${DEC_OPTS.map(o=>`<option>${o}</option>`).join('')}</select></td>`;
+  tbody.appendChild(tr);
+  logEvent(groupId, 'dt_free_row_add', {rowId});
+}
+
+function delFreeRow(rowId) {
+  document.getElementById(`ftr-${rowId}`)?.remove();
   dbSet(`groups/${groupId}/decisionTable/${rowId}`, null);
-  logEvent(groupId, 'dt_row_del', { rowId });
 }
 
-function saveDTRow(rowId) {
-  const hsel = document.getElementById(`dt-haz-${rowId}`);
-  const phases = [...document.querySelectorAll(`#dt-ph-${rowId} input:checked`)].map(cb => cb.dataset.ph);
+function saveFreeRow(rowId) {
   const row = {
-    hazard:      hsel?.value || '',
-    hazardOther: document.getElementById(`dt-haz-other-${rowId}`)?.value || '',
-    source:      document.getElementById(`dt-src-${rowId}`)?.value || '',
-    intensity:   document.getElementById(`dt-int-${rowId}`)?.value || '—',
-    flRange:     document.getElementById(`dt-fl-${rowId}`)?.value  || '—',
-    flightPhases: phases,
-    implication: document.getElementById(`dt-impl-${rowId}`)?.value || '',
-    partialDec:  document.getElementById(`dt-dec-${rowId}`)?.value  || '—',
+    hazard:     document.getElementById(`fr-haz-${rowId}`)?.value  || '',
+    intensity:  document.getElementById(`fr-int-${rowId}`)?.value  || '—',
+    flRange:    document.getElementById(`fr-fl-${rowId}`)?.value   || '—',
+    phases:     document.getElementById(`fr-ph-${rowId}`)?.value   || '',
+    implication:document.getElementById(`fr-impl-${rowId}`)?.value || '',
+    partialDec: document.getElementById(`fr-dec-${rowId}`)?.value  || '—',
     ts: now()
   };
-  dtRows[rowId] = row;
   dbSet(`groups/${groupId}/decisionTable/${rowId}`, row);
 }
 
-function syncDTFromFirebase(dtData) {
-  if (!dtData) return;
-  Object.entries(dtData).forEach(([rowId, data]) => {
-    if (!dtRows[rowId]) {
-      dtRows[rowId] = data;
-      // Add row to tbody if not already there
-      if (!document.getElementById(`dtr-${rowId}`)) {
-        const tbody = document.getElementById('dt-body');
-        if (tbody) {
-          const tr = buildDTRow(rowId, data);
-          tbody.appendChild(tr);
-          // Increment counter to avoid collisions
-          const num = parseInt(rowId.replace('r',''));
-          if (!isNaN(num) && num >= dtRowIdCounter) dtRowIdCounter = num + 1;
-        }
-      }
-    }
-  });
-  // Also sync to dt-body-2 if visible
-  syncDTBody2();
-}
-
-function syncDTBody() {
-  // Re-render rows from dtRows into dt-body
-  const tbody = document.getElementById('dt-body');
-  if (!tbody) return;
-  // Only add rows that aren't there yet
-  Object.entries(dtRows).forEach(([rowId, data]) => {
-    if (!document.getElementById(`dtr-${rowId}`)) tbody.appendChild(buildDTRow(rowId, data));
-  });
-}
-
-function syncDTBody2() {
-  const tbody = document.getElementById('dt-body-2'); if (!tbody) return;
-  tbody.innerHTML = '';
-  Object.entries(dtRows).forEach(([rowId, data]) => {
-    tbody.appendChild(buildDTRow(`2-${rowId}`, data));
-  });
-}
-
-function addDTRow2() {
-  const rowId = `r${dtRowIdCounter++}`;
-  dtRows[rowId] = {};
-  document.getElementById('dt-body-2')?.appendChild(buildDTRow(`2-${rowId}`));
-  document.getElementById('dt-body')?.appendChild(buildDTRow(rowId));
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// ANALYSES (phase 5)
-// ════════════════════════════════════════════════════════════════════════════
-async function loadAnalyses() {
-  const stuData = await dbGet('students'); if (!stuData) return;
-  renderAnalyses(stuData);
-}
-
-function renderAnalyses(stuData) {
-  const el = document.getElementById('analyses-list'); if (!el) return;
-  if (!members.length && groupData?.members) members = groupData.members;
-  el.innerHTML = '';
-  members.forEach(id => {
-    const s = stuData[id] || {};
-    const a = s.analysis || {};
-    const col = a.severity === 'HIGH' ? 'var(--red)' : a.severity === 'MODERATE' ? 'var(--amber)' : a.severity === 'LOW' ? 'var(--green)' : 'var(--text3)';
-    el.innerHTML += `<div class="member-analysis">
-      <div class="member-analysis__name">
-        ${s.name || id}
-        ${a.severity ? `<span class="member-analysis__sev" style="background:${col}22;color:${col}">${a.severity}</span>` : ''}
-        ${a.preDec ? `<span class="tag ${a.preDec==='GO'?'tag-green':a.preDec==='NO-GO'?'tag-red':'tag-amber'}" style="margin-left:6px">${a.preDec}</span>` : ''}
-      </div>
-      ${a.hazard ? `<div class="text-sm text-muted mt-4" style="line-height:1.6">${a.hazard}</div>` : '<div class="text-xs text-dim">No analysis submitted yet</div>'}
-      ${a.impact ? `<div class="text-xs text-dim mt-4">${a.impact.substring(0,180)}${a.impact.length>180?'…':''}</div>` : ''}
-      ${a.src ? `<div class="text-xs text-dim mt-4">Sources: ${a.src}</div>` : ''}
-    </div>`;
-  });
-}
-
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // GROUP DECISION
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 function selDec(val, btn) {
   decVal = val;
-  document.querySelectorAll('#tab-decision .dec-btn').forEach(b => b.className = `dec-btn ${b.classList[1]}`);
+  document.querySelectorAll('#tab-group-dec .dec-btn').forEach(b => b.className=`dec-btn ${b.classList[1]}`);
   btn.className = `dec-btn ${btn.classList[1]} sel`;
+  document.getElementById('delay-fields').style.display = val==='DELAY' ? 'block' : 'none';
 }
+
 function wcG() {
   const n = (document.getElementById('g-just').value.trim().match(/\S+/g)||[]).length;
   const h = document.getElementById('g-wc');
-  h.textContent = `${n} / 60 words minimum`; h.className = n >= 60 ? 'wc ok' : 'wc bad';
+  h.textContent = `${n} / 60 words minimum`; h.className = n>=60?'wc ok':'wc bad';
+}
+
+function saveAltFields() {
+  if (decVal === 'DELAY') {
+    dbSet(`groups/${groupId}/altEtd`, val('alt-etd'));
+    dbSet(`groups/${groupId}/altFl`,  val('alt-fl'));
+  }
 }
 
 async function submitDecision() {
   const just = document.getElementById('g-just').value.trim();
   const wc   = (just.match(/\S+/g)||[]).length;
-  if (!decVal)   { alert('Select GO, DELAY, or NO-GO.'); return; }
-  if (wc < 60)   { alert('Please write a fuller justification (min 60 words).'); return; }
+  if (!decVal)  { alert('Select GO, DELAY, or NO-GO.'); return; }
+  if (wc < 60)  { alert('Justification: minimum 60 words.'); return; }
+  if (decVal === 'DELAY' && !val('alt-etd')) { alert('Please specify the alternative ETD for a DELAY decision.'); return; }
 
-  await dbSet(`groups/${groupId}/decision`, decVal);
+  // Ensure sources are saved
+  saveSources();
+
+  await dbSet(`groups/${groupId}/decision`,     decVal);
   await dbSet(`groups/${groupId}/justification`, just);
-  await dbSet(`groups/${groupId}/decidedAt`, now());
+  await dbSet(`groups/${groupId}/decOther`,      val('dec-other'));
+  await dbSet(`groups/${groupId}/decidedAt`,     now());
+  if (decVal === 'DELAY') { await dbSet(`groups/${groupId}/altEtd`, val('alt-etd')); await dbSet(`groups/${groupId}/altFl`, val('alt-fl')); }
 
-  // Group S score (base 15 for submitting a decision with full justification)
+  // Scoring
   members.forEach(id => dbSet(`students/${id}/groupScore`, 15));
-  // Group K score (hazard identification — number of rows in DT × 1, max 10)
-  const kScore = Math.min(10, Object.keys(dtRows).length);
-  members.forEach(id => dbSet(`students/${id}/groupKScore`, kScore));
-  // Update group KSA
-  const gKSA = groupData?.ksa || {};
-  dbSet(`groups/${groupId}/ksa`, { K: (gKSA.K||0) + kScore, S: (gKSA.S||0) + 15, A: gKSA.A||0 });
+  logEvent(groupId, 'decision', {decision:decVal, justification:just.substring(0,200)});
 
-  logEvent(groupId, 'decision', { decision: decVal, justification: just.substring(0, 200) });
-
-  document.getElementById('decision-form-wrap').style.display = 'none';
-  document.getElementById('decision-submitted-banner').style.display = 'block';
-  document.getElementById('dec-submitted-val').textContent = `Decision: ${decVal} — submitted ✓`;
+  document.getElementById('dec-form-wrap').style.display = 'none';
+  document.getElementById('dec-submitted').style.display = 'block';
+  document.getElementById('dec-sub-val').textContent =
+    `Decision: ${decVal}${decVal==='DELAY'?` · Alt ETD: ${val('alt-etd')}`:''} ✓`;
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// REVISED DECISION (phase 6)
-// ════════════════════════════════════════════════════════════════════════════
-function selRevDec(val, btn) {
-  revDecVal = val;
-  document.querySelectorAll('#tab-rev-dec .dec-btn').forEach(b => b.className = `dec-btn ${b.classList[1]}`);
+// ═══════════════════════════════════════════════════════════════════════════
+// REVISED DECISION
+// ═══════════════════════════════════════════════════════════════════════════
+function selRevDec(v, btn) {
+  revDecVal = v;
+  document.querySelectorAll('#tab-rev-dec .dec-btn').forEach(b => b.className=`dec-btn ${b.classList[1]}`);
   btn.className = `dec-btn ${btn.classList[1]} sel`;
 }
 
 async function submitRevDecision() {
   const just = document.getElementById('g-rev-just').value.trim();
-  if (!revDecVal) { alert('Select a revised decision.'); return; }
-
-  await dbSet(`groups/${groupId}/revisedDecision`, revDecVal);
+  if (!revDecVal) { alert('Select a decision.'); return; }
+  await dbSet(`groups/${groupId}/revisedDecision`,     revDecVal);
   await dbSet(`groups/${groupId}/revisedJustification`, just);
-
-  // Challenge response scores (S+A)
-  const sBonus = 8; const aBonus = 5;
   members.forEach(id => {
-    dbGet(`students/${id}/groupScore`).then(cur => dbSet(`students/${id}/groupScore`, (cur||0) + sBonus));
-    dbGet(`students/${id}/ksa/A`).then(cur => dbSet(`students/${id}/ksa/A`, (cur||0) + aBonus));
+    dbGet(`students/${id}/groupScore`).then(cur => dbSet(`students/${id}/groupScore`, (cur||0)+8));
+    dbGet(`students/${id}/ksa/A`).then(cur     => dbSet(`students/${id}/ksa/A`,      (cur||0)+5));
   });
-  const gKSA = groupData?.ksa || {};
-  dbSet(`groups/${groupId}/ksa`, { K: gKSA.K||0, S: (gKSA.S||0) + sBonus, A: (gKSA.A||0) + aBonus });
-
-  logEvent(groupId, 'revised_decision', { decision: revDecVal });
-
+  logEvent(groupId, 'revised_decision', {decision:revDecVal});
   document.getElementById('rev-form-wrap').style.display = 'none';
   document.getElementById('rev-submitted').style.display = 'block';
   document.getElementById('rev-dec-val').textContent = `Revised to: ${revDecVal}`;
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// KEY MCQ (phase 7)
-// ════════════════════════════════════════════════════════════════════════════
-let keyQData = [];
-
+// ═══════════════════════════════════════════════════════════════════════════
+// KEY MCQ
+// ═══════════════════════════════════════════════════════════════════════════
 async function loadKeyQs() {
   keyQData = (await dbGet('session/keyQuestions')) || [];
   keyAnswers = {};
-  const cont = document.getElementById('key-qs'); cont.innerHTML = '';
-
-  keyQData.forEach((q, qi) => {
-    const card = document.createElement('div');
-    card.className = 'key-q-card';
-    card.innerHTML = `<div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Key Question ${qi+1} / ${keyQData.length}</div>
-      <div style="font-size:.95rem;font-weight:600;line-height:1.6;margin-bottom:14px">${q.text}</div>`;
-
+  const cont = document.getElementById('key-qs'); cont.innerHTML='';
+  keyQData.forEach((q,qi) => {
+    const card = document.createElement('div'); card.className='key-q-card';
+    card.innerHTML = `<div style="font-size:.66rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Key Question ${qi+1} / ${keyQData.length}</div>
+      <div style="font-size:.95rem;font-weight:600;line-height:1.6;margin-bottom:13px">${q.text}</div>`;
     const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:7px';
-    const btnRefs = [];
-
-    (q.options || []).forEach((opt, oi) => {
-      const b = document.createElement('button');
-      b.style.cssText = 'padding:11px 12px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.88rem;font-family:var(--font);text-align:left;cursor:pointer;transition:all .15s';
-      b.textContent = `${['A','B','C','D'][oi]}. ${opt}`;
-      b.onclick = () => {
-        btnRefs.forEach(rb => { rb.style.background='var(--bg3)';rb.style.borderColor='var(--border)';rb.style.color='var(--text2)'; });
+    grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px';
+    const btnRefs=[];
+    (q.options||[]).forEach((opt,oi) => {
+      const b=document.createElement('button');
+      b.style.cssText='padding:10px 12px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.88rem;font-family:var(--font);text-align:left;cursor:pointer;transition:all .15s';
+      b.textContent=`${['A','B','C','D'][oi]}. ${opt}`;
+      b.onclick=()=>{
+        btnRefs.forEach(rb=>{rb.style.background='var(--bg3)';rb.style.borderColor='var(--border)';rb.style.color='var(--text2)';});
         b.style.background='var(--purple-d)';b.style.borderColor='var(--purple)';b.style.color='var(--purple)';
-        keyAnswers[qi] = oi;
-        if (Object.keys(keyAnswers).length === keyQData.length)
-          document.getElementById('btn-key-sub').style.display = 'block';
+        keyAnswers[qi]=oi;
+        if(Object.keys(keyAnswers).length===keyQData.length) document.getElementById('btn-key-sub').style.display='block';
       };
-      grid.appendChild(b);
-      btnRefs.push(b);
+      grid.appendChild(b);btnRefs.push(b);
     });
-    card.appendChild(grid);
-    cont.appendChild(card);
+    card.appendChild(grid);cont.appendChild(card);
   });
 }
 
 async function submitKey() {
   if (Object.keys(keyAnswers).length < keyQData.length) { alert('Answer all questions.'); return; }
-  // Check against QUESTION_BANK (correct answers in data.js)
-  let correct = 0;
-  keyQData.forEach((q, qi) => {
-    const full = QUESTION_BANK.find(bq => bq.id === q.id);
-    if (full && keyAnswers[qi] === full.correct) correct++;
+  let correct=0;
+  keyQData.forEach((q,qi)=>{
+    const full=QUESTION_BANK.find(bq=>bq.id===q.id);
+    if(full&&keyAnswers[qi]===full.correct) correct++;
   });
-  const penalty = correct === 3 ? 0 : correct === 2 ? 10 : correct === 1 ? 20 : 30;
-
+  const penalty=correct===3?0:correct===2?10:correct===1?20:30;
   await dbSet(`groups/${groupId}/keyCorrect`, correct);
-  await dbSet(`groups/${groupId}/keyPenalty`, penalty);
-  // Apply penalty to each member
-  if (penalty > 0) members.forEach(id => dbSet(`students/${id}/penalty`, penalty));
-
-  // Key MCQ K score
-  const kScore = correct === 3 ? 5 : correct === 2 ? 3 : correct === 1 ? 1 : 0;
-  members.forEach(id => {
-    dbGet(`students/${id}/groupKScore`).then(cur => dbSet(`students/${id}/groupKScore`, (cur||0) + kScore));
-  });
-
-  logEvent(groupId, 'key_mcq', { correct, penalty });
-
-  document.getElementById('btn-key-sub').style.display = 'none';
-  const rw = document.getElementById('key-result-wrap');
-  rw.innerHTML = `<div class="key-result ${correct===3?'pass':'fail'}">
-    ${correct === 3
-      ? '✅ 3/3 correct — Free access to oral briefing!'
-      : `⚠ ${correct}/3 correct — Penalty: <strong>−${penalty} pts per member</strong>`}
+  await dbSet(`groups/${groupId}/keyPenalty`,  penalty);
+  if (penalty>0) members.forEach(id=>dbSet(`students/${id}/penalty`,penalty));
+  logEvent(groupId,'key_mcq',{correct,penalty});
+  document.getElementById('btn-key-sub').style.display='none';
+  document.getElementById('key-result-wrap').innerHTML=`<div class="key-result ${correct===3?'pass':'fail'}">
+    ${correct===3?'✅ 3/3 correct — Free access to oral briefing!':`⚠ ${correct}/3 correct — Penalty: −${penalty} pts per member applied`}
   </div>`;
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// ORAL REFERENCE (phase 8)
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// ORAL REFERENCE
+// ═══════════════════════════════════════════════════════════════════════════
 async function loadOralRef() {
   const gd  = await dbGet(`groups/${groupId}`);
-  const gsc = await dbGet('session/groupScenarios');
-  const r   = gsc?.[groupId]?.route || {};
+  const cfg = await dbGet('session/config');
   if (!gd) return;
-
-  const dec = gd.decision || '—';
-  const rev = gd.revisedDecision;
-  const col = dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
-
-  document.getElementById('oral-ref-g').innerHTML = `
+  const dec=gd.decision||'—', rev=gd.revisedDecision;
+  const col=dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
+  const dt=gd.decisionTable||{}, st=dt.structured||{};
+  document.getElementById('oral-ref-g').innerHTML=`
     <div class="card__title">Briefing Reference — ${groupId}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.88rem;line-height:2;margin-bottom:10px">
-      <div><span class="text-dim">Route:</span> <strong>${r.dep||'?'} → ${r.dest||'?'}</strong></div>
-      <div><span class="text-dim">Aircraft:</span> <strong>${r.aircraft||'—'}</strong></div>
+      <div><span class="text-dim">Route:</span> <strong>${cfg?.dep||'?'} → ${cfg?.dest||'?'}</strong></div>
+      <div><span class="text-dim">FL:</span> <strong>${cfg?.fl||'—'}</strong></div>
+      <div><span class="text-dim">ETD:</span> <strong>${cfg?.etd||'—'}</strong></div>
+      <div><span class="text-dim">ETA:</span> <strong>${cfg?.eta||'—'}</strong></div>
     </div>
     <div class="text-sm" style="line-height:1.9">
       <strong>Decision:</strong> <strong style="color:${col}">${dec}</strong>
-      ${rev ? `→ Revised: <strong style="color:${col}">${rev}</strong>` : ''}
+      ${rev?` → Revised: <strong style="color:${col}">${rev}</strong>`:''}
+      ${gd.altEtd?` · Alt ETD: <strong>${gd.altEtd}</strong>`:''}
+      ${gd.altFl?` · Alt FL: <strong>${gd.altFl}</strong>`:''}
       <br><strong>Justification:</strong> ${(gd.justification||'').substring(0,400)||'—'}
     </div>
-    ${Object.values(dtRows).length ? `
-      <div class="mt-8">
-        <div class="card__title" style="margin-bottom:6px">Key Hazards</div>
-        ${Object.values(dtRows).filter(r=>r.hazard).map(r=>`
-          <div style="padding:4px 0;border-bottom:1px solid var(--border);font-size:.78rem;display:flex;gap:8px">
-            <span>${HAZARD_TYPES.find(h=>h.id===r.hazard)?.label||r.hazard}</span>
-            <span class="tag ${r.intensity==='Severe'||r.intensity==='Extreme'?'tag-red':r.intensity==='Moderate'?'tag-amber':'tag-green'}" style="font-size:.65rem">${r.intensity}</span>
-            <span class="tag ${r.partialDec==='GO'?'tag-green':r.partialDec==='NO-GO'?'tag-red':r.partialDec==='DELAY'?'tag-amber':'tag-blue'}" style="font-size:.65rem">${r.partialDec}</span>
-          </div>`).join('')}
-      </div>` : ''}`;
+    ${dt.sources?`<div class="text-sm mt-8" style="border-top:1px solid var(--border);padding-top:8px"><strong>Sources consulted:</strong><br><span class="text-muted">${dt.sources}</span></div>`:''}
+    ${st.dep||st.enroute||st.arr?`
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;font-size:.75rem">
+      <div style="background:var(--bg3);padding:7px;border-radius:var(--r)">
+        <div style="color:var(--blue);font-weight:700;margin-bottom:4px">DEP</div>
+        ${st.dep?.wind?`Wind: ${st.dep.wind}<br>`:''}${st.dep?.visRange?`Vis: ${st.dep.visRange}<br>`:''}
+        ${st.dep?.clouds?`Cloud: ${st.dep.clouds}<br>`:''}${st.dep?.sigwx?`SigWx: ${st.dep.sigwx}`:''}
+      </div>
+      <div style="background:var(--bg3);padding:7px;border-radius:var(--r)">
+        <div style="color:var(--green);font-weight:700;margin-bottom:4px">EN-ROUTE</div>
+        ${st.enroute?.wind?`Wind: ${st.enroute.wind}<br>`:''}${st.enroute?.turb?`Turb: ${st.enroute.turb}<br>`:''}
+        ${st.enroute?.cb?`CB: ${st.enroute.cb} ${st.enroute.cbDetail||''}<br>`:''}
+        ${st.enroute?.jet?`Jet: ${st.enroute.jet} ${st.enroute.jetDetail||''}`:''}
+      </div>
+      <div style="background:var(--bg3);padding:7px;border-radius:var(--r)">
+        <div style="color:var(--amber);font-weight:700;margin-bottom:4px">ARR</div>
+        ${st.arr?.wind?`Wind: ${st.arr.wind}<br>`:''}${st.arr?.visRange?`Vis: ${st.arr.visRange}<br>`:''}
+        ${st.arr?.clouds?`Cloud: ${st.arr.clouds}<br>`:''}${st.arr?.sigwx?`SigWx: ${st.arr.sigwx}`:''}
+      </div>
+    </div>`:''}`;
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// KSA PANEL UPDATE
-// ════════════════════════════════════════════════════════════════════════════
-function updateKSAPanel(ksa) {
-  const K = Math.min(40, ksa.K || 0);
-  const S = Math.min(35, ksa.S || 0);
-  const A = Math.min(25, ksa.A || 0);
-  document.getElementById('g-ksa-k-bar').style.width = `${(K/40)*100}%`;
-  document.getElementById('g-ksa-k-val').textContent  = `${K} / 40`;
-  document.getElementById('g-ksa-s-bar').style.width = `${(S/35)*100}%`;
-  document.getElementById('g-ksa-s-val').textContent  = `${S} / 35`;
-  document.getElementById('g-ksa-a-bar').style.width = `${(A/25)*100}%`;
-  document.getElementById('g-ksa-a-val').textContent  = `${A} / 25`;
+// ═══════════════════════════════════════════════════════════════════════════
+// KSA UPDATE
+// ═══════════════════════════════════════════════════════════════════════════
+function updateKSA(ksa) {
+  const K=Math.min(40,ksa.K||0),S=Math.min(35,ksa.S||0),A=Math.min(25,ksa.A||0);
+  document.getElementById('g-k-bar').style.width=`${(K/40)*100}%`;
+  document.getElementById('g-k-val').textContent=`${K}/40`;
+  document.getElementById('g-s-bar').style.width=`${(S/35)*100}%`;
+  document.getElementById('g-s-val').textContent=`${S}/35`;
+  document.getElementById('g-a-bar').style.width=`${(A/25)*100}%`;
+  document.getElementById('g-a-val').textContent=`${A}/25`;
 }
 
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // HISTORY
-// ════════════════════════════════════════════════════════════════════════════
-function renderHistory(histData) {
-  // Used by real-time listener — update all history lists
-  ['hist-list','ch-hist-list','res-hist-full'].forEach(id => {
-    const el = document.getElementById(id); if (!el) return;
-    const entries = Object.values(histData || {}).sort((a, b) => a.ts - b.ts);
-    if (!entries.length) { el.innerHTML = '<div class="text-xs text-dim">No events yet.</div>'; return; }
-    el.innerHTML = entries.map(e => {
-      const icon = {decision:'🛫',revised_decision:'⚡',key_mcq:'🔑',oral:'🎙️',dt_row_add:'📊',dt_row_del:'✕'}[e.type] || '•';
-      return `<div class="hist-item">
-        <div class="hist-time">${tsToTime(e.ts)}</div>
-        <div class="hist-body"><strong>${icon} ${e.type.replace(/_/g,' ')}</strong><br>
-          ${e.data?.decision||e.data?.correct!==undefined?`<span class="text-xs text-muted">${JSON.stringify(e.data).substring(0,120)}</span>`:''}</div>
-      </div>`;
-    }).join('');
+// ═══════════════════════════════════════════════════════════════════════════
+function renderHistory(histData, elId) {
+  const el = document.getElementById(elId); if (!el) return;
+  const entries = Object.values(histData||{}).sort((a,b)=>a.ts-b.ts);
+  if (!entries.length) { el.innerHTML='<div class="text-xs text-dim">No events yet.</div>'; return; }
+  el.innerHTML = entries.map(e=>`<div class="hist-item">
+    <div class="hist-time">${tsToTime(e.ts)}</div>
+    <div class="hist-body"><strong>${e.type.replace(/_/g,' ')}</strong><br>
+      ${e.data?`<span class="text-xs text-muted">${JSON.stringify(e.data).substring(0,120)}</span>`:''}</div>
+  </div>`).join('');
+}
+
+function renderHistoryFromDb() {
+  dbGet(`groups/${groupId}/history`).then(h=>{
+    if(h){
+      ['hist-list','ch-hist-list','res-hist-full'].forEach(id=>renderHistory(h,id));
+    }
   });
 }
 
-function renderHistoryFromFirebase() {
-  dbGet(`groups/${groupId}/history`).then(hist => { if (hist) renderHistory(hist); });
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// RESULTS (phase 9)
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════════════════════════════════
 async function loadResults() {
-  const stuData = await dbGet('students');
-  const gd      = await dbGet(`groups/${groupId}`);
-  if (!stuData || !gd) return;
-
-  const mems = gd.members || members;
-  const tbody = document.getElementById('res-tbody'); tbody.innerHTML = '';
-  let totalK=0,totalS=0,totalA=0,count=0;
-
-  mems.forEach(id => {
-    const d = stuData[id] || {};
-    const pre   = d.preScore      || 0;
-    const grpK  = d.groupKScore   || 0;
-    const grpS  = d.groupScore    || 0;
-    const grpA  = d.ksa?.A        || 0;
-    const oral  = d.oralScore     || 0;
-    const pen   = d.penalty       || 0;
-    const total = Math.max(0, pre + grpK + grpS + grpA + oral - pen);
-    const col   = total>=75?'var(--green)':total>=50?'var(--amber)':'var(--red)';
-    totalK += pre+grpK; totalS += grpS + Math.round(oral*0.5); totalA += grpA + Math.round(oral*0.5); count++;
-
-    tbody.innerHTML += `<tr>
-      <td style="font-weight:700">${d.name||id}</td>
-      <td style="color:var(--blue)">${pre}</td>
-      <td style="color:var(--blue)">${grpK}</td>
-      <td style="color:var(--green)">${grpS}</td>
-      <td style="color:var(--purple)">${grpA}</td>
+  const stuData=await dbGet('students'),gd=await dbGet(`groups/${groupId}`);
+  if(!stuData||!gd)return;
+  const mems=gd.members||members;
+  const tbody=document.getElementById('res-tbody');tbody.innerHTML='';
+  let tK=0,tS=0,tA=0,cnt=0;
+  mems.forEach(id=>{
+    const d=stuData[id]||{};
+    const pre=d.preScore||0,grpK=d.groupKScore||0,grpS=d.groupScore||0,grpA=d.ksa?.A||0,oral=d.oralScore||0,pen=d.penalty||0;
+    const tot=Math.max(0,pre+grpK+grpS+grpA+oral-pen);
+    const col=tot>=75?'var(--green)':tot>=50?'var(--amber)':'var(--red)';
+    tK+=pre+grpK;tS+=grpS+Math.round(oral*0.5);tA+=grpA+Math.round(oral*0.5);cnt++;
+    tbody.innerHTML+=`<tr><td style="font-weight:700">${d.name||id}</td>
+      <td style="color:var(--blue)">${pre}</td><td style="color:var(--blue)">${grpK}</td>
+      <td style="color:var(--green)">${grpS}</td><td style="color:var(--purple)">${grpA}</td>
       <td style="color:var(--purple)">${oral}</td>
       <td style="color:var(--red)">${pen>0?'−'+pen:'—'}</td>
-      <td style="font-weight:900;font-size:.95rem;color:${col}">${total}</td>
-    </tr>`;
+      <td style="font-weight:900;color:${col}">${tot}</td></tr>`;
   });
-
-  // KSA summary
-  const avgK = count>0?Math.round(totalK/count):0;
-  const avgS = count>0?Math.round(totalS/count):0;
-  const avgA = count>0?Math.round(totalA/count):0;
-  document.getElementById('res-ksa-detail').innerHTML = `
+  const avgK=cnt>0?Math.round(tK/cnt):0,avgS=cnt>0?Math.round(tS/cnt):0,avgA=cnt>0?Math.round(tA/cnt):0;
+  document.getElementById('res-ksa-detail').innerHTML=`
     <div class="ksa-row"><div class="ksa-letter ksa-k">K</div><div class="ksa-label">Knowledge (avg)</div>
       <div class="ksa-bar-track"><div class="ksa-bar-fill" style="width:${Math.min(100,(avgK/40)*100)}%;background:var(--blue)"></div></div>
       <div class="ksa-val ksa-k">${avgK}/40</div></div>
@@ -976,8 +1008,7 @@ async function loadResults() {
     <div class="ksa-row"><div class="ksa-letter ksa-a">A</div><div class="ksa-label">Attitudes (avg)</div>
       <div class="ksa-bar-track"><div class="ksa-bar-fill" style="width:${Math.min(100,(avgA/25)*100)}%;background:var(--purple)"></div></div>
       <div class="ksa-val ksa-a">${avgA}/25</div></div>`;
-
-  renderHistoryFromFirebase();
+  renderHistoryFromDb();
 }
 </script>
 </body>
