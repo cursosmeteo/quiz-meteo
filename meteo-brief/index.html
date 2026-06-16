@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>METEO BRIEF — KSA Assessment Platform</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0f1520;--bg3:#1a2035;--bg4:#243050;--border:#2a3650;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--amber:#f59e0b;--purple:#a855f7;
+  --text:#e8edf5;--text2:#8fa3c0;--text3:#4d6080;
+  --font:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.6;min-height:100vh}
+
+/* Header */
+.header{text-align:center;padding:56px 20px 40px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);pointer-events:none}
+.header__logo{font-size:2.6rem;font-weight:900;letter-spacing:-.03em;margin-bottom:6px}
+.header__logo em{font-style:normal;color:var(--blue)}
+.header__tagline{font-size:1rem;color:var(--text2);margin-bottom:28px}
+.tag{display:inline-flex;align-items:center;padding:4px 14px;border-radius:99px;font-size:.75rem;font-weight:700;margin:0 4px}
+.t-k{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.t-s{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.t-a{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+
+/* Launch */
+.launch{padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+.launch__title{font-size:.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.launch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:720px}
+.launch-btn{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 20px;border-radius:14px;border:1px solid var(--border);background:var(--bg2);color:var(--text);text-decoration:none;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.launch-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.launch-btn:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.launch-btn:hover::before{opacity:1}
+.launch-btn--teacher{border-color:rgba(59,130,246,.5)}
+.launch-btn--teacher::before{background:radial-gradient(circle at 50% 0%,rgba(59,130,246,.1),transparent 70%)}
+.launch-btn--teacher:hover{border-color:var(--blue)}
+.launch-btn--student{border-color:rgba(34,197,94,.5)}
+.launch-btn--student::before{background:radial-gradient(circle at 50% 0%,rgba(34,197,94,.1),transparent 70%)}
+.launch-btn--student:hover{border-color:var(--green)}
+.launch-btn--group{border-color:rgba(6,182,212,.5)}
+.launch-btn--group::before{background:radial-gradient(circle at 50% 0%,rgba(6,182,212,.1),transparent 70%)}
+.launch-btn--group:hover{border-color:var(--cyan)}
+.launch-btn__icon{font-size:2rem;line-height:1}
+.launch-btn__label{font-size:1rem;font-weight:800}
+.launch-btn__desc{font-size:.74rem;color:var(--text2);text-align:center;line-height:1.5}
+.launch-btn__badge{position:absolute;top:10px;right:10px;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:99px}
+.badge-blue{background:rgba(59,130,246,.2);color:var(--blue)}
+.badge-green{background:rgba(34,197,94,.2);color:var(--green)}
+.badge-cyan{background:rgba(6,182,212,.2);color:var(--cyan)}
+
+/* Content */
+.content{max-width:860px;margin:0 auto;padding:48px 24px 64px;display:flex;flex-direction:column;gap:40px}
+.section-label{font-size:.68rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.section-title{font-size:1.35rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+.section-body{font-size:.92rem;color:var(--text2);line-height:1.85}
+.section-body p{margin-bottom:12px}.section-body p:last-child{margin-bottom:0}
+.section-body strong{color:var(--text);font-weight:600}
+
+/* KSA cards */
+.ksa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.ksa-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.ksa-card--k{border-color:rgba(59,130,246,.4)}.ksa-card--s{border-color:rgba(34,197,94,.4)}.ksa-card--a{border-color:rgba(168,85,247,.4)}
+.ksa-card__letter{font-size:2rem;font-weight:900;line-height:1;margin-bottom:6px}
+.ksa-card--k .ksa-card__letter{color:var(--blue)}.ksa-card--s .ksa-card__letter{color:var(--green)}.ksa-card--a .ksa-card__letter{color:var(--purple)}
+.ksa-card__name{font-size:.82rem;font-weight:700;margin-bottom:8px}
+.ksa-card__body{font-size:.78rem;color:var(--text2);line-height:1.7}
+.ksa-card__items{margin-top:8px;padding-left:12px}
+.ksa-card__items li{font-size:.76rem;color:var(--text2);margin-bottom:3px}
+
+/* Timeline */
+.timeline{margin-top:16px;display:flex;flex-direction:column;gap:0}
+.tl-item{display:grid;grid-template-columns:100px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.tl-item:last-child{border-bottom:none}
+.tl-phase__num{font-size:.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.tl-phase__dur{font-size:.72rem;font-weight:700;font-family:'Courier New',monospace;color:var(--blue)}
+.tl-body__name{font-size:.88rem;font-weight:700;margin-bottom:3px}
+.tl-body__desc{font-size:.78rem;color:var(--text2);line-height:1.55}
+.tl-who{display:inline-flex;font-size:.66rem;font-weight:700;padding:1px 7px;border-radius:99px;margin-left:6px}
+.who-ind{background:rgba(59,130,246,.15);color:var(--blue)}
+.who-grp{background:rgba(34,197,94,.15);color:var(--green)}
+.who-all{background:rgba(245,158,11,.15);color:var(--amber)}
+.who-jury{background:rgba(168,85,247,.15);color:var(--purple)}
+
+/* Score table */
+.score-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.82rem}
+.score-table th{text-align:left;padding:8px 10px;font-size:.66rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+.score-table td{padding:9px 10px;border-bottom:1px solid rgba(42,54,80,.5);color:var(--text2);vertical-align:top;line-height:1.5}
+.score-table tr:last-child td{border-bottom:none}
+.pts{font-weight:700;font-family:'Courier New',monospace;white-space:nowrap}
+.pts-k{color:var(--blue)}.pts-s{color:var(--green)}.pts-a{color:var(--purple)}.pts-oral{color:var(--amber)}
+
+/* Info box */
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 22px;border-left:4px solid var(--blue)}
+.info-box--amber{border-left-color:var(--amber)}.info-box--green{border-left-color:var(--green)}
+.info-box__title{font-size:.8rem;font-weight:700;margin-bottom:6px}
+.info-box__body{font-size:.82rem;color:var(--text2);line-height:1.7}
+
+.divider{border:none;border-top:1px solid var(--border)}
+
+/* Footer */
+.footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text3);line-height:1.8}
+
+@media(max-width:640px){
+  .launch-grid{grid-template-columns:1fr}
+  .ksa-grid{grid-template-columns:1fr}
+  .tl-item{grid-template-columns:80px 1fr}
+  .header__logo{font-size:1.9rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header__logo">METEO <em>BRIEF</em></div>
+  <div class="header__tagline">ATPL Meteorology · KSA Assessment Platform</div>
+  <div>
+    <span class="tag t-k">K Knowledge</span>
+    <span class="tag t-s">S Skills</span>
+    <span class="tag t-a">A Attitudes</span>
+  </div>
+</div>
+
+<div class="launch">
+  <div class="launch__title">Open Interface</div>
+  <div class="launch-grid">
+    <a class="launch-btn launch-btn--teacher" href="teacher.html">
+      <span class="launch-btn__badge badge-blue">Projected</span>
+      <div class="launch-btn__icon">🖥️</div>
+      <div class="launch-btn__label">Teacher</div>
+      <div class="launch-btn__desc">Instructor dashboard · Phase control · Timers · Oral scoring · Live results</div>
+    </a>
+    <a class="launch-btn launch-btn--student" href="student.html">
+      <span class="launch-btn__badge badge-green">Individual</span>
+      <div class="launch-btn__icon">👤</div>
+      <div class="launch-btn__label">Student</div>
+      <div class="launch-btn__desc">Pre-test · Individual met analysis · KSA tracker · Personal results</div>
+    </a>
+    <a class="launch-btn launch-btn--group" href="group.html">
+      <span class="launch-btn__badge badge-cyan">Shared screen</span>
+      <div class="launch-btn__icon">👥</div>
+      <div class="launch-btn__label">Group</div>
+      <div class="launch-btn__desc">Decision table · Group decision · Challenge · Key MCQ · Oral reference</div>
+    </a>
+  </div>
+  <div style="font-size:.72rem;color:var(--text3);margin-top:4px">
+    Group screens: add <strong style="color:var(--cyan)">?g=G1</strong> · <strong style="color:var(--cyan)">?g=G2</strong> · <strong style="color:var(--cyan)">?g=G3</strong> to the Group URL
+  </div>
+</div>
+
+<div class="content">
+
+  <div>
+    <div class="section-label">Context</div>
+    <div class="section-title">What is KSA Assessment?</div>
+    <div class="section-body">
+      <p><strong>KSA</strong> stands for <strong>Knowledge, Skills and Attitudes</strong> — the three dimensions used by EASA and ICAO to evaluate pilot competence beyond the traditional written examination. While written tests assess factual recall, KSA assessment evaluates whether a student can <em>apply</em> knowledge in realistic operational scenarios, make sound decisions under time pressure, and demonstrate the professional attitudes expected of a licenced pilot.</p>
+      <p>In the context of EASA ATPL training, KSA assessment is progressively replacing purely academic evaluation methods. The aim is to ensure that future airline pilots do not merely know the theory — they must be able to integrate multiple sources of information, reason under uncertainty, communicate effectively, and make defensible operational decisions.</p>
+    </div>
+    <div class="ksa-grid">
+      <div class="ksa-card ksa-card--k">
+        <div class="ksa-card__letter">K</div>
+        <div class="ksa-card__name">Knowledge</div>
+        <div class="ksa-card__body">Factual and conceptual understanding of meteorological principles, codes, and procedures.</div>
+        <ul class="ksa-card__items">
+          <li>ATPL theory — syllabus 050</li>
+          <li>METAR / TAF / SIGMET decoding</li>
+          <li>Chart interpretation</li>
+          <li>Hazard identification</li>
+        </ul>
+      </div>
+      <div class="ksa-card ksa-card--s">
+        <div class="ksa-card__letter">S</div>
+        <div class="ksa-card__name">Skills</div>
+        <div class="ksa-card__body">Ability to apply knowledge to real-world scenarios and make operationally sound decisions.</div>
+        <ul class="ksa-card__items">
+          <li>Multi-source data integration</li>
+          <li>GO / DELAY / NO-GO reasoning</li>
+          <li>Risk assessment and mitigation</li>
+          <li>Structured oral briefing</li>
+        </ul>
+      </div>
+      <div class="ksa-card ksa-card--a">
+        <div class="ksa-card__letter">A</div>
+        <div class="ksa-card__name">Attitudes</div>
+        <div class="ksa-card__body">Professional behaviours and CRM competencies demonstrated throughout the exercise.</div>
+        <ul class="ksa-card__items">
+          <li>Participation and engagement</li>
+          <li>Team coordination (CRM)</li>
+          <li>Response to new information</li>
+          <li>Communication clarity</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div>
+    <div class="section-label">EASA ATPL Subject 050</div>
+    <div class="section-title">Why Meteorology for KSA?</div>
+    <div class="section-body">
+      <p>Meteorology is uniquely suited to KSA assessment because it requires the integration of <strong>multiple, often conflicting sources of information</strong> — METARs, TAFs, SIGMETs, PIREPs, satellite imagery, radar, upper wind charts, SIGWX — each with different validity periods, geographic coverage, and levels of reliability. No single source tells the full story.</p>
+      <p>A real pre-flight meteorological briefing demands exactly the competencies that KSA assessment targets: the ability to decode and interpret technical data, synthesise it into a coherent situational picture, assess risk against operational constraints, reach a defensible decision, and communicate it clearly to crew and dispatch. These are <strong>Skills</strong> and <strong>Attitudes</strong> that cannot be evaluated by a multiple-choice examination alone.</p>
+      <p>Furthermore, meteorology is dynamic — conditions change between the time a TAF is issued and the actual departure, a SIGMET may be amended, a PIREP may contradict the forecast. The ability to integrate updated information and revise an operational decision accordingly is a core <strong>Attitude</strong> competency directly linked to flight safety.</p>
+    </div>
+    <div class="info-box info-box--amber" style="margin-top:20px">
+      <div class="info-box__title">⚠️ Operational relevance</div>
+      <div class="info-box__body">Weather-related accidents and incidents remain a leading cause of aviation occurrences worldwide. EASA's competency-based training framework (Part-FCL, AMC1 ORA.ATO.120) specifically requires that meteorological decision-making be assessed in realistic, scenario-based contexts — not only in written examinations.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div>
+    <div class="section-label">Exercise Structure</div>
+    <div class="section-title">How the Session Works</div>
+    <div class="section-body">
+      <p>METEO BRIEF is a timed, collaborative simulation exercise. Each session uses a real flight route defined by the instructor. Students work first individually, then in groups, to analyse the current meteorological situation and reach an operational decision — all within a structured timeline visible to everyone.</p>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 1</div><div class="tl-phase__dur">8 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Pre-Test MCQ <span class="tl-who who-ind">Individual</span></div><div class="tl-body__desc">10 ATPL meteorology questions, 20 seconds each. Scored automatically. Results determine group formation.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 2</div><div class="tl-phase__dur">3 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Group Formation <span class="tl-who who-all">Automatic</span></div><div class="tl-body__desc">Snake distribution by score. Highest scorer per group = Leader. Groups receive their shared screen QR code.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 3</div><div class="tl-phase__dur">5 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Mission Briefing <span class="tl-who who-all">Instructor</span></div><div class="tl-body__desc">Route, ETD, ETA, FL and aircraft presented. Students receive access to live meteorological sources.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 4</div><div class="tl-phase__dur">25 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Individual Met Analysis <span class="tl-who who-ind">Individual</span></div><div class="tl-body__desc">Each student independently accesses live met sources and completes an analysis form: primary hazard, severity, operational impact, preliminary GO/DELAY/NO-GO, and sources consulted.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 5</div><div class="tl-phase__dur">20 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Decision Table + Group Decision <span class="tl-who who-grp">Group</span></div><div class="tl-body__desc">Groups discuss individual analyses and complete a structured Decision Table covering DEP, en-route and ARR conditions. They then submit a collective GO / DELAY / NO-GO decision with full justification.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 6</div><div class="tl-phase__dur">10 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Injected Challenge <span class="tl-who who-grp">Group</span></div><div class="tl-body__desc">Instructor injects a new event — updated SIGMET, route change, or time pressure. Groups revise or confirm their decision with justification.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 7</div><div class="tl-phase__dur">5 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Briefing Key MCQ <span class="tl-who who-grp">Group</span></div><div class="tl-body__desc">3 questions to unlock oral briefing at no cost. Wrong answers incur a point penalty per member (−10 / −20 / −30).</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 8</div><div class="tl-phase__dur">~2 min/grp</div></div>
+        <div class="tl-body"><div class="tl-body__name">Oral Briefing <span class="tl-who who-jury">Jury</span></div><div class="tl-body__desc">Each group presents a structured 2-minute meteorological briefing. Each student is scored individually by the instructor on Accuracy, Decision Justified, and Communication Clarity.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-phase"><div class="tl-phase__num">Phase 9</div><div class="tl-phase__dur">10 min</div></div>
+        <div class="tl-body"><div class="tl-body__name">Results &amp; Debrief <span class="tl-who who-all">All</span></div><div class="tl-body__desc">Final KSA scores displayed. Instructor leads debrief comparing group decisions and hazard identification quality.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div>
+    <div class="section-label">Scoring Model</div>
+    <div class="section-title">How KSA Points are Allocated</div>
+    <div class="section-body"><p>Scores are computed automatically from submitted data. The oral briefing is scored individually by the instructor jury.</p></div>
+    <table class="score-table">
+      <thead><tr><th>Component</th><th>Dimension</th><th>Max</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-Test MCQ</td><td><span class="pts pts-k">K</span></td><td class="pts pts-k">20 pts</td><td>Automatic · +20 at 1s → +1 at 20s · −2 wrong · −1 no answer</td></tr>
+        <tr><td>Hazard identification (group)</td><td><span class="pts pts-k">K</span></td><td class="pts pts-k">10 pts</td><td>Automatic · based on Decision Table completeness</td></tr>
+        <tr><td>Key MCQ (group)</td><td><span class="pts pts-k">K</span></td><td class="pts pts-k">5 pts</td><td>Automatic · 3/3 = 5 pts · penalty if wrong</td></tr>
+        <tr><td>Group decision quality</td><td><span class="pts pts-s">S</span></td><td class="pts pts-s">15 pts</td><td>Automatic · awarded on submission with full justification</td></tr>
+        <tr><td>Challenge response</td><td><span class="pts pts-s">S</span></td><td class="pts pts-s">8 pts</td><td>Automatic · awarded on revised decision submission</td></tr>
+        <tr><td>Participation (group)</td><td><span class="pts pts-a">A</span></td><td class="pts pts-a">10 pts</td><td>Automatic · completeness of Decision Table and analysis</td></tr>
+        <tr><td>Challenge response (attitude)</td><td><span class="pts pts-a">A</span></td><td class="pts pts-a">5 pts</td><td>Automatic · awarded on challenge submission</td></tr>
+        <tr><td>Oral briefing (individual jury)</td><td><span class="pts pts-oral">S + A</span></td><td class="pts pts-oral">9 pts</td><td>Instructor · Accuracy (1–3) · Decision Justified (1–3) · Clarity (1–3)</td></tr>
+        <tr style="border-top:2px solid var(--border)"><td><strong style="color:var(--text)">Total</strong></td><td>K + S + A</td><td class="pts" style="color:var(--text);font-size:.9rem">82 pts</td><td>− Key MCQ penalty if applicable (−10 / −20 / −30)</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box info-box--green" style="margin-top:20px">
+      <div class="info-box__title">📋 Sources consulted — mandatory for oral briefing</div>
+      <div class="info-box__body">Students must record all meteorological sources consulted during their analysis (name + URL). These are submitted as part of the group Decision Table and must be cited during the oral briefing. This reflects the operational requirement for a traceable, auditable pre-flight weather assessment.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Carlos Paizinho · cursos.meteo@gmail.com<br>
+  ATPL Meteorology · KSA Assessment Platform<br>
+  Developed with Claude (Anthropic)
+</div>
+
+</body>
+</html>
