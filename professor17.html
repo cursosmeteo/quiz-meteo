@@ -277,7 +277,7 @@ function pushQ(idx) {
 function nextQuestion() {
   if (state.idx === -1) { state.idx = 0; }
   else if (state.revealed) { scoreCurrentQuestion(); state.idx++; state.revealed = false; }
-  if (state.idx >= QUESTIONS.length) { renderFinal(); return; }
+  if (state.idx >= QUESTIONS.length) { renderFinal(false); return; }
   state.responses = {};
   renderQuestion(); pushQ(state.idx); startTimer();
   document.getElementById("btn-reveal").disabled = false;
@@ -392,8 +392,8 @@ function renderScoreboard() {
 }
 
 // Final screen with bar chart
-function renderFinal() {
-  stopTimer(); scoreCurrentQuestion();
+function renderFinal(doScore=true) {
+  stopTimer(); if(doScore) scoreCurrentQuestion();
   document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
   const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts);
   const maxPts = Math.max(...sorted.map(([,s]) => s.pts), 1);
@@ -415,7 +415,7 @@ function renderFinal() {
     <div class="final-screen">
       <h1>FINAL RESULT</h1>
       <div class="chart-wrap">
-        <div class="chart-bars">${bars || "<p>No answers recorded.</p>"}</div>
+        <div class="chart-bars">${bars}</div>
       </div>
       <div class="debrief">Debrief topics:<br><b>${DEBRIEF_TOPICS}</b></div>
     </div>`;
