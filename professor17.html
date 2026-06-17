@@ -298,20 +298,22 @@ function revealAnswer() {
 
 function scoreCurrentQuestion() {
   const Q = QUESTIONS[state.idx];
+  // Ensure all connected students have a score entry
   Object.keys(state.connected).forEach(uid => {
     if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
   });
+  // Score responses
   Object.entries(state.responses).forEach(([uid, d]) => {
     if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
     if (d.answer === Q.correct) {
-      state.scores[uid].pts += calcPts(d.timeLeft || 0);
-    } else if (d.answer === -1 || d.timeout) {
-      state.scores[uid].pts -= 2; // no answer
+      state.scores[uid].pts += calcPts(d.timeLeft || 0); // correct
+    } else if (d.timeout || d.answer === -1) {
+      // timeout already gets -2, skip — handled below as "no response"
     } else {
-      state.scores[uid].pts -= 4; // wrong
+      state.scores[uid].pts -= 4; // wrong answer
     }
   });
-  // -2 for connected but no response at all
+  // -2 for no response (including timeout)
   Object.keys(state.connected).forEach(uid => {
     if (!state.responses[uid]) {
       if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
@@ -406,15 +408,23 @@ function renderFinal(doScore) {
     var range = (maxPts - minPts) || 1;
     barsHtml = sorted.map(function(entry, i) {
       var s = entry[1];
-      var pct = Math.round(((s.pts - minPts) / range) * 160) + 20;
+      // Bar height proportional, minimum 40px for the winner, 0px possible for lowest
+      var pct = Math.round(((s.pts - minPts) / range) * 160);
       var colour = BAR_COLOURS[i % BAR_COLOURS.length];
       var medal = medals[i] || (i+1)+".";
+      // Show pts above bar if bar is too small, inside if tall enough
+      var ptsStyle = pct < 30
+        ? 'style="color:var(--navy);font-size:18px;font-weight:800;margin-bottom:4px;"'
+        : 'style="color:#fff;font-size:18px;font-weight:800;padding-top:6px;"';
+      var ptsAbove = pct < 30 ? '<div ' + ptsStyle + '>' + s.pts + '</div>' : '';
+      var ptsInside = pct >= 30 ? '<span ' + ptsStyle + '>' + s.pts + '</span>' : '';
+      var barHtml = pct > 0
+        ? '<div class="chart-bar" style="height:' + pct + 'px;background:' + colour + ';">' + ptsInside + '</div>'
+        : '';
       return '<div class="chart-col">'
         + '<div class="chart-rank">' + medal + '</div>'
-        + '<div class="chart-bar-wrap">'
-        + '<div class="chart-bar" style="height:' + pct + 'px;background:' + colour + ';">'
-        + '<span class="chart-pts">' + s.pts + '</span>'
-        + '</div></div>'
+        + ptsAbove
+        + '<div class="chart-bar-wrap">' + barHtml + '</div>'
         + '<div class="chart-name">' + s.name + '</div>'
         + '</div>';
     }).join("");
