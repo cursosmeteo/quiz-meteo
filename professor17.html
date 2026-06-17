@@ -284,6 +284,7 @@ function nextQuestion() {
   else if (state.revealed) {
     state.lastResponses = Object.assign({}, state.responses); // snapshot before clearing
     scoreCurrentQuestion();
+    renderScoreboard();
     state.idx++;
     state.revealed = false;
   }
