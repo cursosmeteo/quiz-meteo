@@ -277,7 +277,12 @@ function pushQ(idx) {
 
 function nextQuestion() {
   if (state.idx === -1) { state.idx = 0; }
-  else if (state.revealed) { scoreCurrentQuestion(); state.idx++; state.revealed = false; }
+  else if (state.revealed) {
+    state.lastResponses = Object.assign({}, state.responses); // snapshot before clearing
+    scoreCurrentQuestion();
+    state.idx++;
+    state.revealed = false;
+  }
   if (state.idx >= QUESTIONS.length) { renderFinal(false); return; }
   state.responses = {};
   renderQuestion(); pushQ(state.idx); startTimer();
@@ -299,14 +304,18 @@ function revealAnswer() {
 
 function scoreCurrentQuestion() {
   const Q = QUESTIONS[state.idx];
-  // Ensure all connected students have a score entry
-  Object.keys(state.connected).forEach(uid => {
-    if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-  });
-  // Score every connected student exactly once
-  Object.keys(state.connected).forEach(uid => {
-    if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-    const d = state.responses[uid];
+  // Build full list of participants: connected + anyone who responded
+  const snap = state.lastResponses || state.responses;
+  const allUids = new Set([
+    ...Object.keys(state.connected),
+    ...Object.keys(snap)
+  ]);
+  allUids.forEach(uid => {
+    const name = (state.connected[uid] && state.connected[uid].name)
+      || (snap[uid] && snap[uid].name)
+      || uid;
+    if (!state.scores[uid]) state.scores[uid] = { name: name, pts: 0 };
+    const d = snap[uid];
     if (!d || d.answer === -1 || d.timeout) {
       state.scores[uid].pts -= 2; // no answer or timeout
     } else if (d.answer === Q.correct) {
