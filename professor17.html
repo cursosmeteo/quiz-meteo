@@ -74,13 +74,14 @@
   .final-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; text-align: center; padding: 20px; }
   .final-screen h1 { font-size: 42px; font-weight: 800; color: var(--navy); }
   .chart-wrap { width: 100%; max-width: 700px; background: var(--light); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px 16px; }
-  .chart-bars { display: flex; align-items: flex-end; justify-content: center; gap: 16px; height: 200px; }
-  .chart-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 100px; }
-  .chart-bar-wrap { display: flex; align-items: flex-end; height: 180px; width: 100%; }
-  .chart-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height .6s ease; display: flex; align-items: flex-start; justify-content: center; padding-top: 6px; }
-  .chart-pts { font-size: 20px; font-weight: 800; color: #fff; }
-  .chart-name { font-size: 13px; font-weight: 700; color: var(--navy); text-align: center; line-height: 1.2; }
-  .chart-rank { font-size: 20px; margin-bottom: 2px; }
+  .chart-bars { display: flex; align-items: flex-end; justify-content: center; gap: 20px; height: 240px; }
+  .chart-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; flex: 1; max-width: 120px; height: 100%; }
+  .chart-bar-wrap { display: flex; align-items: flex-end; width: 100%; }
+  .chart-bar { width: 100%; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: center; }
+  .chart-pts-above { font-size: 18px; font-weight: 800; color: var(--navy); }
+  .chart-pts-inside { font-size: 18px; font-weight: 800; color: #fff; }
+  .chart-name { font-size: 13px; font-weight: 700; color: var(--navy); text-align: center; line-height: 1.2; margin-top: 6px; }
+  .chart-rank { font-size: 20px; }
   .debrief { font-size: 13px; color: var(--steel); max-width: 600px; line-height: 1.7; }
   .debrief b { color: var(--navy); }
 </style>
@@ -302,22 +303,16 @@ function scoreCurrentQuestion() {
   Object.keys(state.connected).forEach(uid => {
     if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
   });
-  // Score responses
-  Object.entries(state.responses).forEach(([uid, d]) => {
-    if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
-    if (d.answer === Q.correct) {
-      state.scores[uid].pts += calcPts(d.timeLeft || 0); // correct
-    } else if (d.timeout || d.answer === -1) {
-      // timeout already gets -2, skip — handled below as "no response"
-    } else {
-      state.scores[uid].pts -= 4; // wrong answer
-    }
-  });
-  // -2 for no response (including timeout)
+  // Score every connected student exactly once
   Object.keys(state.connected).forEach(uid => {
-    if (!state.responses[uid]) {
-      if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
-      state.scores[uid].pts -= 2;
+    if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
+    const d = state.responses[uid];
+    if (!d || d.answer === -1 || d.timeout) {
+      state.scores[uid].pts -= 2; // no answer or timeout
+    } else if (d.answer === Q.correct) {
+      state.scores[uid].pts += calcPts(d.timeLeft || 0); // correct
+    } else {
+      state.scores[uid].pts -= 4; // wrong
     }
   });
 }
@@ -408,19 +403,13 @@ function renderFinal(doScore) {
     var range = (maxPts - minPts) || 1;
     barsHtml = sorted.map(function(entry, i) {
       var s = entry[1];
-      // Bar height proportional, minimum 40px for the winner, 0px possible for lowest
-      var pct = Math.round(((s.pts - minPts) / range) * 160);
+      var pct = Math.round(((s.pts - minPts) / range) * 180);
       var colour = BAR_COLOURS[i % BAR_COLOURS.length];
       var medal = medals[i] || (i+1)+".";
-      // Show pts above bar if bar is too small, inside if tall enough
-      var ptsStyle = pct < 30
-        ? 'style="color:var(--navy);font-size:18px;font-weight:800;margin-bottom:4px;"'
-        : 'style="color:#fff;font-size:18px;font-weight:800;padding-top:6px;"';
-      var ptsAbove = pct < 30 ? '<div ' + ptsStyle + '>' + s.pts + '</div>' : '';
-      var ptsInside = pct >= 30 ? '<span ' + ptsStyle + '>' + s.pts + '</span>' : '';
+      var ptsAbove = '<div class="chart-pts-above">' + s.pts + '</div>';
       var barHtml = pct > 0
-        ? '<div class="chart-bar" style="height:' + pct + 'px;background:' + colour + ';">' + ptsInside + '</div>'
-        : '';
+        ? '<div class="chart-bar" style="height:' + pct + 'px;background:' + colour + ';"></div>'
+        : '<div style="height:4px;width:100%;background:#ccc;border-radius:2px;"></div>';
       return '<div class="chart-col">'
         + '<div class="chart-rank">' + medal + '</div>'
         + ptsAbove
