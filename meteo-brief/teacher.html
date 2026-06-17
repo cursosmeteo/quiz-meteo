@@ -4,10 +4,207 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>METEO BRIEF — Teacher</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* METEO BRIEF v2 — style.css */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0f1520;--bg3:#1a2035;--bg4:#243050;
+  --border:#2a3650;--border2:#3a4a6a;
+  --blue:#3b82f6;--blue-d:rgba(59,130,246,.15);
+  --cyan:#06b6d4;--cyan-d:rgba(6,182,212,.15);
+  --green:#22c55e;--green-d:rgba(34,197,94,.15);
+  --amber:#f59e0b;--amber-d:rgba(245,158,11,.15);
+  --red:#ef4444;--red-d:rgba(239,68,68,.15);
+  --purple:#a855f7;--purple-d:rgba(168,85,247,.15);
+  --text:#e8edf5;--text2:#8fa3c0;--text3:#4d6080;
+  --font:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Courier New',monospace;
+  --r:8px;--r-lg:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.55;min-height:100vh}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:var(--r);border:none;font-family:var(--font);font-size:.84rem;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap;text-decoration:none}
+.btn:active:not(:disabled){transform:scale(.97)}.btn:hover:not(:disabled){opacity:.88}.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn-primary{background:var(--blue);color:#fff}.btn-green{background:var(--green);color:#0a1a0a}
+.btn-amber{background:var(--amber);color:#1a0800}.btn-red{background:var(--red);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){color:var(--text);background:var(--bg4);opacity:1}
+.btn-sm{padding:5px 10px;font-size:.76rem}.btn-lg{padding:11px 24px;font-size:.95rem}.btn-full{width:100%}
+
+/* ── Card ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
+.card--blue{border-color:rgba(59,130,246,.4)}.card--green{border-color:rgba(34,197,94,.4)}
+.card--amber{border-color:rgba(245,158,11,.4)}.card--red{border-color:rgba(239,68,68,.4)}
+.card--purple{border-color:rgba(168,85,247,.4)}.card--cyan{border-color:rgba(6,182,212,.4)}
+.card__title{font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+
+/* ── Form ── */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fg label{font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+input[type=text],input[type=number],select,textarea{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:var(--font);font-size:.88rem;padding:7px 10px;width:100%;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:70px;line-height:1.5}
+
+/* ── Tags ── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700}
+.tag-blue{background:var(--blue-d);color:var(--blue)}.tag-green{background:var(--green-d);color:var(--green)}
+.tag-amber{background:var(--amber-d);color:var(--amber)}.tag-red{background:var(--red-d);color:var(--red)}
+.tag-purple{background:var(--purple-d);color:var(--purple)}.tag-cyan{background:var(--cyan-d);color:var(--cyan)}
+
+/* ── Topbar ── */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(7,9,15,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;height:52px;flex-wrap:nowrap;overflow:hidden}
+.topbar__logo{font-size:.95rem;font-weight:900;letter-spacing:-.02em;white-space:nowrap;flex-shrink:0}
+.topbar__logo em{font-style:normal;color:var(--blue)}
+.sep{width:1px;height:26px;background:var(--border);flex-shrink:0}
+.ml-auto{margin-left:auto}
+
+/* ── Timers ── */
+.timer-lg{font-family:var(--mono);font-size:1.4rem;font-weight:900;color:var(--blue);letter-spacing:.05em;line-height:1}
+.timer-md{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--text2);letter-spacing:.04em}
+.t-warn{color:var(--amber)!important}.t-danger{color:var(--red)!important;animation:blink .9s infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* ── Live dot ── */
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite;vertical-align:middle;margin-right:4px}
+.dot.amber{background:var(--amber)}.dot.red{background:var(--red)}
+
+/* ── Progress bar ── */
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.prog-label{font-size:.78rem;color:var(--text2);min-width:70px}
+.prog-track{flex:1;height:8px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:var(--blue);transition:width .5s ease}
+.prog-count{font-size:.78rem;color:var(--text3);min-width:36px;text-align:right}
+
+/* ── Decision buttons ── */
+.dec-group{display:flex;gap:8px}
+.dec-btn{flex:1;padding:14px 8px;border-radius:var(--r);border:2px solid var(--border);background:var(--bg3);color:var(--text3);font-family:var(--font);font-size:1rem;font-weight:800;cursor:pointer;text-align:center;transition:all .15s}
+.dec-btn.go{border-color:rgba(34,197,94,.4)}.dec-btn.delay{border-color:rgba(245,158,11,.4)}.dec-btn.nogo{border-color:rgba(239,68,68,.4)}
+.dec-btn.go.sel{background:var(--green-d);color:var(--green);border-color:var(--green)}
+.dec-btn.delay.sel{background:var(--amber-d);color:var(--amber);border-color:var(--amber)}
+.dec-btn.nogo.sel{background:var(--red-d);color:var(--red);border-color:var(--red)}
+.dec-btn:hover:not(.sel){background:var(--bg4);color:var(--text)}
+
+/* ── Rubric ── */
+.rub-row{margin-bottom:12px}
+.rub-label{font-size:.82rem;color:var(--text2);font-weight:600;margin-bottom:5px}
+.rub-btns{display:flex;gap:5px}
+.rub-btn{flex:1;padding:9px 6px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text3);font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
+.rub-btn:hover{background:var(--bg4);color:var(--text)}
+.rub-btn.r1{background:var(--red-d);color:var(--red);border-color:var(--red)}
+.rub-btn.r2{background:var(--amber-d);color:var(--amber);border-color:var(--amber)}
+.rub-btn.r3{background:var(--green-d);color:var(--green);border-color:var(--green)}
+
+/* ── KSA Panel ── */
+.ksa-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:14px}
+.ksa-panel__title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:10px}
+.ksa-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.ksa-k{color:var(--blue)}.ksa-s{color:var(--green)}.ksa-a{color:var(--purple)}
+.ksa-letter{font-size:.78rem;font-weight:800;width:18px;flex-shrink:0}
+.ksa-label{font-size:.78rem;color:var(--text2);flex:1}
+.ksa-bar-track{width:80px;height:7px;background:var(--bg4);border-radius:99px;overflow:hidden;flex-shrink:0}
+.ksa-bar-fill{height:100%;border-radius:99px;transition:width .5s}
+.ksa-val{font-size:.78rem;font-weight:700;min-width:44px;text-align:right}
+.ksa-sub{font-size:.68rem;color:var(--text3);padding-left:26px;margin-top:-4px;margin-bottom:6px}
+
+/* ── Decision Table ── */
+.dt-wrap{overflow-x:auto;margin-top:8px}
+.dt{width:100%;border-collapse:collapse;font-size:.78rem;min-width:900px}
+.dt th{background:var(--bg3);color:var(--text3);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:7px 8px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.dt td{padding:5px 6px;border-bottom:1px solid rgba(42,54,80,.5);vertical-align:middle}
+.dt tr:hover td{background:rgba(30,40,60,.4)}
+.dt select,.dt input[type=text]{font-size:.78rem;padding:4px 6px;min-height:0;background:var(--bg3)}
+.dt textarea{font-size:.78rem;padding:4px 6px;min-height:50px}
+.dt-add{font-size:.75rem;padding:6px 12px}
+.dt-del{background:none;border:none;color:var(--red-d);cursor:pointer;font-size:.9rem;padding:2px 5px;border-radius:4px}
+.dt-del:hover{background:var(--red-d);color:var(--red)}
+
+/* ── Phase pills ── */
+.ph-pill{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);cursor:pointer;border:1px solid transparent;transition:all .12s}
+.ph-pill:hover{background:var(--bg3)}
+.ph-pill.active{background:var(--blue-d);border-color:var(--blue)}
+.ph-pill.done{opacity:.45}
+.ph-num{width:24px;height:24px;border-radius:50%;background:var(--bg4);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:var(--text2);flex-shrink:0}
+.ph-pill.active .ph-num{background:var(--blue);border-color:var(--blue);color:#fff}
+.ph-pill.done .ph-num{background:var(--green);border-color:var(--green);color:#fff}
+.ph-name{font-size:.82rem;font-weight:600}.ph-dur{font-size:.66rem;color:var(--text3)}
+
+/* ── History timeline ── */
+.hist-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,54,80,.4);font-size:.78rem}
+.hist-item:last-child{border-bottom:none}
+.hist-time{color:var(--text3);font-family:var(--mono);font-size:.7rem;white-space:nowrap;padding-top:1px;min-width:58px}
+.hist-body{flex:1;color:var(--text2);line-height:1.5}
+.hist-body strong{color:var(--text)}
+
+/* ── Met link ── */
+.met-link{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);text-decoration:none;font-size:.82rem;font-weight:500;transition:all .15s}
+.met-link:hover{border-color:var(--blue);color:var(--text);background:var(--bg4)}
+.met-link__icon{font-size:1.1rem;flex-shrink:0}
+.met-link__lbl{font-weight:700;color:var(--text);font-size:.8rem}
+.met-link__desc{font-size:.7rem;color:var(--text3)}
+
+/* ── Challenge ── */
+.challenge-banner{background:rgba(239,68,68,.08);border:2px solid var(--red);border-radius:var(--r-lg);padding:16px}
+.challenge-banner__hdr{font-size:.68rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
+.challenge-banner__txt{font-size:.92rem;color:var(--text);line-height:1.65}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex;animation:fadeIn .2s}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-lg);padding:22px;width:90%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 4px 32px rgba(0,0,0,.6)}
+.modal__title{font-size:.95rem;font-weight:800;margin-bottom:14px}
+.modal__actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+/* ── QR ── */
+.qr-wrap{display:inline-block;padding:8px;background:#fff;border-radius:var(--r)}
+
+/* ── Tables ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;padding:7px 8px;font-size:.66rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+.tbl td{padding:7px 8px;font-size:.82rem;border-bottom:1px solid rgba(42,54,80,.45);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.hl td{color:var(--amber)}
+
+/* ── Screens ── */
+.screen{display:none}.screen.active{display:block;animation:fadeIn .3s}
+
+/* ── Wait ── */
+.wait-box{text-align:center;padding:60px 20px}
+.wait-icon{font-size:3rem;margin-bottom:12px}
+.pulse-ring{width:48px;height:48px;border:3px solid var(--blue);border-radius:50%;margin:20px auto 0;animation:pulse-r 1.5s infinite}
+@keyframes pulse-r{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.45}}
+
+/* ── Score circle ── */
+.score-circle{width:96px;height:96px;border-radius:50%;background:var(--blue-d);border:3px solid var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 14px}
+.score-circle__val{font-size:1.7rem;font-weight:900;color:var(--blue);line-height:1}
+.score-circle__lbl{font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Met data block ── */
+.met-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:.8rem;color:var(--text2);white-space:pre-wrap;word-break:break-word;line-height:1.7}
+
+/* ── Utility ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.flex{display:flex}.fc{display:flex;align-items:center}
+.gap-4{gap:4px}.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.text-sm{font-size:.82rem}.text-xs{font-size:.72rem}.text-muted{color:var(--text2)}.text-dim{color:var(--text3)}
+.font-bold{font-weight:700}.font-mono{font-family:var(--mono)}.text-center{text-align:center}
+.hidden{display:none!important}.w-full{width:100%}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@media print{.topbar,.btn,.modal-overlay{display:none!important}body{background:#fff;color:#000;font-size:12px}.card{border:1px solid #ccc}}
+
+</style>
+
+
+
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr 256px;grid-template-rows:52px 1fr;height:100vh;overflow:hidden}
 .topbar{grid-column:1/-1}
@@ -62,6 +259,11 @@
 .oral-stu-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px;margin-bottom:8px}
 .oral-stu-card__name{font-weight:700;font-size:.85rem;margin-bottom:7px}
 </style>
+<!-- Firebase SDK — must load before any firebase code -->
+
+
+
+
 </head>
 <body>
 
@@ -344,20 +546,355 @@
   </div>
 </div>
 
-<script src="firebase-config.js"></script>
-<script src="data.js"></script>
+
+
+
+
+
 <script>
+// ── data.js ───────────────────────────────────────────────────────────────
+/**
+ * METEO BRIEF v3 — data.js
+ * Question bank (50 MCQ) + Met sources.
+ * No preset scenarios — professor defines route freely.
+ */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 50 ATPL METEOROLOGY QUESTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+const QUESTION_BANK = [
+  {id:'Q01',topic:'ISA',syl:'050 01 05',text:'In the ISA, sea-level temperature is:',options:['−15 °C','+15 °C','+25 °C','0 °C'],correct:1},
+  {id:'Q02',topic:'ISA',syl:'050 01 05',text:'ISA temperature lapse rate in the troposphere:',options:['2 °C/1000 ft','1.98 °C/1000 ft','3 °C/1000 ft','1 °C/1000 ft'],correct:1},
+  {id:'Q03',topic:'ISA',syl:'050 01 05',text:'The tropopause in mid-latitudes is approximately at:',options:['36 089 ft','25 000 ft','45 000 ft','20 000 ft'],correct:0},
+  {id:'Q04',topic:'ISA',syl:'050 01 05',text:'ISA sea-level pressure is:',options:['1003.25 hPa','1013.25 hPa','1023.25 hPa','1033.25 hPa'],correct:1},
+  {id:'Q05',topic:'ISA',syl:'050 01 05',text:'Above the tropopause in the lower stratosphere, temperature:',options:['Continues to decrease','Remains constant at −56.5 °C','Increases with altitude','Varies with season'],correct:1},
+  {id:'Q06',topic:'ISA',syl:'050 01 05',text:'ISA+20 at FL350 means the actual temperature is:',options:['−36.5 °C','−16.5 °C','−56.5 °C','+20 °C'],correct:0},
+  {id:'Q07',topic:'Altimetry',syl:'050 01 06',text:'Pressure Altitude is read with the altimeter set to:',options:['QNH','1013.25 hPa','QFE','Sea-level elevation'],correct:1},
+  {id:'Q08',topic:'Altimetry',syl:'050 01 06',text:'With temperature colder than ISA, the altimeter indicates:',options:['Higher than true altitude','Lower than true altitude','Equal to true altitude','Depends on QNH'],correct:0},
+  {id:'Q09',topic:'Altimetry',syl:'050 01 06',text:'QFE is the pressure reduced to:',options:['Mean sea level','Aerodrome elevation','1013.25 hPa','Cruise altitude'],correct:1},
+  {id:'Q10',topic:'Altimetry',syl:'050 01 06',text:'Density Altitude is important because it determines:',options:['IFR minimum altitudes','Aircraft performance','QNH settings','Radar coverage'],correct:1},
+  {id:'Q11',topic:'Altimetry',syl:'050 01 06',text:'QNH drops from 1013 to 993 hPa. Setting the altimeter, indicated altitude:',options:['Increases by 600 ft','Decreases by 600 ft','Does not change','Increases by 200 ft'],correct:1},
+  {id:'Q12',topic:'Wind',syl:'050 02',text:'Geostrophic wind results from balance between:',options:['Coriolis and centrifugal','Pressure gradient and Coriolis','Friction and pressure gradient','Centrifugal and pressure gradient'],correct:1},
+  {id:'Q13',topic:'Wind',syl:'050 02',text:'In NH, surface wind rotates relative to geostrophic wind:',options:['10–15° left','10–40° left','10–40° right','No deviation'],correct:1},
+  {id:'Q14',topic:'Wind',syl:'050 02',text:'Wind 240°/35 kt. RWY 27 (270°). Crosswind component ≈:',options:['35 kt','17 kt','30 kt','25 kt'],correct:1},
+  {id:'Q15',topic:'Wind',syl:'050 02',text:'LLWS is most likely associated with:',options:['Temperature inversion at low altitude','High cloud cover','Weak surface wind','Surface high pressure'],correct:0},
+  {id:'Q16',topic:'Wind',syl:'050 02',text:'METAR: wind 270°/25G40KT. Maximum gust:',options:['25 kt','40 kt','270 kt','65 kt'],correct:1},
+  {id:'Q17',topic:'Stability',syl:'050 03',text:'The DALR is:',options:['1 °C/100 m','0.6 °C/100 m','1.5 °C/100 m','2 °C/100 m'],correct:0},
+  {id:'Q18',topic:'Stability',syl:'050 03',text:'SALR compared to DALR is:',options:['Equal','Always 0.6 °C/100 m','Less than DALR, variable','Greater than DALR'],correct:2},
+  {id:'Q19',topic:'Stability',syl:'050 03',text:'Air mass is unstable when ELR is:',options:['Less than DALR','Greater than DALR','Equal to DALR','Equal to SALR'],correct:1},
+  {id:'Q20',topic:'Stability',syl:'050 03',text:'Subsidence in an anticyclone causes:',options:['Instability','Temperature inversion and stability','Severe turbulence','Pressure fall'],correct:1},
+  {id:'Q21',topic:'Stability',syl:'050 03',text:'Cloud base in convective clouds is determined by:',options:['Tropopause altitude','Condensation level (LCL)','Surface dew point only','Freezing level'],correct:1},
+  {id:'Q22',topic:'Clouds',syl:'050 05',text:'Greatest risk of severe turbulence and hail:',options:['Nimbostratus','Altostratus','Cumulonimbus','Altocumulus castellanus'],correct:2},
+  {id:'Q23',topic:'Clouds',syl:'050 05',text:'Radiation fog forms on nights that are:',options:['Windy and overcast','Calm, clear, high humidity','Active cold front','High subsidence'],correct:1},
+  {id:'Q24',topic:'Clouds',syl:'050 05',text:'Freezing rain forms when:',options:['T sub-zero throughout','Warm layer above cold layer near surface','Low dew point','High updraft speed'],correct:1},
+  {id:'Q25',topic:'Clouds',syl:'050 05',text:'Altocumulus castellanus signals:',options:['Prolonged stability','Potential afternoon instability','Approaching warm front','Radiation fog'],correct:1},
+  {id:'Q26',topic:'Clouds',syl:'050 05',text:'Mist (BR) corresponds to visibility:',options:['< 200 m','200–1000 m','1000–5000 m','> 5000 m'],correct:1},
+  {id:'Q27',topic:'Clouds',syl:'050 05',text:'Advection fog forms when:',options:['Cold air over warm surface','Warm moist air over colder surface','T drops at night','Pressure rises rapidly'],correct:1},
+  {id:'Q28',topic:'METAR',syl:'050 04',text:'"TSRA" in a METAR means:',options:['Sand storm','Thunderstorm with rain','Torrential rain','Severe turbulence with rain'],correct:1},
+  {id:'Q29',topic:'METAR',syl:'050 04',text:'"BKN015CB" means:',options:['Broken at 1500 ft, CB','Black nimbus 150 ft','Broken low stratus','CB base 15000 ft'],correct:0},
+  {id:'Q30',topic:'METAR',syl:'050 04',text:'"CAVOK" means:',options:['Cloud >3000 ft, vis >5 km','Cloud >5000 ft/MSA, vis ≥10 km, no CB/phenomena','No cloud, unlimited vis','Stable atmosphere'],correct:1},
+  {id:'Q31',topic:'TAF',syl:'050 04',text:'"TEMPO" in a TAF:',options:['Permanent change','Fluctuations <60 min each','20% probability','SIGMET issued'],correct:1},
+  {id:'Q32',topic:'TAF',syl:'050 04',text:'"PROB30 TEMPO" means:',options:['30% permanent change','30% probability, <60 min','3% storm probability','30% probability, >60 min'],correct:1},
+  {id:'Q33',topic:'TAF',syl:'050 04',text:'"TAF AMD" means:',options:['Automatic TAF','Amended TAF','Corrected TAF','Cancelled TAF'],correct:1},
+  {id:'Q34',topic:'METAR',syl:'050 04',text:'"RE" group in METAR:',options:['Forecast phenomena','Recent phenomena, past 60 min','Resolution forecast','Recent clouds'],correct:1},
+  {id:'Q35',topic:'METAR',syl:'050 04',text:'RVR is measured by:',options:['Tower observer','Transmissometer near runway','Weather radar','Solar pyrometer'],correct:1},
+  {id:'Q36',topic:'SIGMET',syl:'050 04',text:'SIGMET for severe icing — max validity:',options:['2 h','4 h','6 h','12 h'],correct:1},
+  {id:'Q37',topic:'SIGMET',syl:'050 04',text:'"TB SEV" in a PIREP:',options:['Light turbulence','Moderate turbulence','Severe turbulence','Extreme turbulence'],correct:2},
+  {id:'Q38',topic:'Fronts',syl:'050 06',text:'Cold front passage sequence (NH):',options:['P rises, wind backs SW, T rises','P falls then rises, wind veers NW, T falls','P constant, variable winds','T constant, heavy rain'],correct:1},
+  {id:'Q39',topic:'Fronts',syl:'050 06',text:'Cold occlusion forms when:',options:['Cold front catches warm front, air behind colder than ahead','Two warm fronts merge','Warm front catches cold front','Polar air warms'],correct:0},
+  {id:'Q40',topic:'Fronts',syl:'050 06',text:'Isobars close together on surface chart indicate:',options:['Weak pressure gradient','Strong gradient and winds','Stable air mass','High humidity'],correct:1},
+  {id:'Q41',topic:'Fronts',syl:'050 06',text:'A trough on a pressure chart:',options:['Maximum pressure','Extension of low, no closed centre','Elongated high','Stationary front'],correct:1},
+  {id:'Q42',topic:'Fronts',syl:'050 07',text:'NH low-pressure system wind circulates:',options:['Clockwise','Counter-clockwise','Outside to centre','Centre outwards'],correct:1},
+  {id:'Q43',topic:'Icing',syl:'050 09',text:'Most dangerous structural icing type:',options:['Clear ice (glaze)','Rime ice','Mixed ice','In-flight frost'],correct:0},
+  {id:'Q44',topic:'Icing',syl:'050 09',text:'Structural icing most intense between:',options:['−40 °C and 0 °C','−10 °C and +2 °C','−60 °C and −20 °C','0 °C and +10 °C'],correct:1},
+  {id:'Q45',topic:'Turbulence',syl:'050 09',text:'CAT most frequently occurs:',options:['Inside CB','Near jet streams and mountain waves','Near low-altitude inversions','In polar air masses'],correct:1},
+  {id:'Q46',topic:'Turbulence',syl:'050 09',text:'Mountain wave turbulence is most severe:',options:['Windward side above summit','Lee side, wavelengths downwind','Directly over summit','Above FL300 only'],correct:1},
+  {id:'Q47',topic:'Turbulence',syl:'050 09',text:'SIGWX symbol for moderate turbulence:',options:['Single wavy line','Double wavy line','Triangle','Broken arrow'],correct:0},
+  {id:'Q48',topic:'Local',syl:'050 10',text:'Sea breeze blows during the day from:',options:['Land to sea','Sea to land','North to south','Along the coast'],correct:1},
+  {id:'Q49',topic:'Local',syl:'050 10',text:'The Foehn produces wind that is:',options:['Cold and wet, lee side','Warm and dry, lee side','Cold and dry, windward','Wet on both sides'],correct:1},
+  {id:'Q50',topic:'Local',syl:'050 10',text:'Air mass mP affecting Iberia originates from:',options:['North Africa','North-east Europe','North Atlantic','Arctic continent'],correct:2},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LIVE MET SOURCES
+// ═══════════════════════════════════════════════════════════════════════════
+const MET_SOURCES = [
+  {icon:'🌡️',label:'METAR / TAF',      desc:'IPMA Self-Briefing (PT)',    url:'https://www.ipma.pt/pt/aeronautica/selfbriefing/'},
+  {icon:'📡',label:'METAR / TAF',      desc:'AVWX (global)',              url:'https://avwx.rest'},
+  {icon:'⚠️',label:'SIGMETs',          desc:'NOAA AWC International',     url:'https://aviationweather.gov/sigmet/intl'},
+  {icon:'🗺️',label:'Surface Chart',    desc:'Wetterzentrale',             url:'https://www.wetterzentrale.de/en/archive.php'},
+  {icon:'🗺️',label:'Surface Chart',    desc:'Met Office',                 url:'https://www.metoffice.gov.uk/weather/maps-and-charts/surface-pressure'},
+  {icon:'✈️',label:'SIGWX Chart',      desc:'WAFC Washington (NOAA)',     url:'https://aviationweather.gov/products/progs/progchart.php'},
+  {icon:'💨',label:'Upper Wind / Temp',desc:'Met Office Upper Air',       url:'https://www.metoffice.gov.uk/weather/maps-and-charts/upper-air-charts'},
+  {icon:'💨',label:'Upper Wind / Temp',desc:'ECMWF Charts',               url:'https://charts.ecmwf.int'},
+  {icon:'🛰️',label:'Satellite',        desc:'EUMETSAT Viewer',            url:'https://view.eumetsat.int/productviewer?v=default'},
+  {icon:'🌧️',label:'Radar',            desc:'RainViewer',                 url:'https://www.rainviewer.com/map.html'},
+  {icon:'🌬️',label:'All Layers',       desc:'Windy',                      url:'https://www.windy.com'},
+  {icon:'📊',label:'Sounding / Skew-T',desc:'Wyoming Upper Air',          url:'https://weather.uwyo.edu/upperair/sounding.html'},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLOUD TYPES FOR DECISION TABLE
+// ═══════════════════════════════════════════════════════════════════════════
+const CLOUD_TYPES = ['SKC','FEW','SCT','BKN','OVC','VV///'];
+const INTENSITY   = ['NIL','Light','Moderate','Severe','Extreme'];
+const VIS_RANGE   = ['≥ 10 km','5–10 km','1.5–5 km','800 m–1.5 km','< 800 m'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SESSION GUIDE CONTENT
+// ═══════════════════════════════════════════════════════════════════════════
+const SESSION_GUIDE = [
+  {
+    phase: 'PRE-SESSION',
+    who: 'Instructor',
+    duration: 'Before students arrive',
+    color: '#64748b',
+    steps: [
+      'Open teacher.html on the projected screen.',
+      'Fill in route: DEP / DEST / ALT1 / ALT2 / ETD / ETA / FL / Aircraft.',
+      'Enter additional briefing notes if needed.',
+      'Select exactly 10 pre-test questions from the question bank.',
+      'Select exactly 3 briefing key questions.',
+      'Click ✓ Launch Session.',
+      'Show QR codes (📱 button in topbar) — project or print for students.',
+    ]
+  },
+  {
+    phase: 'PHASE 1 — Pre-Test',
+    who: 'Individual',
+    duration: '8 min',
+    color: '#3b82f6',
+    steps: [
+      'INSTRUCTOR: Click "Next →" to advance each question. Click "Show Answer" before moving on.',
+      'STUDENTS: Open student.html (scan QR code). Enter your name and join.',
+      'STUDENTS: Answer each question before the 20-second timer expires.',
+      'SCORING: Correct answer → +20 pts at 1s, −1 pt/sec (min +1 at 20s). Wrong → −2 pts. No answer → −1 pt.',
+      'INSTRUCTOR: Monitor submission progress on the right panel.',
+      '⚠️ Sound alert at 10% remaining (48 sec). 🔴 Sound alert at 5% remaining (24 sec).',
+    ]
+  },
+  {
+    phase: 'PHASE 2 — Group Formation',
+    who: 'Automatic',
+    duration: '3–5 min',
+    color: '#06b6d4',
+    steps: [
+      'INSTRUCTOR: Click "Confirm & Broadcast Groups".',
+      'Groups are formed automatically by snake distribution (ranked by pre-test score).',
+      'Highest scorer in each group = Leader (coordinator role only).',
+      'STUDENTS: Note your group assignment on student.html.',
+      'GROUPS: Each group scans their specific QR code to open group.html?g=G1 (G2, G3…).',
+    ]
+  },
+  {
+    phase: 'PHASE 3 — Mission Briefing',
+    who: 'Instructor presents',
+    duration: '5 min',
+    color: '#f59e0b',
+    steps: [
+      'INSTRUCTOR: Present the route and task verbally to the class.',
+      'ALL: Route details visible on student.html and group.html.',
+      'GROUPS: Open the Met Sources tab on group.html.',
+      'Remind students: all groups have the same route. Analysis is individual, decision is collective.',
+      'Remind students: sources consulted must be recorded — required for oral briefing.',
+    ]
+  },
+  {
+    phase: 'PHASE 4 — Individual Analysis',
+    who: 'Individual',
+    duration: '25 min',
+    color: '#3b82f6',
+    steps: [
+      'STUDENTS: Access live met sources on student.html (or archive if no internet).',
+      'STUDENTS: Complete the analysis form:',
+      '  · Primary hazard description (minimum 30 words)',
+      '  · Severity: LOW / MODERATE / HIGH',
+      '  · Operational impact (minimum 25 words)',
+      '  · Preliminary assessment: GO / DELAY / NO-GO',
+      '  · Sources consulted (list all URLs/references used)',
+      'STUDENTS: Click ✓ Submit My Analysis when complete.',
+      'INSTRUCTOR: Monitor submission progress per group on the dashboard.',
+      '⚠️ Sound alert at 10% remaining (2:30). 🔴 Sound alert at 5% remaining (1:15).',
+    ]
+  },
+  {
+    phase: 'PHASE 5 — Decision Table + Group Decision',
+    who: 'Group',
+    duration: '20 min',
+    color: '#22c55e',
+    steps: [
+      'GROUPS: Discuss individual analyses. Leader coordinates.',
+      'GROUPS: Complete the structured Decision Table on group.html:',
+      '  · DEPARTURE: wind, visibility, clouds, significant weather',
+      '  · EN-ROUTE: wind, temperature, turbulence, CAT, icing, CB, jet stream',
+      '  · ARRIVAL: wind, visibility, clouds, significant weather',
+      '  · Add additional hazard rows as needed (free rows)',
+      'GROUPS: Submit group decision — GO / DELAY / NO-GO.',
+      '  · If DELAY: specify alternative ETD.',
+      '  · Alternative FL optional.',
+      '  · Justification minimum 60 words.',
+      '  · List all sources consulted (required for oral briefing).',
+      'INSTRUCTOR: Monitor decision table and decisions in real time.',
+      '⚠️ Sound alert at 10% remaining (2 min). 🔴 Sound alert at 5% remaining (1 min).',
+    ]
+  },
+  {
+    phase: 'PHASE 6 — Challenge',
+    who: 'Group',
+    duration: '10 min',
+    color: '#ef4444',
+    steps: [
+      'INSTRUCTOR: Click ⚡ Challenge in the topbar. Select type and enter text. Click Inject Now.',
+      'Challenge types: New Met Information / Route Change / Time Pressure / Direct Question.',
+      'GROUPS: Read the challenge on group.html. Discuss impact.',
+      'GROUPS: Revise or confirm decision. Update Decision Table if needed.',
+      'GROUPS: Submit revised decision with justification.',
+      '⚠️ Sound alert at 10% remaining (1 min). 🔴 Sound alert at 5% remaining (30 sec).',
+    ]
+  },
+  {
+    phase: 'PHASE 7 — Briefing Key MCQ',
+    who: 'Group',
+    duration: '5 min',
+    color: '#a855f7',
+    steps: [
+      'GROUPS: Answer 3 multiple-choice questions on group.html.',
+      'All group members should discuss before submitting.',
+      'SCORING: 3/3 correct → free access. 2/3 → −10 pts/member. 1/3 → −20 pts/member. 0/3 → −30 pts/member.',
+      'All groups present the oral briefing regardless of key result.',
+      'INSTRUCTOR: View key results on dashboard.',
+    ]
+  },
+  {
+    phase: 'PHASE 8 — Oral Briefing',
+    who: 'Jury evaluation',
+    duration: '~2 min per group',
+    color: '#a855f7',
+    steps: [
+      'INSTRUCTOR: Select presenting group in the Oral Briefing panel.',
+      'GROUP presents (~2 minutes):',
+      '  1. Current synoptic situation — one sentence',
+      '  2. Main hazard identified + operational significance',
+      '  3. Group decision: GO / DELAY / NO-GO + justification',
+      '  4. All sources consulted (mandatory)',
+      '  5. Confidence level + one mitigation or contingency',
+      'INSTRUCTOR: Score each student individually (1–3 per dimension):',
+      '  · Meteorological Accuracy',
+      '  · Decision Justified by Met Data',
+      '  · Communication Clarity',
+      'INSTRUCTOR: Click Save All Oral Scores before selecting next group.',
+    ]
+  },
+  {
+    phase: 'PHASE 9 — Results & Debrief',
+    who: 'All',
+    duration: '10 min',
+    color: '#22c55e',
+    steps: [
+      'INSTRUCTOR: Final scores displayed automatically.',
+      'Review KSA breakdown per student and per group.',
+      'Click ⬇ Export JSON to save the full session report.',
+      'Debrief: compare group decisions, discuss hazard identification quality.',
+      'Highlight differences between individual analyses and group decisions.',
+      'Discuss sources consulted — were the right sources used?',
+    ]
+  },
+];
+</script>
+<script>
+// ── firebase config (safe — init deferred) ────────────────────────────────
+/**
+ * METEO BRIEF v2 — firebase-config.js
+ * Shared Firebase initialisation.
+ * Load AFTER the Firebase compat SDK scripts, BEFORE any app script.
+ */
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",
+  authDomain:        "meteorology-quiz-2b061.firebaseapp.com",
+  databaseURL:       "https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "meteorology-quiz-2b061",
+  storageBucket:     "meteorology-quiz-2b061.firebasestorage.app",
+  messagingSenderId: "595212568307",
+  appId:             "1:595212568307:web:e51bc42c187f13a6359986"
+};
+
+const DB_ROOT = 'meteo-brief';
+
+// Firebase init deferred to initFirebase()
+
+function dbRef(path) {
+  return path ? DB.ref(`${DB_ROOT}/${path}`) : DB.ref(DB_ROOT);
+}
+function dbSet(path, value)   { return dbRef(path).set(value); }
+function dbGet(path)          { return dbRef(path).once('value').then(s => s.val()); }
+function dbPush(path, value)  { return dbRef(path).push(value); }
+function dbRemove(path)       { return dbRef(path).remove(); }
+function dbOn(path, cb) {
+  const r = dbRef(path);
+  r.on('value', s => cb(s.val()));
+  return () => r.off('value');
+}
+function dbOnChild(path, cb) {
+  const r = dbRef(path);
+  r.on('child_added', s => cb(s.key, s.val()));
+  return () => r.off('child_added');
+}
+function onConnectionChange(cb) {
+  DB.ref('.info/connected').on('value', s => cb(s.val() === true));
+}
+function now() { return Date.now(); }
+function formatTime(s) {
+  s = Math.abs(Math.round(s));
+  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+function tsToTime(ms) {
+  return new Date(ms).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// ── KSA scoring constants ─────────────────────────────────────────────────
+const KSA = {
+  maxK:  40,   // Knowledge
+  maxS:  35,   // Skills
+  maxA:  25,   // Attitudes
+  maxOral: 9,  // per student (jury)
+  // Group scoring weights
+  decisionTableK:   10,  // knowledge: hazard identification quality (jury)
+  decisionTableS:   15,  // skills: decision quality (auto + jury)
+  keyMCQ:            5,  // knowledge: key questions
+  challengeS:        8,  // skills: challenge response quality
+  challengeA:        5,  // attitudes: speed + coherence
+  participationA:   10,  // attitudes: completeness of decision table
+  // Individual
+  preTestK:         20,  // knowledge: MCQ score (auto)
+};
+
+// ── QR code generator (using qrcode.js CDN) ──────────────────────────────
+function generateQR(url, containerEl, size = 160) {
+  containerEl.innerHTML = '';
+  if (typeof QRCode === 'undefined') {
+    containerEl.innerHTML = `<div style="font-size:.75rem;color:#94a3b8;word-break:break-all">${url}</div>`;
+    return;
+  }
+  new QRCode(containerEl, { text: url, width: size, height: size, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.M });
+}
+
+// ── Event log helper ──────────────────────────────────────────────────────
+function logEvent(groupId, type, data) {
+  return dbPush(`groups/${groupId}/history`, { type, data, ts: now() });
+}
+
+let DB = null;
+
+</script>
+<script>
+// ── app ───────────────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 // AUDIO
 // ═══════════════════════════════════════════════════════════════════════════
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-
-function getAudio() {
-  if (!audioCtx) audioCtx = new AudioCtx();
-  return audioCtx;
-}
-
+function getAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
 function beep(freq, dur, vol, type = 'sine') {
   try {
     const ctx = getAudio();
@@ -370,165 +907,113 @@ function beep(freq, dur, vol, type = 'sine') {
     o.start(ctx.currentTime); o.stop(ctx.currentTime + dur);
   } catch(e) {}
 }
-
 function alertWarn()   { beep(660, 0.15, 0.3); setTimeout(() => beep(660, 0.15, 0.3), 200); }
 function alertDanger() { beep(880, 0.15, 0.5); setTimeout(() => beep(880, 0.15, 0.5), 200); setTimeout(() => beep(880, 0.15, 0.5), 400); }
 function alertEnd()    { beep(440, 0.6, 0.5); }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════════════════════════════════════
-const PH_NAMES = ['Setup','Pre-Test','Groups','Briefing','Analysis','Decision Table','Challenge','Key MCQ','Oral','Results'];
-const PH_MINS  = [0, 8, 5, 5, 25, 20, 10, 5, 15, 10];
-const BASE_URL = location.href.replace(/teacher\.html.*$/, '');
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════════════════════════════════
+const PH_NAMES = ['Setup','Pre-Test','Groups','Briefing','Analysis','Decision Table','Challenge','Key MCQ','Oral','Results'];
+const PH_MINS  = [0,8,5,5,25,20,10,5,15,10];
+
+// Base URL for QR codes — update after GitHub Pages deploy
+const BASE_URL = location.href.replace(/teacher\.html.*$/,'');
+
+// ════════════════════════════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 let cfg={}, students=[], groups=[], phase=0;
 let selQs=[], selKQs=[], qIdx=0, qTimer=null, qSecs=20;
 let gSecs=0, pSecs=0, phDuration=0, gInt=null, pInt=null, paused=false;
 let oralScores={};
-let warned10=false, warned5=false;
+let warned10=false, warned5=false;   // {groupId: {studentId: {acc,dec,cla,total}}}
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  loadScripts([
+    'firebase-app.js',
+    'firebase-database.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  ], () => {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    DB = firebase.database();
+    console.log('Firebase OK (local)');
+    startApp();
+  });
+});
+
+function loadScripts(urls, cb) {
+  if (!urls.length) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = urls[0];
+  s.onload  = () => loadScripts(urls.slice(1), cb);
+  s.onerror = () => { console.error('Failed to load:', urls[0]); loadScripts(urls.slice(1), cb); };
+  document.head.appendChild(s);
+}
+
+function startApp() {
   buildPills();
   buildRoster();
   buildQSel();
   buildKQSel();
+  buildGroupScenarioSetup();
   buildGuide();
   onConnectionChange(on => {
     const el = document.getElementById('conn-badge');
     el.innerHTML = on ? '<span class="dot"></span>Connected' : '<span class="dot red"></span>Offline';
     el.className = on ? 'tag tag-green' : 'tag tag-red';
   });
-  dbOn('students', d => {
-    if (!d) return;
-    renderLiveScores(d);
-    if (phase === 1) renderTestProg(d);
-    if (phase === 4) renderAnalysisProg(d);
-  });
-  dbOn('groups', d => {
-    if (!d) return;
-    if (phase === 5) { renderGrpDecisions(d); renderDTPreview(d); }
-    if (phase === 6) renderRevisedDecs(d);
-    if (phase === 7) renderKeyResults(d);
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// GUIDE
-// ═══════════════════════════════════════════════════════════════════════════
-function buildGuide() {
-  const c = document.getElementById('guide-content');
-  c.innerHTML = '';
-  SESSION_GUIDE.forEach((g, i) => {
-    const div = document.createElement('div');
-    div.className = 'guide-phase';
-    div.innerHTML = `
-      <div class="guide-phase__header" onclick="toggleGuidePhase(${i})">
-        <div class="guide-phase__dot" style="background:${g.color}"></div>
-        <div class="guide-phase__name">${g.phase}</div>
-        <div class="guide-phase__dur">${g.duration} · ${g.who}</div>
-        <span style="color:var(--text3);font-size:.8rem">▼</span>
-      </div>
-      <div class="guide-phase__body" id="gph-${i}">
-        ${g.steps.map(s => `<div class="guide-step">${s}</div>`).join('')}
-      </div>`;
-    c.appendChild(div);
-  });
-  // Open first phase by default
-  document.getElementById('gph-0')?.classList.add('open');
+  dbOn('students', d => { if(d){ renderLiveScores(d); if(phase===1)renderTestProg(d); if(phase===4)renderAnalysisProg(d); } });
+  dbOn('groups',   d => { if(d){ if(phase===5){renderGrpDecisions(d);renderDTPreview(d);} if(phase===6)renderRevisedDecs(d); if(phase===7)renderKeyResults(d); } });
 }
 
-function toggleGuidePhase(i) {
-  const el = document.getElementById(`gph-${i}`);
-  el?.classList.toggle('open');
-}
-
-function toggleGuide() {
-  document.getElementById('guide-panel').classList.toggle('open');
-}
-
-function printGuide() {
-  const w = window.open('', '_blank');
-  w.document.write(`<html><head><title>METEO BRIEF — Session Guide</title>
-    <style>body{font-family:Arial,sans-serif;font-size:13px;max-width:800px;margin:40px auto;color:#111}
-    h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#555;margin:16px 0 6px}
-    .phase{margin-bottom:20px;border-left:4px solid #ccc;padding-left:12px}
-    .step{margin:4px 0;line-height:1.6;color:#333}.step::before{content:'› '}
-    .dur{font-size:11px;color:#888}</style></head><body>
-    <h1>METEO BRIEF — Session Guide</h1>
-    ${SESSION_GUIDE.map(g => `
-      <div class="phase" style="border-left-color:${g.color}">
-        <h2>${g.phase} <span class="dur">${g.duration} · ${g.who}</span></h2>
-        ${g.steps.map(s => `<div class="step">${s}</div>`).join('')}
-      </div>`).join('')}
-    </body></html>`);
-  w.document.close();
-  w.print();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // PHASE SYSTEM
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 function buildPills() {
-  const c = document.getElementById('ph-pills'); c.innerHTML = '';
-  PH_NAMES.forEach((n, i) => {
-    const d = document.createElement('div');
-    d.className = 'ph-pill'; d.id = `pp-${i}`;
-    d.innerHTML = `<div class="ph-num">${i}</div>
-      <div><div class="ph-name">${n}</div>
-      <div class="ph-dur">${PH_MINS[i]>0?PH_MINS[i]+' min':'config'}</div></div>`;
-    d.onclick = () => { if (confirm(`Jump to Phase ${i}: ${n}?`)) jumpPhase(i); };
+  const c=document.getElementById('ph-pills');
+  c.innerHTML='';
+  PH_NAMES.forEach((n,i)=>{
+    const d=document.createElement('div');
+    d.className='ph-pill';d.id=`pp-${i}`;
+    d.innerHTML=`<div class="ph-num">${i}</div><div><div class="ph-name">${n}</div><div class="ph-dur">${PH_MINS[i]>0?PH_MINS[i]+' min':'config'}</div></div>`;
+    d.onclick=()=>{if(confirm(`Jump to Phase ${i}: ${n}?`))jumpPhase(i);};
     c.appendChild(d);
   });
 }
 
 function showPhase(n) {
-  phase = n;
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  phase=n;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(`panel-${n}`)?.classList.add('active');
-  document.querySelectorAll('.ph-pill').forEach((p, i) => {
-    p.className = 'ph-pill' + (i===n?' active':i<n?' done':'');
-  });
-  document.getElementById('ph-label').textContent = `Phase ${n} — ${PH_NAMES[n]}`;
-  document.getElementById('btn-next').disabled = (n >= 9);
-  // Auto-open guide phase
-  document.querySelectorAll('.guide-phase__body').forEach(el => el.classList.remove('open'));
-  document.getElementById(`gph-${n}`)?.classList.add('open');
+  document.querySelectorAll('.ph-pill').forEach((p,i)=>{ p.className='ph-pill'+(i===n?' active':i<n?' done':''); });
+  document.getElementById('ph-label').textContent=`Phase ${n} — ${PH_NAMES[n]}`;
+  document.getElementById('btn-next').disabled=(n>=9);
   onPhaseEnter(n);
 }
 
-function nextPhase() { if (phase < 9) jumpPhase(phase + 1); }
-function jumpPhase(n) {
-  startPT(n);
-  showPhase(n);
-  dbSet('session/phase', n);
-  log(`Phase ${n}: ${PH_NAMES[n]}`, 'blue');
-}
+function nextPhase()  { if(phase<9) jumpPhase(phase+1); }
+function jumpPhase(n) { startPT(n); showPhase(n); dbSet('session/phase',n); log(`Phase ${n}: ${PH_NAMES[n]}`,'blue'); }
 
 function onPhaseEnter(n) {
-  if (n === 2) buildRanking();
-  if (n === 3) renderBriefingPanel();
-  if (n === 7) dbGet('groups').then(d => { if (d) renderKeyResults(d); });
-  if (n === 8) populateOralSel();
-  if (n === 9) buildResults();
+  if(n===2) buildRanking();
+  if(n===3) renderBriefingPanel();
+  if(n===7) dbGet('groups').then(d=>{if(d)renderKeyResults(d);});
+  if(n===8) {populateOralSel(); dbGet('groups').then(d=>{if(d)renderKeyResults(d);});}
+  if(n===9) buildResults();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// TIMERS WITH SOUND
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+// TIMERS
+// ════════════════════════════════════════════════════════════════════════════
 function startGT() {
-  gSecs = 0; clearInterval(gInt);
-  gInt = setInterval(() => {
-    if (!paused) { gSecs++; document.getElementById('t-global').textContent = formatTime(gSecs); }
-  }, 1000);
+  gSecs=0; clearInterval(gInt);
+  gInt=setInterval(()=>{ if(!paused){gSecs++; document.getElementById('t-global').textContent=formatTime(gSecs);} },1000);
 }
-
 function startPT(n) {
   const mins = PH_MINS[n] || 5;
   pSecs = mins * 60;
@@ -540,78 +1025,114 @@ function startPT(n) {
     if (paused) return;
     pSecs = Math.max(0, pSecs - 1);
     el.textContent = formatTime(pSecs);
-    // Sound alerts
     const pct = pSecs / phDuration;
     if (!warned10 && pct <= 0.10 && pct > 0.05) { warned10 = true; alertWarn(); el.className = 'timer-md t-warn'; }
     if (!warned5  && pct <= 0.05 && pSecs > 0)  { warned5  = true; alertDanger(); el.className = 'timer-md t-danger'; }
     if (pSecs === 0) { clearInterval(pInt); alertEnd(); log('⏱ Phase time expired', 'amber'); }
   }, 1000);
 }
-
 function togglePause() {
-  paused = !paused;
-  const b = document.getElementById('btn-pause');
-  b.textContent = paused ? '▶ Resume' : '⏸ Pause';
-  b.className = paused ? 'btn btn-green btn-sm' : 'btn btn-ghost btn-sm';
-  dbSet('session/paused', paused);
-  log(paused ? 'Paused' : 'Resumed', 'amber');
+  paused=!paused;
+  const b=document.getElementById('btn-pause');
+  b.textContent=paused?'▶ Resume':'⏸ Pause';
+  b.className=paused?'btn btn-green btn-sm':'btn btn-ghost btn-sm';
+  dbSet('session/paused',paused);
+  log(paused?'Paused':'Resumed','amber');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // SETUP
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 function buildRoster() {
-  const ng  = +document.getElementById('c-ng').value  || 3;
-  const spg = +document.getElementById('c-spg').value || 4;
-  const r   = document.getElementById('stu-roster');
-  r.innerHTML = '';
-  for (let i = 1; i <= ng * spg; i++) {
-    r.innerHTML += `<div style="display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:.66rem;color:var(--text3);font-weight:700;width:16px">${i}</span>
-      <input type="text" id="s-${i}" placeholder="Student ${i}">
-    </div>`;
+  const ng=+document.getElementById('c-ng').value||3;
+  const spg=+document.getElementById('c-spg').value||4;
+  const r=document.getElementById('stu-roster');
+  r.innerHTML='';
+  for(let i=1;i<=ng*spg;i++) {
+    r.innerHTML+=`<div class="stu-row"><span class="stu-num">${i}</span><input type="text" id="s-${i}" placeholder="Student ${i}"></div>`;
   }
-  const sel = document.getElementById('ch-target');
-  if (sel) {
-    sel.innerHTML = '<option value="all">All groups</option>';
-    for (let g = 1; g <= ng; g++) sel.innerHTML += `<option value="G${g}">Group ${g}</option>`;
+  buildGroupScenarioSetup();
+  // challenge target
+  const sel=document.getElementById('ch-target');
+  if(sel){sel.innerHTML='<option value="all">All groups</option>';for(let g=1;g<=ng;g++)sel.innerHTML+=`<option value="G${g}">Group ${g}</option>`;}
+}
+
+function buildGroupScenarioSetup() {
+  const ng=+document.getElementById('c-ng').value||3;
+  const c=document.getElementById('grp-scenario-setup');
+  if(!c)return;
+  c.innerHTML='';
+  for(let g=1;g<=ng;g++) {
+    const row=document.createElement('div');
+    row.className='grp-scenario-row';
+    row.innerHTML=`<div style="font-weight:700;color:var(--cyan)">G${g}</div>
+      <select id="sc-${g}" onchange="updateScenarioPreview(${g})">
+        <option value="custom">✏️ Custom (enter below)</option>
+        ${PRESET_SCENARIOS.map(s=>`<option value="${s.id}">[${s.family}/${s.difficulty}] ${s.title}</option>`).join('')}
+      </select>
+      <span id="sc-diff-${g}" class="text-xs text-dim"></span>`;
+    c.appendChild(row);
+    // Custom route fields (initially hidden)
+    const custom=document.createElement('div');
+    custom.id=`custom-${g}`;
+    custom.style.cssText='grid-column:span 3;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:6px 0;';
+    custom.innerHTML=`
+      <input type="text" id="dep-${g}" placeholder="DEP" maxlength="4">
+      <input type="text" id="dest-${g}" placeholder="DEST" maxlength="4">
+      <input type="text" id="alt1-${g}" placeholder="ALT1" maxlength="4">
+      <input type="text" id="alt2-${g}" placeholder="ALT2" maxlength="4">
+      <input type="text" id="dtime-${g}" placeholder="DepTime" maxlength="6">
+    `;
+    c.appendChild(custom);
+  }
+}
+
+function updateScenarioPreview(g) {
+  const sel=document.getElementById(`sc-${g}`).value;
+  const custom=document.getElementById(`custom-${g}`);
+  const diff=document.getElementById(`sc-diff-${g}`);
+  if(sel==='custom'){custom.style.display='grid';diff.textContent='';}
+  else{
+    custom.style.display='none';
+    const sc=PRESET_SCENARIOS.find(s=>s.id===sel);
+    if(sc) diff.textContent=`${sc.route.dep}→${sc.route.dest} | ★${sc.difficulty}`;
   }
 }
 
 function buildQSel() {
-  const c = document.getElementById('q-sel'); c.innerHTML = '';
-  QUESTION_BANK.forEach(q => {
-    const r = document.createElement('div'); r.className = 'q-row';
-    r.innerHTML = `<input type="checkbox" id="qc-${q.id}" value="${q.id}" onchange="cntQ()">
+  const c=document.getElementById('q-sel');c.innerHTML='';
+  QUESTION_BANK.forEach(q=>{
+    const r=document.createElement('div');r.className='q-row';
+    r.innerHTML=`<input type="checkbox" id="qc-${q.id}" value="${q.id}" onchange="cntQ()">
       <label for="qc-${q.id}"><span class="text-dim text-xs">[${q.topic}] ${q.id}</span><br>${q.text}</label>`;
     c.appendChild(r);
   });
 }
 
 function buildKQSel() {
-  const c = document.getElementById('kq-sel'); c.innerHTML = '';
-  QUESTION_BANK.forEach(q => {
-    const r = document.createElement('div'); r.className = 'q-row';
-    r.innerHTML = `<input type="checkbox" id="kc-${q.id}" value="${q.id}" onchange="cntKQ()">
+  const c=document.getElementById('kq-sel');c.innerHTML='';
+  QUESTION_BANK.forEach(q=>{
+    const r=document.createElement('div');r.className='q-row';
+    r.innerHTML=`<input type="checkbox" id="kc-${q.id}" value="${q.id}" onchange="cntKQ()">
       <label for="kc-${q.id}"><span class="text-dim text-xs">[${q.topic}] ${q.id}</span> ${q.text}</label>`;
     c.appendChild(r);
   });
 }
 
-function cntQ() {
-  const n = document.querySelectorAll('#q-sel input:checked').length;
-  const el = document.getElementById('q-cnt');
-  el.textContent = `${n}/10`; el.style.color = n===10?'var(--green)':n>10?'var(--red)':'var(--blue)';
+function cntQ(){
+  const n=document.querySelectorAll('#q-sel input:checked').length;
+  const el=document.getElementById('q-cnt');el.textContent=`${n}/10`;
+  el.style.color=n===10?'var(--green)':n>10?'var(--red)':'var(--blue)';
 }
-function cntKQ() {
-  const n = document.querySelectorAll('#kq-sel input:checked').length;
-  const el = document.getElementById('kq-cnt');
-  el.textContent = `${n}/3`; el.style.color = n===3?'var(--green)':n>3?'var(--red)':'var(--purple)';
+function cntKQ(){
+  const n=document.querySelectorAll('#kq-sel input:checked').length;
+  const el=document.getElementById('kq-cnt');el.textContent=`${n}/3`;
+  el.style.color=n===3?'var(--green)':n>3?'var(--red)':'var(--purple)';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // LAUNCH
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 function launch() {
   const ng  = +document.getElementById('c-ng').value  || 3;
   const spg = +document.getElementById('c-spg').value || 4;
@@ -652,9 +1173,9 @@ function launch() {
   });
 
   dbSet('session', {
-    config: cfg, phase: 1, paused: false, startedAt: now(),
-    questions:    selQs.map(q  => ({id:q.id,  text:q.text,  options:q.options})),
-    keyQuestions: selKQs.map(q => ({id:q.id,  text:q.text,  options:q.options})),
+    config: cfg, phase: 0, paused: false, startedAt: now(),
+    questions:    selQs.map(q  => ({id:q.id, text:q.text, options:q.options})),
+    keyQuestions: selKQs.map(q => ({id:q.id, text:q.text, options:q.options})),
   });
   dbSet('students', stuData);
 
@@ -666,104 +1187,47 @@ function launch() {
      ${cfg.fl} · ${cfg.aircraft}<br>
      ${total} students · ${ng} groups`;
 
-  startGT(); startPT(1); showPhase(1); renderQuestion();
+  startGT();
   document.getElementById('btn-next').disabled = false;
-  log('Session launched!', 'green');
+  log('Session configured — show QR codes then click Next →', 'green');
+
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background:rgba(34,197,94,.1);border:1px solid var(--green);border-radius:var(--r-lg);padding:16px;margin-top:8px';
+  banner.innerHTML = `<div style="font-weight:700;color:var(--green);margin-bottom:6px">✓ Session configured!</div>
+    <div class="text-sm text-muted">
+      1. Click <strong style="color:var(--text)">📱 QR</strong> in the topbar to show QR codes to students.<br>
+      2. When students are connected, click <strong style="color:var(--text)">Next →</strong> to start the pre-test.
+    </div>`;
+  document.getElementById('panel-0').appendChild(banner);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PHASE 1 — PRE-TEST
-// ═══════════════════════════════════════════════════════════════════════════
-function renderQuestion() {
-  if (!selQs.length) return;
-  const q = selQs[qIdx];
-  document.getElementById('q-num').textContent  = `Question ${qIdx+1} / ${selQs.length}`;
-  document.getElementById('q-text').textContent = q.text;
-  const clk = document.getElementById('q-clock');
-  clk.textContent = '20'; clk.style.color = 'var(--blue)';
-  const opts = document.getElementById('q-opts'); opts.innerHTML = '';
-  ['A','B','C','D'].forEach((l, i) => {
-    const b = document.createElement('button');
-    b.style.cssText = 'padding:9px 12px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.85rem;font-family:var(--font);text-align:left;cursor:default';
-    b.textContent = `${l}. ${q.options[i]}`; b.id = `ob-${i}`;
-    opts.appendChild(b);
-  });
-  dbSet('session/currentQuestion', {
-    index:qIdx, id:q.id, text:q.text, options:q.options,
-    startedAt:now(), expired:false, showAnswer:false
-  });
-  clearInterval(qTimer); qSecs = 20;
-  let w10=false, w5=false;
-  qTimer = setInterval(() => {
-    if (paused) return;
-    qSecs--;
-    const c = document.getElementById('q-clock'); if (!c) return;
-    c.textContent = qSecs;
-    c.style.color = qSecs<=5?'var(--red)':qSecs<=10?'var(--amber)':'var(--blue)';
-    if (!w10 && qSecs<=2)  { w10=true; alertWarn(); }
-    if (!w5  && qSecs<=1)  { w5=true; alertDanger(); }
-    if (qSecs<=0) { clearInterval(qTimer); dbSet('session/currentQuestion/expired',true); }
-  }, 1000);
-}
-
-function revealAnswer() {
-  clearInterval(qTimer);
-  const q = selQs[qIdx];
-  const btn = document.getElementById(`ob-${q.correct}`);
-  if (btn) { btn.style.background='rgba(34,197,94,.2)'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; }
-  dbSet('session/currentQuestion/correctIndex', q.correct);
-  dbSet('session/currentQuestion/showAnswer',   true);
-}
-
-function nextQuestion() {
-  clearInterval(qTimer); qIdx++;
-  if (qIdx >= selQs.length) {
-    dbSet('session/currentQuestion', { done:true });
-    document.getElementById('panel-1').innerHTML =
-      '<div class="wait-box"><div style="font-size:2.5rem">✅</div><div style="font-weight:700;margin-top:12px">Pre-test complete — advance to Phase 2</div></div>';
-    log('Pre-test complete', 'green'); return;
-  }
-  renderQuestion();
-}
-
-function renderTestProg(data) {
-  const el = document.getElementById('test-prog'); if (!el) return;
-  el.innerHTML = students.map(s => {
-    const cnt = Object.keys(data[s.id]?.answers || {}).length;
-    const pct = (cnt / (selQs.length||10)) * 100;
-    return `<div class="prog-row"><div class="prog-label">${s.name}</div>
-      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
-      <div class="prog-count">${cnt}/${selQs.length||10}</div></div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PHASE 2 — GROUPS
-// ═══════════════════════════════════════════════════════════════════════════
-function buildRanking() {
-  dbGet('students').then(data => {
-    if (!data) return;
-    const ranked = students.map(s => ({...s, preScore:data[s.id]?.preScore||0})).sort((a,b)=>b.preScore-a.preScore);
-    const ng = cfg.numGroups || 3;
-    groups = Array.from({length:ng}, (_,i) => ({id:`G${i+1}`,name:`Group ${i+1}`,members:[],leaderId:null}));
-    ranked.forEach((s,i) => {
-      const cycle=Math.floor(i/ng), pos=i%ng, gIdx=cycle%2===0?pos:ng-1-pos;
-      groups[gIdx].members.push(s.id); s.groupId=groups[gIdx].id;
-      if (!groups[gIdx].leaderId) groups[gIdx].leaderId=s.id;
+function buildRanking(){
+  dbGet('students').then(data=>{
+    if(!data)return;
+    const ranked=students.map(s=>({...s,preScore:data[s.id]?.preScore||0})).sort((a,b)=>b.preScore-a.preScore);
+    const ng=cfg.numGroups||3;
+    groups=Array.from({length:ng},(_,i)=>({id:`G${i+1}`,name:`Group ${i+1}`,members:[],leaderId:null}));
+    ranked.forEach((s,i)=>{
+      const cycle=Math.floor(i/ng),pos=i%ng;
+      const gIdx=cycle%2===0?pos:ng-1-pos;
+      groups[gIdx].members.push(s.id);s.groupId=groups[gIdx].id;
+      if(!groups[gIdx].leaderId)groups[gIdx].leaderId=s.id;
     });
-    const tbody = document.getElementById('rank-body'); tbody.innerHTML='';
-    ranked.forEach((s,i) => {
-      const g = groups.find(g=>g.members.includes(s.id));
-      const ldr = g?.leaderId===s.id;
-      tbody.innerHTML += `<tr class="${ldr?'hl':''}"><td>${i+1}</td>
+    // Render table
+    const tbody=document.getElementById('rank-body');tbody.innerHTML='';
+    ranked.forEach((s,i)=>{
+      const g=groups.find(g=>g.members.includes(s.id));
+      const ldr=g?.leaderId===s.id;
+      tbody.innerHTML+=`<tr class="${ldr?'hl':''}"><td>${i+1}</td>
         <td>${s.name}${ldr?' <span class="tag tag-amber">★</span>':''}</td>
         <td>${s.preScore}</td><td>${g?.id||'—'}</td><td>${ldr?'★ Leader':'Member'}</td></tr>`;
     });
-    const gc = document.getElementById('grp-grid'); gc.innerHTML='';
-    groups.forEach(g => {
-      const leader = students.find(s=>s.id===g.leaderId);
-      const names  = g.members.map(id=>students.find(s=>s.id===id)?.name||id);
-      gc.innerHTML += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px">
+    // Group cards
+    const gc=document.getElementById('grp-grid');gc.innerHTML='';
+    groups.forEach(g=>{
+      const leader=students.find(s=>s.id===g.leaderId);
+      const names=g.members.map(id=>students.find(s=>s.id===id)?.name||id);
+      gc.innerHTML+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px">
         <div style="font-weight:800;color:var(--cyan);margin-bottom:4px">${g.id}</div>
         <div style="font-size:.72rem;color:var(--amber);font-weight:700;margin-bottom:8px">★ ${leader?.name||'—'}</div>
         ${names.map(n=>`<div style="font-size:.78rem;color:var(--text2)">· ${n}</div>`).join('')}
@@ -772,376 +1236,394 @@ function buildRanking() {
   });
 }
 
-function confirmGroups() {
-  const gData = {};
-  groups.forEach(g => {
-    gData[g.id] = {name:g.name,members:g.members,leaderId:g.leaderId,
-      status:'active',decision:null,revisedDecision:null,ksa:{K:0,S:0,A:0},
-      decisionTable:{},history:{},oralScores:{}};
-  });
-  dbSet('groups', gData);
-  students.forEach(s => { if (s.groupId) dbSet(`students/${s.id}/groupId`, s.groupId); });
-  log('Groups confirmed', 'green');
-  nextPhase();
+function confirmGroups(){
+  const gData={};
+  groups.forEach(g=>{gData[g.id]={name:g.name,members:g.members,leaderId:g.leaderId,status:'active',decision:null,revisedDecision:null,ksa:{K:0,S:0,A:0},decisionTable:{},history:{},oralScores:{}};});
+  dbSet('groups',gData);
+  students.forEach(s=>{if(s.groupId)dbSet(`students/${s.id}/groupId`,s.groupId);});
+  log('Groups confirmed','green');nextPhase();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // PHASE 3 — BRIEFING
-// ═══════════════════════════════════════════════════════════════════════════
-function renderBriefingPanel() {
-  const c = cfg;
-  document.getElementById('brief-card').innerHTML = `
-    <div class="card__title">📋 Flight Information</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:.9rem;line-height:2.2;margin-bottom:10px">
-      <div><span class="text-dim">Aircraft:</span> <strong>${c.aircraft||'—'}</strong></div>
-      <div><span class="text-dim">FL:</span> <strong>${c.fl||'—'}</strong></div>
-      <div><span class="text-dim">ETD:</span> <strong>${c.etd||'—'}</strong></div>
-      <div><span class="text-dim">ETA:</span> <strong>${c.eta||'—'}</strong></div>
-      <div><span class="text-dim">From:</span> <strong style="color:var(--cyan);font-size:1.05rem">${c.dep||'—'}</strong></div>
-      <div><span class="text-dim">To:</span>   <strong style="color:var(--cyan);font-size:1.05rem">${c.dest||'—'}</strong></div>
-      <div><span class="text-dim">ALT 1:</span> <strong>${c.alt1||'—'}</strong></div>
-      <div><span class="text-dim">ALT 2:</span> <strong>${c.alt2||'—'}</strong></div>
-    </div>
-    ${c.notes?`<div class="text-sm text-muted" style="line-height:1.7;border-top:1px solid var(--border);padding-top:8px">${c.notes}</div>`:''}`;
-
-  const bs = document.getElementById('brief-sources');
-  bs.innerHTML = MET_SOURCES.map(s => `
-    <a class="met-link" href="${s.url}" target="_blank">
-      <span class="met-link__icon">${s.icon}</span>
-      <div><div class="met-link__lbl">${s.label}</div><div class="met-link__desc">${s.desc}</div></div>
-    </a>`).join('');
+// ════════════════════════════════════════════════════════════════════════════
+function renderBriefingPanel(){
+  document.getElementById('brief-card').innerHTML=`
+    <div class="card__title">Session: ${cfg.name}</div>
+    <div class="text-sm text-muted">Each group has a different scenario. Students see their group's route on the group screen.</div>`;
+  const c=document.getElementById('brief-scenarios');c.innerHTML='';
+  dbGet('session/groupScenarios').then(gsc=>{
+    if(!gsc)return;
+    groups.forEach(g=>{
+      const sc=gsc[g.id]||{};const r=sc.route||{};
+      c.innerHTML+=`<div style="padding:10px;background:var(--bg3);border-radius:var(--r);margin-bottom:8px">
+        <div class="fc gap-8 mb-4"><strong style="color:var(--cyan)">${g.id}</strong>
+          ${sc.preset&&sc.preset!=='custom'?`<span class="tag tag-cyan">${sc.preset}</span>`:'<span class="tag tag-amber">Custom</span>'}
+        </div>
+        <div class="text-sm" style="line-height:1.9">
+          ${r.dep?`<strong>${r.dep}</strong> → <strong>${r.dest}</strong> | ALT: ${r.alt1}/${r.alt2} | ${r.aircraft||'—'} ${r.depTime||''}`:'No route configured'}
+        </div>
+        ${sc.synopsis?`<div class="text-xs text-dim mt-4">${sc.synopsis}</div>`:''}
+      </div>`;
+    });
+  });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PHASE 4 — ANALYSIS
-// ═══════════════════════════════════════════════════════════════════════════
-function renderAnalysisProg(data) {
-  const el = document.getElementById('analysis-prog'); if (!el) return;
-  el.innerHTML = groups.map(g => {
-    const sub = g.members.filter(id=>data[id]?.analysisSubmitted).length;
-    const pct = g.members.length>0?(sub/g.members.length)*100:0;
-    return `<div class="prog-row"><div class="prog-label">${g.id}</div>
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 4 — ANALYSIS PROGRESS
+// ════════════════════════════════════════════════════════════════════════════
+function renderAnalysisProg(data){
+  const el=document.getElementById('analysis-prog');if(!el)return;
+  let html='';
+  groups.forEach(g=>{
+    const sub=g.members.filter(id=>data[id]?.analysisSubmitted).length;
+    const pct=g.members.length>0?(sub/g.members.length)*100:0;
+    html+=`<div class="prog-row"><div class="prog-label">${g.id}</div>
       <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
       <div class="prog-count">${sub}/${g.members.length}</div></div>`;
-  }).join('');
-
-  const prev = document.getElementById('analysis-preview'); if (!prev) return;
-  let html = '';
-  students.forEach(s => {
-    const sd = data[s.id]; if (!sd?.analysisSubmitted) return;
-    const a = sd.analysis || {};
-    const col = a.severity==='HIGH'?'var(--red)':a.severity==='MODERATE'?'var(--amber)':a.severity==='LOW'?'var(--green)':'var(--text3)';
-    html += `<div style="padding:8px;border-bottom:1px solid var(--border);font-size:.78rem">
-      <span class="font-bold">${s.name}</span>
-      <span class="tag" style="background:transparent;color:${col};margin-left:6px">${a.severity||'—'}</span>
-      <span class="tag ${a.preDec==='GO'?'tag-green':a.preDec==='NO-GO'?'tag-red':'tag-amber'}" style="margin-left:4px">${a.preDec||'—'}</span>
-      <br><span class="text-muted">${(a.hazard||'').substring(0,120)}${(a.hazard||'').length>120?'…':''}</span>
-    </div>`;
   });
-  prev.innerHTML = html || '<div class="text-xs text-dim" style="padding:8px">Waiting for submissions…</div>';
+  el.innerHTML=html;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PHASE 5 — DECISIONS
-// ═══════════════════════════════════════════════════════════════════════════
-function renderGrpDecisions(data) {
-  const el = document.getElementById('grp-decisions'); if (!el) return;
-  el.innerHTML = groups.map(g => {
-    const gd = data[g.id] || {};
-    const dec = gd.decision;
-    const col = dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
-    return `<div style="padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px">
-      <div class="fc gap-8 mb-4">
-        <strong>${g.id}</strong>
-        <span style="font-weight:900;font-size:.95rem;color:${col}">${dec||'Waiting…'}</span>
-        ${gd.altEtd?`<span class="tag tag-amber">Alt ETD: ${gd.altEtd}</span>`:''}
-        ${gd.altFl?`<span class="tag tag-blue">Alt FL: ${gd.altFl}</span>`:''}
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 5 — DECISIONS + DECISION TABLE
+// ════════════════════════════════════════════════════════════════════════════
+function renderGrpDecisions(data){
+  const el=document.getElementById('grp-decisions');if(!el)return;
+  el.innerHTML='';
+  groups.forEach(g=>{
+    const gd=data[g.id]||{};const dec=gd.decision;
+    const col=dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
+    el.innerHTML+=`<div style="padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px">
+      <div class="fc gap-8"><strong>${g.id}</strong><span style="font-weight:900;font-size:.95rem;color:${col}">${dec||'—'}</span></div>
+      ${gd.justification?`<div class="text-sm text-muted mt-4">${gd.justification.substring(0,200)}${gd.justification.length>200?'…':''}</div>`:''}
+    </div>`;
+  });
+  // KSA scoring for group decisions
+  groups.forEach(g=>{
+    const gd=data[g.id]||{};
+    if(gd.decision){
+      // Participation A points for submitting
+      const aScore=10;
+      dbSet(`groups/${g.id}/ksa/A`,aScore);
+    }
+  });
+}
+
+function renderDTPreview(data){
+  const el=document.getElementById('dt-preview');if(!el)return;
+  el.innerHTML='';
+  groups.forEach(g=>{
+    const dt=data[g.id]?.decisionTable||{};
+    const rows=Object.values(dt);
+    if(!rows.length){
+      el.innerHTML+=`<div style="color:var(--text3);font-size:.78rem;margin-bottom:8px">${g.id}: No entries yet…</div>`;return;
+    }
+    el.innerHTML+=`<div style="margin-bottom:14px">
+      <div style="font-weight:700;color:var(--cyan);font-size:.82rem;margin-bottom:5px">${g.id} — ${rows.length} hazard(s)</div>
+      <div class="dt-wrap">
+        <table class="dt">
+          <thead><tr><th>Hazard</th><th>Intensity</th><th>FL Range</th><th>Phase</th><th>Decision</th></tr></thead>
+          <tbody>${rows.map(r=>`<tr>
+            <td>${r.hazard||'—'}</td>
+            <td><span class="tag ${r.intensity==='Severe'||r.intensity==='Extreme'?'tag-red':r.intensity==='Moderate'?'tag-amber':'tag-green'}">${r.intensity||'—'}</span></td>
+            <td>${r.flRange||'—'}</td>
+            <td>${(r.flightPhases||[]).join(', ')||'—'}</td>
+            <td><span class="tag ${r.partialDec==='GO'?'tag-green':r.partialDec==='NO-GO'?'tag-red':r.partialDec==='DELAY'?'tag-amber':'tag-blue'}">${r.partialDec||'—'}</span></td>
+          </tr>`).join('')}</tbody>
+        </table>
       </div>
-      ${gd.justification?`<div class="text-sm text-muted">${gd.justification.substring(0,200)}${gd.justification.length>200?'…':''}</div>`:''}
     </div>`;
-  }).join('');
-}
-
-function renderDTPreview(data) {
-  const el = document.getElementById('dt-preview'); if (!el) return;
-  el.innerHTML = '';
-  groups.forEach(g => {
-    const gd = data[g.id] || {};
-    const dt = gd.decisionTable || {};
-    const structured = dt.structured || {};
-    const freeRows = Object.entries(dt).filter(([k]) => k !== 'structured' && k !== 'sources');
-
-    let html = `<div style="margin-bottom:16px">
-      <div style="font-weight:700;color:var(--cyan);font-size:.82rem;margin-bottom:6px">${g.id}</div>`;
-
-    // Structured summary
-    if (structured.dep || structured.arr || structured.enroute) {
-      html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;font-size:.75rem">
-        <div style="background:var(--bg3);padding:7px;border-radius:var(--r)">
-          <div style="color:var(--text3);font-weight:700;margin-bottom:4px">DEP</div>
-          ${structured.dep?.wind?`Wind: ${structured.dep.wind}<br>`:''}
-          ${structured.dep?.vis?`Vis: ${structured.dep.vis}<br>`:''}
-          ${structured.dep?.clouds?`Clouds: ${structured.dep.clouds}<br>`:''}
-        </div>
-        <div style="background:var(--bg3);padding:7px;border-radius:var(--r)">
-          <div style="color:var(--text3);font-weight:700;margin-bottom:4px">EN-ROUTE</div>
-          ${structured.enroute?.wind?`Wind: ${structured.enroute.wind}<br>`:''}
-          ${structured.enroute?.turb?`Turb: ${structured.enroute.turb}<br>`:''}
-          ${structured.enroute?.cb?`CB: ${structured.enroute.cb}<br>`:''}
-        </div>
-        <div style="background:var(--bg3);padding:7px;border-radius:var(--r)">
-          <div style="color:var(--text3);font-weight:700;margin-bottom:4px">ARR</div>
-          ${structured.arr?.wind?`Wind: ${structured.arr.wind}<br>`:''}
-          ${structured.arr?.vis?`Vis: ${structured.arr.vis}<br>`:''}
-          ${structured.arr?.clouds?`Clouds: ${structured.arr.clouds}<br>`:''}
-        </div>
-      </div>`;
-    }
-
-    if (freeRows.length) {
-      html += `<div class="text-xs text-dim">${freeRows.length} additional hazard row(s)</div>`;
-    }
-    if (dt.sources) {
-      html += `<div class="text-xs text-dim mt-4">Sources: ${dt.sources.substring(0,120)}</div>`;
-    }
-    html += '</div>';
-    el.innerHTML += html;
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // PHASE 6 — CHALLENGE
-// ═══════════════════════════════════════════════════════════════════════════
-function sendChallenge() {
-  const type   = document.getElementById('ch-type').value;
-  const text   = document.getElementById('ch-text').value.trim();
-  const target = document.getElementById('ch-target').value;
-  if (!text) { alert('Enter challenge text.'); return; }
-  dbSet('session/challenge', {type, text, target, sentAt:now()});
-  document.getElementById('ch-body').textContent = text;
+// ════════════════════════════════════════════════════════════════════════════
+function sendChallenge(){
+  const type=document.getElementById('ch-type').value;
+  const text=document.getElementById('ch-text').value.trim();
+  const target=document.getElementById('ch-target').value;
+  if(!text){alert('Enter challenge text.');return;}
+  const ch={type,text,target,sentAt:now()};
+  dbSet('session/challenge',ch);
+  document.getElementById('ch-body').textContent=text;
   closeModal('challenge-modal');
-  document.getElementById('ch-text').value = '';
-  if (phase < 6) jumpPhase(6);
-  log(`⚡ Challenge: ${type}`, 'red');
+  document.getElementById('ch-text').value='';
+  if(phase<6)jumpPhase(6);
+  log(`⚡ Challenge: ${type}`,'red');
 }
 
-function renderRevisedDecs(data) {
-  const el = document.getElementById('revised-decs'); if (!el) return;
-  el.innerHTML = groups.map(g => {
-    const dec = data[g.id]?.revisedDecision || '—';
-    const col = dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
-    return `<div class="fc gap-8" style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:5px">
-      <strong>${g.id}</strong><span style="font-weight:900;color:${col}">${dec}</span>
-    </div>`;
-  }).join('');
+function renderRevisedDecs(data){
+  const el=document.getElementById('revised-decs');if(!el)return;
+  el.innerHTML='';
+  groups.forEach(g=>{
+    const dec=data[g.id]?.revisedDecision||'—';
+    const col=dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
+    el.innerHTML+=`<div class="fc gap-8" style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:5px">
+      <strong>${g.id}</strong><span style="font-weight:900;color:${col}">${dec}</span></div>`;
+  });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // PHASE 7 — KEY MCQ
-// ═══════════════════════════════════════════════════════════════════════════
-function renderKeyResults(data) {
-  const el = document.getElementById('key-results'); if (!el) return;
-  el.innerHTML = groups.map(g => {
-    const correct = data[g.id]?.keyCorrect ?? null;
-    const penalty = correct===null?null:correct===3?0:correct===2?10:correct===1?20:30;
-    const col = penalty===0?'var(--green)':penalty===null?'var(--text3)':penalty<=10?'var(--amber)':'var(--red)';
-    return `<div class="fc gap-8" style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:5px">
+// ════════════════════════════════════════════════════════════════════════════
+function renderKeyResults(data){
+  const el=document.getElementById('key-results');if(!el)return;
+  el.innerHTML='';
+  groups.forEach(g=>{
+    const correct=data[g.id]?.keyCorrect??null;
+    const penalty=correct===null?null:correct===3?0:correct===2?10:correct===1?20:30;
+    const col=penalty===0?'var(--green)':penalty===null?'var(--text3)':penalty<=10?'var(--amber)':'var(--red)';
+    el.innerHTML+=`<div class="fc gap-8" style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:5px">
       <strong>${g.id}</strong>
-      <span>${correct!==null?`${correct}/3`:' Waiting'}</span>
+      <span>${correct!==null?`${correct}/3`:'Waiting'}</span>
       ${penalty!==null?`<span style="font-weight:800;color:${col};margin-left:auto">${penalty===0?'✓ Free':`−${penalty} pts/member`}</span>`:''}
     </div>`;
-  }).join('');
+    if(penalty!==null){
+      const g_data=data[g.id]||{};const members=g_data.members||groups.find(gr=>gr.id===g.id)?.members||[];
+      members.forEach(id=>dbSet(`students/${id}/penalty`,penalty));
+    }
+  });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // PHASE 8 — ORAL (individual per student)
-// ═══════════════════════════════════════════════════════════════════════════
-function populateOralSel() {
-  const sel = document.getElementById('oral-grp-sel'); if (!sel) return;
-  sel.innerHTML = groups.map(g => `<option value="${g.id}">${g.id}</option>`).join('');
+// ════════════════════════════════════════════════════════════════════════════
+function populateOralSel(){
+  const sel=document.getElementById('oral-grp-sel');if(!sel)return;
+  sel.innerHTML=groups.map(g=>`<option value="${g.id}">${g.id}</option>`).join('');
   loadOralGroup();
 }
 
-function loadOralGroup() {
-  const gId = document.getElementById('oral-grp-sel')?.value; if (!gId) return;
-  const g   = groups.find(gr => gr.id === gId); if (!g) return;
-  if (!oralScores[gId]) oralScores[gId] = {};
+function loadOralGroup(){
+  const gId=document.getElementById('oral-grp-sel')?.value;if(!gId)return;
+  const g=groups.find(gr=>gr.id===gId);if(!g)return;
+  if(!oralScores[gId])oralScores[gId]={};
 
-  dbGet(`groups/${gId}`).then(gd => {
-    const ref = document.getElementById('oral-ref'); if (!ref) return;
-    const dec = gd?.decision || '—';
-    const col = dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
-    const dt  = gd?.decisionTable || {};
-    ref.innerHTML = `<div class="card__title">Briefing Reference — ${gId}</div>
+  dbGet(`groups/${gId}`).then(gd=>{
+    const ref=document.getElementById('oral-ref');if(!ref)return;
+    const dec=gd?.decision||'—';
+    const col=dec==='GO'?'var(--green)':dec==='NO-GO'?'var(--red)':dec==='DELAY'?'var(--amber)':'var(--text3)';
+    ref.innerHTML=`<div class="card__title">Reference — ${gId}</div>
       <div class="text-sm" style="line-height:1.9">
-        <strong>Decision:</strong> <strong style="color:${col}">${dec}</strong>
-        ${gd?.altEtd?` · Alt ETD: ${gd.altEtd}`:''}
-        ${gd?.altFl?` · Alt FL: ${gd.altFl}`:''}
-        <br><strong>Justification:</strong> ${(gd?.justification||'').substring(0,300)||'—'}
-        ${dt.sources?`<br><strong>Sources:</strong> ${dt.sources.substring(0,200)}`:''}
+        <strong>Decision:</strong> <strong style="color:${col}">${dec}</strong><br>
+        <strong>Justification:</strong> ${(gd?.justification||'').substring(0,300)||'—'}
       </div>`;
   });
 
-  const cont = document.getElementById('oral-stu-cards'); cont.innerHTML = '';
-  g.members.forEach(sId => {
-    const sName = students.find(s => s.id === sId)?.name || sId;
-    if (!oralScores[gId][sId]) oralScores[gId][sId] = {acc:0, dec:0, cla:0};
-    const card = document.createElement('div');
-    card.className = 'oral-stu-card';
-    card.innerHTML = `<div class="oral-stu-card__name">${sName}</div>`;
-    [['acc','Meteorological Accuracy'],['dec','Decision Justified by Met Data'],['cla','Communication Clarity']].forEach(([key,label]) => {
-      const rr = document.createElement('div'); rr.className = 'rub-row';
-      rr.innerHTML = `<div class="rub-label">${label}</div>
+  // Build per-student rubric cards
+  const cont=document.getElementById('oral-student-cards');cont.innerHTML='';
+  g.members.forEach(sId=>{
+    const sName=students.find(s=>s.id===sId)?.name||sId;
+    if(!oralScores[gId][sId])oralScores[gId][sId]={acc:0,dec:0,cla:0};
+
+    const card=document.createElement('div');card.className='oral-student-card';
+    card.innerHTML=`<div class="oral-student-card__name">${sName}</div>`;
+
+    [['acc','Meteorological Accuracy'],['dec','Decision Justified'],['cla','Communication Clarity']].forEach(([key,label])=>{
+      const rr=document.createElement('div');rr.className='rub-row';
+      rr.innerHTML=`<div class="rub-label">${label}</div>
         <div class="rub-btns" id="rb-${gId}-${sId}-${key}">
           ${[1,2,3].map(v=>`<button class="rub-btn" onclick="setOral('${gId}','${sId}','${key}',${v},this)">${v}</button>`).join('')}
         </div>`;
       card.appendChild(rr);
     });
-    const tot = document.createElement('div');
-    tot.style.cssText = 'font-size:.82rem;margin-top:6px';
-    tot.id = `oral-tot-${gId}-${sId}`;
-    tot.innerHTML = 'Total: <strong style="color:var(--purple)">0</strong> / 9';
-    card.appendChild(tot);
+
+    const totEl=document.createElement('div');
+    totEl.style.cssText='font-size:.82rem;margin-top:6px';
+    totEl.id=`oral-tot-${gId}-${sId}`;
+    totEl.innerHTML='Total: <strong style="color:var(--purple)">0</strong> / 9';
+    card.appendChild(totEl);
     cont.appendChild(card);
   });
 }
 
-function setOral(gId, sId, key, val, btn) {
-  if (!oralScores[gId]) oralScores[gId] = {};
-  if (!oralScores[gId][sId]) oralScores[gId][sId] = {acc:0,dec:0,cla:0};
-  oralScores[gId][sId][key] = val;
-  btn.parentElement.querySelectorAll('.rub-btn').forEach(b => b.className = 'rub-btn');
-  btn.className = `rub-btn r${val}`;
-  const tot = oralScores[gId][sId].acc + oralScores[gId][sId].dec + oralScores[gId][sId].cla;
-  const el  = document.getElementById(`oral-tot-${gId}-${sId}`);
-  if (el) el.innerHTML = `Total: <strong style="color:var(--purple)">${tot}</strong> / 9`;
+function setOral(gId,sId,key,val,btn){
+  if(!oralScores[gId])oralScores[gId]={};
+  if(!oralScores[gId][sId])oralScores[gId][sId]={acc:0,dec:0,cla:0};
+  oralScores[gId][sId][key]=val;
+  const c=btn.parentElement;
+  c.querySelectorAll('.rub-btn').forEach(b=>b.className='rub-btn');
+  btn.className=`rub-btn r${val}`;
+  const tot=oralScores[gId][sId].acc+oralScores[gId][sId].dec+oralScores[gId][sId].cla;
+  const el=document.getElementById(`oral-tot-${gId}-${sId}`);
+  if(el)el.innerHTML=`Total: <strong style="color:var(--purple)">${tot}</strong> / 9`;
 }
 
-function saveAllOral() {
-  const gId = document.getElementById('oral-grp-sel')?.value; if (!gId) return;
-  const g   = groups.find(gr => gr.id === gId); if (!g) return;
+function saveAllOral(){
+  const gId=document.getElementById('oral-grp-sel')?.value;if(!gId)return;
+  const g=groups.find(gr=>gr.id===gId);if(!g)return;
+  let allOk=true;
+  g.members.forEach(sId=>{
+    const sc=oralScores[gId]?.[sId];
+    if(!sc||sc.acc+sc.dec+sc.cla===0){allOk=false;}
+  });
+  if(!allOk&&!confirm('Some students have 0 oral score. Save anyway?'))return;
 
-  let logLine = '';
-  g.members.forEach(sId => {
-    const sc  = oralScores[gId]?.[sId] || {acc:0,dec:0,cla:0};
-    const tot = sc.acc + sc.dec + sc.cla;
-    dbSet(`groups/${gId}/oralScores/${sId}`, {...sc, total:tot, scoredAt:now()});
-    dbSet(`students/${sId}/oralScore`, tot);
-    dbSet(`students/${sId}/oralScoreBreakdown`, sc);
-    const name = students.find(s=>s.id===sId)?.name||sId;
-    logLine += `${name}: ${tot}/9 · `;
+  g.members.forEach(sId=>{
+    const sc=oralScores[gId]?.[sId]||{acc:0,dec:0,cla:0};
+    const tot=sc.acc+sc.dec+sc.cla;
+    dbSet(`groups/${gId}/oralScores/${sId}`,{...sc,total:tot,scoredAt:now()});
+    // Store on student node too
+    dbSet(`students/${sId}/oralScore`,tot);
+    dbSet(`students/${sId}/oralScoreBreakdown`,sc);
   });
 
-  document.getElementById('oral-log').innerHTML +=
-    `<div style="padding:6px;background:var(--bg3);border-radius:5px;margin-bottom:4px;font-size:.75rem">
-      <strong style="color:var(--cyan)">${gId}</strong> — ${logLine.replace(/ · $/,'')}
+  const log_entry=g.members.map(sId=>{
+    const sc=oralScores[gId]?.[sId]||{};const tot=sc.acc+sc.dec+sc.cla||0;
+    const sName=students.find(s=>s.id===sId)?.name||sId;
+    return `${sName}: ${tot}/9`;
+  }).join(' | ');
+
+  document.getElementById('oral-log').innerHTML+=
+    `<div style="padding:6px;background:var(--bg3);border-radius:5px;margin-bottom:4px;font-size:.78rem">
+      <strong style="color:var(--cyan)">${gId}</strong> — ${log_entry}
     </div>`;
-  log(`${gId} oral saved`, 'purple');
+  logEvent(gId,'oral',{scores:oralScores[gId]});
+  log(`${gId} oral saved`,'purple');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PHASE 9 — RESULTS
-// ═══════════════════════════════════════════════════════════════════════════
-function buildResults() {
-  dbGet('students').then(data => {
-    if (!data) return;
-    const tbody = document.getElementById('res-body'); tbody.innerHTML='';
-    const scored = students.map(s => {
-      const d   = data[s.id] || {};
-      const pre = d.preScore    || 0;
-      const grpK= d.groupKScore || 0;
-      const grpS= d.groupScore  || 0;
-      const grpA= d.ksa?.A      || 0;
-      const oral= d.oralScore   || 0;
-      const pen = d.penalty     || 0;
-      const tot = Math.max(0, pre+grpK+grpS+grpA+oral-pen);
-      return {...s, pre,grpK,grpS,grpA,oral,pen,tot,gid:d.groupId};
-    }).sort((a,b)=>b.tot-a.tot);
-
-    scored.forEach((s,i) => {
-      const col = s.tot>=75?'var(--green)':s.tot>=50?'var(--amber)':'var(--red)';
-      tbody.innerHTML += `<tr><td>${i+1}</td><td style="font-weight:700">${s.name}</td>
-        <td class="text-dim">${s.gid||'—'}</td>
-        <td style="color:var(--blue)">${s.pre}</td>
-        <td style="color:var(--blue)">${s.grpK}</td>
-        <td style="color:var(--green)">${s.grpS}</td>
-        <td style="color:var(--purple)">${s.grpA}</td>
-        <td style="color:var(--purple)">${s.oral}</td>
-        <td style="color:var(--red)">${s.pen>0?'−'+s.pen:'—'}</td>
-        <td style="font-weight:900;font-size:.95rem;color:${col}">${s.tot}</td></tr>`;
-    });
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // LIVE SCORES
-// ═══════════════════════════════════════════════════════════════════════════
-function renderLiveScores(data) {
-  const tb = document.getElementById('live-scores'); if (!tb) return;
-  const sorted = students.map(s=>({...s,...(data[s.id]||{})})).sort((a,b)=>(b.preScore||0)-(a.preScore||0));
-  tb.innerHTML = sorted.map(s=>`<tr>
-    <td style="font-weight:600;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name}</td>
+// ════════════════════════════════════════════════════════════════════════════
+function renderLiveScores(data){
+  const tb=document.getElementById('live-scores');if(!tb)return;
+  const sorted=students.map(s=>({...s,...(data[s.id]||{})})).sort((a,b)=>(b.preScore||0)-(a.preScore||0));
+  tb.innerHTML=sorted.map(s=>`<tr>
+    <td style="font-weight:600;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name}</td>
     <td style="color:var(--blue);font-weight:700">${s.preScore||0}</td>
     <td style="color:var(--green)">${s.groupScore||0}</td>
     <td style="color:var(--purple)">${s.oralScore||0}</td>
   </tr>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 9 — RESULTS
+// ════════════════════════════════════════════════════════════════════════════
+function buildResults(){
+  dbGet('students').then(data=>{
+    if(!data)return;
+    const tbody=document.getElementById('results-body');tbody.innerHTML='';
+    const scored=students.map(s=>{
+      const d=data[s.id]||{};
+      const preK=d.preScore||0;
+      const grpK=d.groupKScore||0;
+      const grpS=d.groupScore||0;
+      const grpA=d.groupA||0;
+      const oral=d.oralScore||0;
+      const pen=d.penalty||0;
+      // Total: K(pre+grpK) + S(grpS + oral*0.5) + A(grpA + oral*0.5) − penalty
+      const total=Math.max(0,preK+grpK+grpS+grpA+oral-pen);
+      return {...s,preK,grpK,grpS,grpA,oral,pen,total,gid:d.groupId};
+    }).sort((a,b)=>b.total-a.total);
+
+    scored.forEach((s,i)=>{
+      const col=s.total>=75?'var(--green)':s.total>=50?'var(--amber)':'var(--red)';
+      tbody.innerHTML+=`<tr><td>${i+1}</td><td style="font-weight:700">${s.name}</td>
+        <td class="text-dim">${s.gid||'—'}</td>
+        <td>${s.preK}</td><td>${s.grpK}</td><td>${s.grpS}</td><td>${s.grpA}</td>
+        <td style="color:var(--purple);font-weight:700">${s.oral}</td>
+        <td style="font-weight:900;font-size:.95rem;color:${col}">${s.total}${s.pen>0?` <span class="text-xs" style="color:var(--red)">−${s.pen}</span>`:''}</td>
+      </tr>`;
+    });
+
+    // Group KSA
+    const gc=document.getElementById('grp-ksa-results');if(!gc)return;gc.innerHTML='';
+    dbGet('groups').then(gdata=>{
+      groups.forEach(g=>{
+        const gd=gdata?.[g.id]||{};const ksa=gd.ksa||{};
+        gc.innerHTML+=`<div style="padding:10px;background:var(--bg3);border-radius:var(--r);margin-bottom:7px">
+          <div style="font-weight:700;color:var(--cyan);margin-bottom:6px">${g.id}</div>
+          <div class="text-sm" style="line-height:2">
+            <span style="color:var(--blue)">K: ${ksa.K||0}</span> &nbsp;
+            <span style="color:var(--green)">S: ${ksa.S||0}</span> &nbsp;
+            <span style="color:var(--purple)">A: ${ksa.A||0}</span> &nbsp;
+            Decision: <strong>${gd.decision||'—'}</strong>
+          </div>
+        </div>`;
+      });
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // QR CODES
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 function openQRModal() {
-  const c = document.getElementById('qr-content'); c.innerHTML='';
+  const base = location.href.replace(/[^/]*$/, '');
+  const c = document.getElementById('qr-content'); c.innerHTML = '';
   const addQR = (label, url, color) => {
     const div = document.createElement('div');
     div.style.cssText = 'text-align:center';
     div.innerHTML = `<div style="font-weight:700;font-size:.78rem;margin-bottom:6px;color:${color}">${label}</div>`;
-    const qrDiv = document.createElement('div'); qrDiv.className='qr-wrap';
-    generateQR(url, qrDiv, 130);
+    const qrDiv = document.createElement('div'); qrDiv.className = 'qr-wrap';
+    // Generate QR via dynamic import
+    import('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js')
+      .then(() => { try { new QRCode(qrDiv, {text:url,width:130,height:130}); } catch(e){} })
+      .catch(() => { qrDiv.style.cssText='font-size:.65rem;color:#94a3b8;word-break:break-all;padding:4px'; qrDiv.textContent=url; });
     div.appendChild(qrDiv);
     div.innerHTML += `<div style="font-size:.6rem;color:var(--text3);margin-top:4px;word-break:break-all">${url}</div>`;
     c.appendChild(div);
   };
-  addQR('Student', `${BASE_URL}student.html`, 'var(--blue)');
-  groups.forEach(g => addQR(g.id, `${BASE_URL}group.html?g=${g.id}`, 'var(--cyan)'));
-  openModal('qr-modal');
+  addQR('Student', `${base}student.html`, 'var(--blue)');
+  const ng = groups.length > 0 ? groups.length : (cfg.numGroups || +document.getElementById('c-ng')?.value || 3);
+  const grpList = groups.length > 0 ? groups.map(g => g.id) : Array.from({length:ng}, (_,i) => `G${i+1}`);
+  grpList.forEach(gid => addQR(gid, `${base}group.html?g=${gid}`, 'var(--cyan)'));
+  document.getElementById('qr-modal').classList.add('open');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// Override openModal for QR
+const _openModal=window.openModal;
+
+
+// ════════════════════════════════════════════════════════════════════════════
 // UTILS
-// ═══════════════════════════════════════════════════════════════════════════
-function openModal(id) {
-  if (id === 'qr-modal') { openQRModal(); return; }
-  document.getElementById(id)?.classList.add('open');
-}
-function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target===el) el.classList.remove('open'); });
-});
-document.addEventListener('keydown', e => { if (e.key==='Escape') { document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); document.getElementById('guide-panel')?.classList.remove('open'); } });
+// ════════════════════════════════════════════════════════════════════════════
+function openModal(id){document.getElementById(id)?.classList.add('open');}
+function closeModal(id){document.getElementById(id)?.classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
 
-function log(text, type='blue') {
-  const feed = document.getElementById('activity-feed'); if (!feed) return;
-  const ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const item = document.createElement('div'); item.className='feed-item';
+function log(text,type='blue'){
+  const feed=document.getElementById('activity-feed');if(!feed)return;
+  const ts=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const item=document.createElement('div');item.className='feed-item fade-in';
   item.innerHTML=`<span class="tag tag-${type}" style="font-size:.6rem;padding:1px 5px">${type.toUpperCase()}</span> ${text}<div class="feed-time">${ts}</div>`;
-  feed.insertBefore(item, feed.firstChild);
-  if (feed.children.length > 60) feed.removeChild(feed.lastChild);
+  feed.insertBefore(item,feed.firstChild);
+  if(feed.children.length>60)feed.removeChild(feed.lastChild);
 }
 
-function exportData() {
-  dbGet('').then(d => {
-    const b = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = `meteo-brief-${now()}.json`;
-    a.click();
+function exportData(){dbGet('').then(d=>{const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`meteo-brief-${now()}.json`;a.click();});}
+function resetSession(){if(!confirm('Reset? All data deleted.'))return;dbRemove('').then(()=>location.reload());}
+
+function buildGuide() {
+  const c = document.getElementById('guide-content'); if (!c) return;
+  c.innerHTML = '';
+  SESSION_GUIDE.forEach((g, i) => {
+    const div = document.createElement('div');
+    div.className = 'guide-phase';
+    div.innerHTML = `
+      <div class="guide-phase__header" onclick="toggleGuidePhase(${i})">
+        <div class="guide-phase__dot" style="background:${g.color}"></div>
+        <div class="guide-phase__name">${g.phase}</div>
+        <div class="guide-phase__dur">${g.duration} · ${g.who}</div>
+        <span style="color:var(--text3);font-size:.8rem">▼</span>
+      </div>
+      <div class="guide-phase__body" id="gph-${i}">
+        ${g.steps.map(s => `<div class="guide-step">${s}</div>`).join('')}
+      </div>`;
+    c.appendChild(div);
   });
+  document.getElementById('gph-0')?.classList.add('open');
 }
-
-function resetSession() {
-  if (!confirm('Reset entire session? All Firebase data will be deleted.')) return;
-  dbRemove('').then(() => location.reload());
+function toggleGuidePhase(i) { document.getElementById('gph-'+i)?.classList.toggle('open'); }
+function toggleGuide() { document.getElementById('guide-panel').classList.toggle('open'); }
+function printGuide() {
+  const w = window.open('', '_blank');
+  w.document.write('<html><head><title>Session Guide</title><style>body{font-family:Arial,sans-serif;font-size:13px;max-width:800px;margin:40px auto}h2{font-size:14px;margin:16px 0 6px;color:#333}.step{margin:3px 0;line-height:1.6}.step::before{content:"› "}</style></head><body><h1>METEO BRIEF — Session Guide</h1>' +
+    SESSION_GUIDE.map(g => '<h2>' + g.phase + ' — ' + g.duration + '</h2>' + g.steps.map(s => '<div class="step">' + s + '</div>').join('')).join('') +
+    '</body></html>');
+  w.document.close(); w.print();
 }
 </script>
 </body>
