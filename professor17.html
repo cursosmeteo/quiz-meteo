@@ -25,7 +25,7 @@
   .qr-link { font-size: 20px; font-weight: 800; color: var(--aviation); margin-top: 8px; }
   .start-hint { font-size: 15px; color: var(--steel); margin-top: 12px; }
   .start-hint kbd { background: var(--navy); color: #fff; padding: 4px 12px; border-radius: 4px; font-family: monospace; }
-  .scoring-info { background: var(--light); border: 1px solid var(--border); border-top: 3px solid var(--aviation); padding: 14px 20px; border-radius: 4px; font-size: 14px; color: var(--text); line-height: 1.8; max-width: 500px; }
+  .scoring-info { background: var(--light); border: 1px solid var(--border); border-top: 3px solid var(--aviation); padding: 14px 20px; border-radius: 4px; font-size: 13px; color: var(--text); line-height: 1.9; max-width: 520px; }
   .scoring-info b { color: var(--navy); }
   .s1{color:var(--green);font-weight:700}.s2{color:var(--amber);font-weight:700}.s3{color:var(--steel);font-weight:700}.s0{color:var(--red);font-weight:700}
   .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
@@ -49,32 +49,40 @@
   .r-panel h3 { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: var(--steel); text-transform: uppercase; }
   .connected-count { font-size: 13px; color: var(--steel); margin-top: -8px; }
   .connected-count span { font-weight: 700; color: var(--navy); }
-  .response-bars{display:flex;flex-direction:column;gap:6px}.r-bar-wrap{display:flex;flex-direction:column;gap:2px}
-  .r-bar-label{display:flex;justify-content:space-between;font-size:13px}.r-bar-label .opt-letter{font-weight:700;color:var(--aviation)}.r-bar-label .opt-count{color:var(--steel)}
-  .r-bar-track{height:10px;background:var(--light);border-radius:5px;overflow:hidden;border:1px solid var(--border)}.r-bar-fill{height:100%;background:var(--aviation);border-radius:5px;transition:width .4s}
-  .r-bar-wrap.correct .r-bar-fill{background:var(--green)}.r-bar-wrap.wrong .r-bar-fill{background:var(--red)}
-  .responses-list{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto}
-  .r-item{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--light);border-radius:4px;font-size:12px;border:1px solid var(--border)}
-  .r-item .r-name{flex:1;font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .r-item .r-ans{font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;background:var(--aviation);color:#fff;flex-shrink:0}
-  .r-item.correct .r-ans{background:var(--green)}.r-item.wrong .r-ans{background:var(--red)}
-  .r-item .r-pts{font-size:11px;color:var(--green);font-weight:700;white-space:nowrap}.r-item .r-pts.neg{color:var(--red)}
-  .scoreboard-panel{border-top:1px solid var(--border);padding-top:10px}
-  .score-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}.score-row:last-child{border:none}
-  .score-rank{font-size:11px;color:var(--steel);width:20px;text-align:center;font-weight:700}
-  .score-name{flex:1;font-size:13px;font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .score-pts{font-size:18px;font-weight:800;color:var(--navy);min-width:40px;text-align:right}
-  .controls{border-top:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--light)}
-  .ctrl-btn{padding:8px 20px;border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;transition:opacity .15s}
+  /* Response indicators - YES/NO only, no letter */
+  .responses-grid { display: flex; flex-direction: column; gap: 5px; }
+  .r-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--light); border-radius: 6px; font-size: 13px; border: 1px solid var(--border); }
+  .r-item .r-name { flex: 1; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-item .r-indicator { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; background: var(--steel); color: #fff; }
+  .r-item.answered .r-indicator { background: var(--aviation); }
+  .r-item.correct .r-indicator { background: var(--green); }
+  .r-item.wrong .r-indicator { background: var(--red); }
+  .r-item .r-pts { font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; min-width: 28px; text-align: right; }
+  .r-item .r-pts.neg { color: var(--red); }
+  .scoreboard-panel { border-top: 1px solid var(--border); padding-top: 10px; }
+  .score-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border: none; }
+  .score-rank { font-size: 11px; color: var(--steel); width: 20px; text-align: center; font-weight: 700; }
+  .score-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .score-pts { font-size: 18px; font-weight: 800; color: var(--navy); min-width: 40px; text-align: right; }
+  .controls { border-top: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--light); }
+  .ctrl-btn { padding: 8px 20px; border: none; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .15s; }
   .ctrl-btn:hover{opacity:.85}.ctrl-btn:disabled{opacity:.35;cursor:not-allowed}
   .ctrl-btn.primary{background:var(--navy);color:#fff}.ctrl-btn.reveal{background:var(--amber);color:var(--navy)}.ctrl-btn.danger{background:var(--red);color:#fff}
   .ctrl-hint{font-size:12px;color:var(--steel)}.ctrl-hint kbd{background:var(--navy);color:#fff;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:10px}
-  .final-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:24px;text-align:center}
-  .final-screen h1{font-size:52px;font-weight:800;color:var(--navy)}
-  .podium{display:flex;gap:20px;align-items:flex-end}
-  .pillar{width:150px;padding:20px 12px;text-align:center;color:#fff;border-radius:6px 6px 0 0}
-  .pillar .rank{font-size:12px;opacity:.85;letter-spacing:2px}.pillar .name{font-size:18px;font-weight:700;margin:6px 0}.pillar .pts{font-size:44px;font-weight:800}
-  .pillar.gold{background:var(--amber);height:220px}.pillar.silver{background:var(--steel);height:185px}.pillar.bronze{background:#B87333;height:155px}
+  /* FINAL SCREEN WITH CHART */
+  .final-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; text-align: center; padding: 20px; }
+  .final-screen h1 { font-size: 42px; font-weight: 800; color: var(--navy); }
+  .chart-wrap { width: 100%; max-width: 700px; background: var(--light); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px 16px; }
+  .chart-bars { display: flex; align-items: flex-end; justify-content: center; gap: 16px; height: 200px; }
+  .chart-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 100px; }
+  .chart-bar-wrap { display: flex; align-items: flex-end; height: 180px; width: 100%; }
+  .chart-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height .6s ease; display: flex; align-items: flex-start; justify-content: center; padding-top: 6px; }
+  .chart-pts { font-size: 20px; font-weight: 800; color: #fff; }
+  .chart-name { font-size: 13px; font-weight: 700; color: var(--navy); text-align: center; line-height: 1.2; }
+  .chart-rank { font-size: 20px; margin-bottom: 2px; }
+  .debrief { font-size: 13px; color: var(--steel); max-width: 600px; line-height: 1.7; }
+  .debrief b { color: var(--navy); }
 </style>
 </head>
 <body>
@@ -92,12 +100,10 @@
         <div class="qr-link" id="aluno-url">— loading —</div>
         <div id="qrcode-container"></div>
         <div class="scoring-info">
-          <b>Scoring — all answer</b><br>
-          <span class="s1">+20 pts</span> correct in 1s &nbsp;·&nbsp;
-          <span class="s2">+11 pts</span> correct in 10s<br>
-          <span class="s3">+1 pt</span> correct in 20s &nbsp;·&nbsp;
-          <span class="s0">−2 pts</span> wrong &nbsp;·&nbsp;
-          <span class="s0">−1 pt</span> no answer
+          <b>Scoring — all answer · 30 seconds</b><br>
+          <span class="s1">+6</span> correct 1–5s &nbsp;·&nbsp; <span class="s1">+5</span> correct 6–10s &nbsp;·&nbsp; <span class="s2">+4</span> correct 11–15s<br>
+          <span class="s2">+3</span> correct 16–20s &nbsp;·&nbsp; <span class="s3">+2</span> correct 21–25s &nbsp;·&nbsp; <span class="s3">+1</span> correct 26–30s<br>
+          <span class="s0">−4</span> wrong &nbsp;·&nbsp; <span class="s0">−2</span> no answer
         </div>
         <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
       </div>
@@ -107,9 +113,8 @@
       <div class="connected-count"><span id="connected-num">0</span> devices</div>
       <div>
         <h3>Answers <span id="answer-count" style="color:var(--navy);font-size:14px;"></span></h3>
-        <div class="response-bars" id="response-bars"><div style="font-size:13px;color:var(--steel);">Awaiting start</div></div>
+        <div class="responses-grid" id="responses-grid"><div style="font-size:13px;color:var(--steel);">Awaiting start</div></div>
       </div>
-      <div><h3 style="margin-bottom:6px;">Detail</h3><div class="responses-list" id="responses-list"></div></div>
       <div class="scoreboard-panel"><h3 style="margin-bottom:8px;">Scoreboard</h3><div id="scoreboard-list"></div></div>
     </div>
   </main>
@@ -136,150 +141,97 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "595212568307",
   appId: "1:595212568307:web:e51bc42c187f13a6359986"
 };
-const TIME_PER_Q = 20;
+
+const TIME_PER_Q = 30;
 
 const QUESTIONS = [
   {
-    eyebrow: "WIND SHEAR · DEFINITION",
-    code: "050 09 03 01",
+    eyebrow: "WIND SHEAR · DEFINITION", code: "050 09 03 01",
     q: "Vertical wind shear is defined as a change in wind speed and/or direction with change of height, measured in:",
-    options: [
-      "Knots per 1 000 ft — as measured along a runway by multiple anemometers",
-      "Knots per 100 ft — as measured by anemometers at different heights on a single mast",
-      "Metres per second per kilometre — standard SI definition",
-      "Knots per 500 ft — ICAO standard measurement interval"
-    ],
+    options: ["Knots per 1 000 ft — as measured along a runway by multiple anemometers","Knots per 100 ft — as measured by anemometers at different heights on a single mast","Metres per second per kilometre — standard SI definition","Knots per 500 ft — ICAO standard measurement interval"],
     correct: 1,
     explain: "Vertical wind shear = change in speed/direction with height, measured in kt/100 ft (two anemometers at different heights on a mast). Horizontal wind shear = change in speed/direction in the horizontal plane, measured in kt/1 000 ft along a runway."
   },
   {
-    eyebrow: "WIND SHEAR · CONDITIONS",
-    code: "050 09 03 02",
+    eyebrow: "WIND SHEAR · CONDITIONS", code: "050 09 03 02",
     q: "The greatest wind shear associated with a jet stream is found:",
-    options: [
-      "On the warm air side of the jet core, at the tropopause",
-      "On the cold air side of the jet core just below the core, and above the core into the stratosphere",
-      "At the jet stream core itself, where wind speeds are maximum",
-      "Equatorward of the jet, between FL150 and FL200"
-    ],
+    options: ["On the warm air side of the jet core, at the tropopause","On the cold air side of the jet core just below the core, and above the core into the stratosphere","At the jet stream core itself, where wind speeds are maximum","Equatorward of the jet, between FL150 and FL200"],
     correct: 1,
-    explain: "Greatest shear is on the COLD air side just below the jet core (where wind decreases most steeply). A secondary shear area exists above the core, extending into the stratosphere as winds rapidly decrease. This is a classic CAT zone."
+    explain: "Greatest shear is on the COLD air side just below the jet core. A secondary shear area exists above the core, extending into the stratosphere. This is a classic CAT zone."
   },
   {
-    eyebrow: "WIND SHEAR · MICROBURST",
-    code: "050 09 03 02",
+    eyebrow: "WIND SHEAR · MICROBURST", code: "050 09 03 02",
     q: "A microburst warning sign that can be seen visually from the cockpit is:",
-    options: [
-      "Lenticular clouds downwind of a mountain range",
-      "Virga — precipitation below a cloud that evaporates before reaching the ground",
-      "St Elmo's fire around the nose and wing tips",
-      "A roll of stratocumulus ahead of the storm gust front"
-    ],
+    options: ["Lenticular clouds downwind of a mountain range","Virga — precipitation below a cloud that evaporates before reaching the ground","St Elmo's fire around the nose and wing tips","A roll of stratocumulus ahead of the storm gust front"],
     correct: 1,
-    explain: "Virga is precipitation that evaporates before reaching the ground. As it evaporates it cools the air, intensifying the downdraft. It is a key visual warning of potential microburst activity. The microburst itself is concentrated in a 3 NM area and lasts ~5 minutes."
+    explain: "Virga is precipitation that evaporates before reaching the ground. As it evaporates it cools the air, intensifying the downdraft. It is a key visual warning of potential microburst activity."
   },
   {
-    eyebrow: "THUNDERSTORMS · CONDITIONS",
-    code: "050 09 04 01",
+    eyebrow: "THUNDERSTORMS · CONDITIONS", code: "050 09 04 01",
     q: "Which THREE conditions are required for thunderstorm development?",
-    options: [
-      "Frontal uplift, a stable lapse rate, and sufficient moisture",
-      "A lapse rate greater than SALR through 10 000+ ft above the freezing level, sufficient moisture, and a trigger mechanism",
-      "Cold advection above FL200, anticyclonic conditions, and a deep moist layer",
-      "A jet stream at FL300, a tropopause above FL500, and orographic forcing"
-    ],
+    options: ["Frontal uplift, a stable lapse rate, and sufficient moisture","A lapse rate greater than SALR through 10 000+ ft above the freezing level, sufficient moisture, and a trigger mechanism","Cold advection above FL200, anticyclonic conditions, and a deep moist layer","A jet stream at FL300, a tropopause above FL500, and orographic forcing"],
     correct: 1,
-    explain: "Thunderstorms need: (1) a lapse rate > SALR through at least 10 000 ft extending above the freezing level — deep instability, (2) sufficient water vapour to form and maintain the cloud, and (3) a trigger (convection, orographic uplift, convergence, or frontal uplift)."
+    explain: "Thunderstorms need: (1) a lapse rate > SALR through at least 10 000 ft above the freezing level, (2) sufficient water vapour, and (3) a trigger (convection, orographic uplift, convergence, or frontal uplift)."
   },
   {
-    eyebrow: "THUNDERSTORMS · LIFE CYCLE",
-    code: "050 09 04 02",
+    eyebrow: "THUNDERSTORMS · LIFE CYCLE", code: "050 09 04 02",
     q: "During the MATURE stage of a single-cell thunderstorm, which statement is correct?",
-    options: [
-      "Only updrafts are present — no precipitation has yet formed",
-      "Updrafts of up to 10 000 fpm coexist with downdrafts; heavy precipitation, severe turbulence and microbursts are possible",
-      "All updrafts have ceased — only downdrafts and dissipating precipitation remain",
-      "The cloud is entirely in the cumulus stage, capped by a stable layer"
-    ],
+    options: ["Only updrafts are present — no precipitation has yet formed","Updrafts of up to 10 000 fpm coexist with downdrafts; heavy precipitation, severe turbulence and microbursts are possible","All updrafts have ceased — only downdrafts and dissipating precipitation remain","The cloud is entirely in the cumulus stage, capped by a stable layer"],
     correct: 1,
-    explain: "In the mature stage: updrafts remain very strong (up to 10 000 fpm) while rain/hail triggers downdrafts (up to 2 400 fpm). Result: moderate to severe turbulence, gust front up to 13–17 NM ahead, microbursts, lightning, and heavy precipitation. The most dangerous phase — lasts 15–20 min."
+    explain: "In the mature stage: updrafts remain very strong (up to 10 000 fpm) while rain/hail triggers downdrafts (up to 2 400 fpm). Most dangerous phase — lasts 15–20 min."
   },
   {
-    eyebrow: "THUNDERSTORMS · LIGHTNING",
-    code: "050 09 04 03",
+    eyebrow: "THUNDERSTORMS · LIGHTNING", code: "050 09 04 03",
     q: "A lightning strike on an aircraft is most likely to occur between which temperatures?",
-    options: [
-      "0°C and −10°C (between the freezing level and 5 000 ft above it)",
-      "+10°C and −10°C (most likely between 0°C and −10°C)",
-      "−20°C and −40°C in the upper CB anvil",
-      "Any temperature — lightning strikes are uniformly distributed in the cloud"
-    ],
+    options: ["0°C and −10°C (between the freezing level and 5 000 ft above it)","+10°C and −10°C (most likely between 0°C and −10°C)","−20°C and −40°C in the upper CB anvil","Any temperature — lightning strikes are uniformly distributed in the cloud"],
     correct: 1,
-    explain: "Aircraft lightning strikes are most likely between +10°C and −10°C, with the highest probability between 0°C and −10°C — around the freezing level where charge separation is most active. Voltage: 10–120 million volts; current: up to 100 000 A; channel temperature: ~30 000°C."
+    explain: "Aircraft lightning strikes are most likely between +10°C and −10°C, with the highest probability between 0°C and −10°C — around the freezing level where charge separation is most active."
   },
   {
-    eyebrow: "THUNDERSTORMS · MICROBURST",
-    code: "050 09 04 04",
+    eyebrow: "THUNDERSTORMS · MICROBURST", code: "050 09 04 04",
     q: "A microburst is particularly dangerous on approach because it produces a headwind-to-tailwind sequence that results in:",
-    options: [
-      "A sudden increase in lift — aircraft climbs above the glidepath",
-      "First a performance gain (headwind) then a sudden and severe performance loss (tailwind) — risk of controlled flight into terrain",
-      "Severe icing on the leading edges due to rapid temperature change",
-      "A 180° wind reversal causing the aircraft to stall at cruise altitude"
-    ],
+    options: ["A sudden increase in lift — aircraft climbs above the glidepath","First a performance gain (headwind) then a sudden and severe performance loss (tailwind) — risk of controlled flight into terrain","Severe icing on the leading edges due to rapid temperature change","A 180° wind reversal causing the aircraft to stall at cruise altitude"],
     correct: 1,
-    explain: "On approach: the aircraft first encounters an increasing headwind (airspeed/lift increase), then crosses the microburst core and enters the tailwind portion (airspeed/lift collapse). The wind shear (headwind to tailwind) can be 50–90 kt. Recovery requires immediate go-around or windshear escape manoeuvre."
+    explain: "On approach: increasing headwind (airspeed/lift increase), then tailwind (airspeed/lift collapse). Wind shear can be 50–90 kt. Recovery requires immediate go-around or windshear escape manoeuvre."
   },
   {
-    eyebrow: "THUNDERSTORMS · AVOIDANCE",
-    code: "050 09 04 05",
+    eyebrow: "THUNDERSTORMS · AVOIDANCE", code: "050 09 04 05",
     q: "A thunderstorm cell should NOT be overflown unless there is at least:",
-    options: [
-      "1 000 ft clearance above the visible cloud top",
-      "5 000 ft clearance above the visible cloud top, and tops must be below 25 000 ft",
-      "10 000 ft clearance — required any time CB is forecast on route",
-      "FL200 cruise altitude — below this storms can be overflown at any separation"
-    ],
+    options: ["1 000 ft clearance above the visible cloud top","5 000 ft clearance above the visible cloud top, and tops must be below 25 000 ft","10 000 ft clearance — required any time CB is forecast on route","FL200 cruise altitude — below this storms can be overflown at any separation"],
     correct: 1,
-    explain: "A CB cell requires at least 5 000 ft vertical separation above the visible cloud top. Additionally, cells with tops above 25 000 ft should NOT be overflown due to the potential for strong turbulence well above the visible top. Flying around is always preferred."
+    explain: "A CB cell requires at least 5 000 ft vertical separation above the visible cloud top. Cells with tops above 25 000 ft should NOT be overflown. Flying around is always preferred."
   },
   {
-    eyebrow: "TORNADOES · PROPERTIES",
-    code: "050 09 05 01",
+    eyebrow: "TORNADOES · PROPERTIES", code: "050 09 05 01",
     q: "Tornadoes are exclusively associated with:",
-    options: [
-      "Tropical cyclones and hurricanes only",
-      "Cumulonimbus (Cb) and large Cumulus (Cu) clouds",
-      "Frontal systems in polar regions during winter",
-      "Radiation inversions over flat continental plains"
-    ],
+    options: ["Tropical cyclones and hurricanes only","Cumulonimbus (Cb) and large Cumulus (Cu) clouds","Frontal systems in polar regions during winter","Radiation inversions over flat continental plains"],
     correct: 1,
-    explain: "Tornadoes are exclusively associated with Cb and large Cu clouds. They form when vertical wind shear converts to horizontal — typically warm moist air at low altitude meets cool dry air from a different direction at altitude. Supercell thunderstorms are the primary producer of tornadoes."
+    explain: "Tornadoes are exclusively associated with Cb and large Cu clouds. They form when vertical wind shear converts to horizontal — supercell thunderstorms are the primary producer of tornadoes."
   },
   {
-    eyebrow: "THUNDERSTORMS · HAZARDS",
-    code: "050 09 04 05",
+    eyebrow: "THUNDERSTORMS · HAZARDS", code: "050 09 04 05",
     q: "Which effect does a lightning strike typically have on aircraft systems?",
-    options: [
-      "Immediate structural failure of the primary airframe",
-      "Temporary pilot blindness, magnetic compass errors, and possible disruption to electrical equipment",
-      "Complete loss of all avionics requiring an immediate emergency landing",
-      "Fuel tank ignition leading to catastrophic in-flight fire"
-    ],
+    options: ["Immediate structural failure of the primary airframe","Temporary pilot blindness, magnetic compass errors, and possible disruption to electrical equipment","Complete loss of all avionics requiring an immediate emergency landing","Fuel tank ignition leading to catastrophic in-flight fire"],
     correct: 1,
-    explain: "A lightning strike typically causes: temporary blindness of the pilots (flashblindness), minor airframe damage, serious magnetic compass errors, and disruption to electrical/avionics equipment. Modern aircraft are designed to withstand lightning, but the effects can still be significant operationally."
+    explain: "A lightning strike typically causes: temporary blindness, minor airframe damage, serious magnetic compass errors, and disruption to electrical/avionics equipment. Modern aircraft are designed to withstand lightning but effects can be significant operationally."
   }
 ];
 
 const DEBRIEF_TOPICS = "Jet stream wind shear · Microburst (virga warning) · CB 3-stage lifecycle · Lightning strike effects · Thunderstorm avoidance (5 000 ft / 20 NM)";
 
+const BAR_COLOURS = ["#1B4F8E","#06A77D","#F4A261","#E63946","#5A7A9C","#8B5CF6","#EC4899","#14B8A6"];
+
 let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
 let db;
+
 try {
   firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
   document.getElementById("conn-status").textContent = "Connected ✓";
   document.getElementById("conn-status").className = "conn ok";
-} catch(e) { document.getElementById("conn-status").textContent = "Firebase error"; document.getElementById("conn-status").className = "conn err"; }
+} catch(e) {
+  document.getElementById("conn-status").textContent = "Firebase error";
+  document.getElementById("conn-status").className = "conn err";
+}
 
 window.addEventListener("load", () => {
   const alunoUrl = window.location.origin + window.location.pathname.replace("professor17.html","") + "aluno17.html";
@@ -290,51 +242,92 @@ window.addEventListener("load", () => {
 
 function listenFirebase() {
   if (!db) return;
-  db.ref("connected").on("value", snap => { state.connected = snap.val() || {}; document.getElementById("connected-num").textContent = Object.keys(state.connected).length; });
+  db.ref("connected").on("value", snap => {
+    state.connected = snap.val() || {};
+    document.getElementById("connected-num").textContent = Object.keys(state.connected).length;
+    renderResponseGrid();
+  });
   db.ref("responses").on("value", snap => {
-    state.responses = snap.val() || {}; renderResponses(); renderScoreboard();
+    state.responses = snap.val() || {};
+    renderResponseGrid();
+    renderScoreboard();
     const el = document.getElementById("answer-count");
     if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
   });
 }
-function calcPts(t) { return Math.max(1, t + 1); }
+
+// New scoring: +6 to +1 based on speed, -4 wrong, -2 no answer
+function calcPts(timeLeft) {
+  const elapsed = TIME_PER_Q - timeLeft;
+  if (elapsed <= 5)  return 6;
+  if (elapsed <= 10) return 5;
+  if (elapsed <= 15) return 4;
+  if (elapsed <= 20) return 3;
+  if (elapsed <= 25) return 2;
+  return 1;
+}
+
 function pushQ(idx) {
-  if (!db) return; const Q = QUESTIONS[idx];
+  if (!db) return;
+  const Q = QUESTIONS[idx];
   db.ref("currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
   db.ref("responses").remove();
 }
+
 function nextQuestion() {
   if (state.idx === -1) { state.idx = 0; }
   else if (state.revealed) { scoreCurrentQuestion(); state.idx++; state.revealed = false; }
   if (state.idx >= QUESTIONS.length) { renderFinal(); return; }
-  state.responses = {}; renderQuestion(); pushQ(state.idx); startTimer();
+  state.responses = {};
+  renderQuestion(); pushQ(state.idx); startTimer();
   document.getElementById("btn-reveal").disabled = false;
   document.getElementById("btn-next").textContent = "Next question";
   document.getElementById("btn-next").disabled = true;
   document.getElementById("answer-count").textContent = "";
 }
+
 function revealAnswer() {
-  if (state.revealed) return; state.revealed = true; stopTimer();
+  if (state.revealed) return;
+  state.revealed = true; stopTimer();
   if (db) { db.ref("currentQuestion/revealed").set(true); db.ref("currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
   showCorrectAnswer();
-  document.getElementById("btn-reveal").disabled = true; document.getElementById("btn-next").disabled = false;
+  document.getElementById("btn-reveal").disabled = true;
+  document.getElementById("btn-next").disabled = false;
   if (state.idx >= QUESTIONS.length - 1) document.getElementById("btn-next").textContent = "View final results";
 }
+
 function scoreCurrentQuestion() {
   const Q = QUESTIONS[state.idx];
-  Object.keys(state.connected).forEach(uid => { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; });
+  Object.keys(state.connected).forEach(uid => {
+    if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
+  });
   Object.entries(state.responses).forEach(([uid, d]) => {
     if (!state.scores[uid]) state.scores[uid] = { name: d.name, pts: 0 };
-    state.scores[uid].pts += d.answer === Q.correct ? calcPts(d.timeLeft || 0) : (d.answer === -1 ? 0 : -2);
+    if (d.answer === Q.correct) {
+      state.scores[uid].pts += calcPts(d.timeLeft || 0);
+    } else if (d.answer === -1 || d.timeout) {
+      state.scores[uid].pts -= 2; // no answer
+    } else {
+      state.scores[uid].pts -= 4; // wrong
+    }
   });
-  Object.keys(state.connected).forEach(uid => { if (!state.responses[uid]) { if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 }; state.scores[uid].pts -= 1; } });
+  // -2 for connected but no response at all
+  Object.keys(state.connected).forEach(uid => {
+    if (!state.responses[uid]) {
+      if (!state.scores[uid]) state.scores[uid] = { name: state.connected[uid]?.name || uid, pts: 0 };
+      state.scores[uid].pts -= 2;
+    }
+  });
 }
+
 function resetQuiz() {
   if (!confirm("Restart the quiz? All scores will be lost.")) return;
-  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected }; stopTimer();
+  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected };
+  stopTimer();
   if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
   location.reload();
 }
+
 function renderQuestion() {
   const Q = QUESTIONS[state.idx];
   document.getElementById("progress").innerHTML = `Question <span>${state.idx + 1} / ${QUESTIONS.length}</span>`;
@@ -346,60 +339,112 @@ function renderQuestion() {
     <div class="q-text">${Q.q}</div>
     <div class="options">${Q.options.map((o,i)=>`<div class="opt" id="opt-${i}"><div class="key">${String.fromCharCode(65+i)}</div><div>${o}</div></div>`).join("")}</div>
     <div class="feedback" id="feedback"></div>`;
-  renderResponseBars({});
 }
+
 function showCorrectAnswer() {
   const Q = QUESTIONS[state.idx];
   const el = document.getElementById("opt-"+Q.correct); if (el) el.classList.add("correct");
-  const fb = document.getElementById("feedback"); if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
-  renderResponses();
+  const fb = document.getElementById("feedback");
+  if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
+  renderResponseGrid();
 }
-function renderResponses() {
-  const counts = [0,0,0,0]; Object.values(state.responses).forEach(r => { if (r.answer>=0&&r.answer<=3) counts[r.answer]++; });
-  renderResponseBars(counts, Math.max(1, Object.keys(state.responses).length));
-  const list = document.getElementById("responses-list"); if (!list) return;
-  const Q = state.idx >= 0 ? QUESTIONS[state.idx] : null;
-  list.innerHTML = Object.entries(state.responses).sort((a,b)=>(b[1].timeLeft||0)-(a[1].timeLeft||0)).map(([uid,r])=>{
-    const tLeft = r.timeLeft || 0;
-    const timeLbl = r.answer === -1 ? "—" : (TIME_PER_Q - tLeft) + "s";
-    const isC = Q&&state.revealed ? r.answer===Q.correct : null;
-    const pts = state.revealed&&Q ? (r.answer===Q.correct?`+${calcPts(tLeft)}`:(r.answer===-1?"−1":"−2")) : "";
-    return `<div class="r-item ${isC===true?"correct":isC===false?"wrong":""}"><div class="r-name">${r.name||"Student"}</div><div class="r-ans" style="font-size:10px">${timeLbl}</div><div class="r-pts ${pts.startsWith("+")?"":"neg"}">${pts}</div></div>`;
+
+// Show YES/NO indicators only — no letter shown
+function renderResponseGrid() {
+  const grid = document.getElementById("responses-grid");
+  if (!grid) return;
+  const Q = state.idx >= 0 && state.idx < QUESTIONS.length ? QUESTIONS[state.idx] : null;
+  const connectedList = Object.entries(state.connected);
+  if (!connectedList.length) {
+    grid.innerHTML = `<div style="font-size:13px;color:var(--steel);">No students connected</div>`;
+    return;
+  }
+  grid.innerHTML = connectedList.map(([uid, c]) => {
+    const r = state.responses[uid];
+    let cls = "", indicator = "—", pts = "";
+    if (r) {
+      const isC = Q && state.revealed ? r.answer === Q.correct : null;
+      if (isC === true) {
+        cls = "correct"; indicator = "✓";
+        pts = `+${calcPts(r.timeLeft||0)}`;
+      } else if (isC === false) {
+        cls = "wrong"; indicator = "✗";
+        pts = r.answer === -1 ? "−2" : "−4";
+      } else {
+        cls = "answered"; indicator = "✓";
+      }
+    }
+    const ptsClass = pts.startsWith("+") ? "" : "neg";
+    return `<div class="r-item ${cls}">
+      <div class="r-name">${c.name || uid}</div>
+      <div class="r-indicator">${indicator}</div>
+      <div class="r-pts ${ptsClass}">${state.revealed ? pts : ""}</div>
+    </div>`;
   }).join("");
 }
-function renderResponseBars(counts, total) {
-  const barsEl = document.getElementById("response-bars"); if (!barsEl) return;
-  const Q = state.idx>=0&&state.idx<QUESTIONS.length ? QUESTIONS[state.idx] : null;
-  if (!Q) { barsEl.innerHTML=`<div style="font-size:13px;color:var(--steel);">Awaiting start</div>`; return; }
-  barsEl.innerHTML = [0,1,2,3].map(i => {
-    const n=counts[i]||0, pct=Math.round((n/(total||1))*100)||0;
-    const cls=state.revealed?(i===Q.correct?"correct":n>0?"wrong":""):"";
-    return `<div class="r-bar-wrap ${cls}"><div class="r-bar-label"><span class="opt-letter">${String.fromCharCode(65+i)}</span><span class="opt-count">${n}</span></div><div class="r-bar-track"><div class="r-bar-fill" style="width:${pct}%"></div></div></div>`;
-  }).join("");
-}
+
 function renderScoreboard() {
   const el = document.getElementById("scoreboard-list"); if (!el) return;
-  const sorted = Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts).slice(0,10);
-  el.innerHTML = sorted.length ? sorted.map(([,s],i)=>`<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("") : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts).slice(0,10);
+  el.innerHTML = sorted.length
+    ? sorted.map(([,s],i) => `<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("")
+    : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
 }
+
+// Final screen with bar chart
 function renderFinal() {
-  stopTimer(); scoreCurrentQuestion(); document.getElementById("progress").innerHTML="<span>FINAL RESULT</span>";
-  const sorted=Object.entries(state.scores).sort((a,b)=>b[1].pts-a[1].pts);
-  const podium=sorted.slice(0,3).map(([,s],i)=>`<div class="pillar ${["gold","silver","bronze"][i]}"><div class="rank">${["1st","2nd","3rd"][i]}</div><div class="name">${s.name}</div><div class="pts">${s.pts}</div></div>`).join("");
-  document.getElementById("q-panel").innerHTML=`<div class="final-screen"><h1>FINAL RESULT</h1><div class="podium">${podium||"<p>No answers recorded.</p>"}</div><div style="font-size:14px;color:var(--steel);margin-top:18px;max-width:560px;line-height:1.7;">Debrief topics:<br><b style="color:var(--navy);">${DEBRIEF_TOPICS}</b></div></div>`;
-  if (db) db.ref("currentQuestion").set({idx:-1,q:"END",options:[],revealed:true,final:true,mode:"all"});
+  stopTimer(); scoreCurrentQuestion();
+  document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts);
+  const maxPts = Math.max(...sorted.map(([,s]) => s.pts), 1);
+  const medals = ["🥇","🥈","🥉"];
+  const bars = sorted.map(([,s], i) => {
+    const pct = Math.max(5, Math.round(((s.pts - Math.min(0, ...sorted.map(([,x])=>x.pts))) / (maxPts - Math.min(0, ...sorted.map(([,x])=>x.pts)) || 1)) * 180));
+    const colour = BAR_COLOURS[i % BAR_COLOURS.length];
+    return `<div class="chart-col">
+      <div class="chart-rank">${medals[i] || (i+1)+"."}</div>
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height:${pct}px;background:${colour};">
+          <span class="chart-pts">${s.pts}</span>
+        </div>
+      </div>
+      <div class="chart-name">${s.name}</div>
+    </div>`;
+  }).join("");
+  document.getElementById("q-panel").innerHTML = `
+    <div class="final-screen">
+      <h1>FINAL RESULT</h1>
+      <div class="chart-wrap">
+        <div class="chart-bars">${bars || "<p>No answers recorded.</p>"}</div>
+      </div>
+      <div class="debrief">Debrief topics:<br><b>${DEBRIEF_TOPICS}</b></div>
+    </div>`;
+  if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
 }
-function startTimer() { stopTimer(); state.timeLeft=TIME_PER_Q; updateTimer(); state.timerInterval=setInterval(()=>{state.timeLeft--;updateTimer();if(state.timeLeft<=0){stopTimer();if(!state.revealed)revealAnswer();}},1000); }
+
+let audioCtx;
+function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+function tone(f,d,t,v){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;o.type=t||"sine";g.gain.setValueAtTime(v||.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}
+function tickSound(){ensureAudio();tone(880,.08,"square",.12)}
+
+function startTimer() {
+  stopTimer(); state.timeLeft = TIME_PER_Q; updateTimer();
+  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
+}
 function stopTimer() { clearInterval(state.timerInterval); }
 function updateTimer() {
-  const t=document.getElementById("timer"); if(!t)return;
-  t.querySelector(".n").textContent=state.timeLeft; t.classList.remove("warn","crit","expired");
-  if(state.timeLeft<=0)t.classList.add("expired"); else if(state.timeLeft<=5)t.classList.add("crit"); else if(state.timeLeft<=10)t.classList.add("warn");
+  const t = document.getElementById("timer"); if (!t) return;
+  t.querySelector(".n").textContent = state.timeLeft;
+  t.classList.remove("warn","crit","expired");
+  if (state.timeLeft <= 0) t.classList.add("expired");
+  else if (state.timeLeft <= 8) t.classList.add("crit");
+  else if (state.timeLeft <= 15) t.classList.add("warn");
 }
-document.addEventListener("keydown",e=>{
-  if(e.code==="Space"){e.preventDefault();if(!document.getElementById("btn-next").disabled)nextQuestion();}
-  if(e.code==="KeyR"){e.preventDefault();revealAnswer();}
-  if(e.code==="Escape")resetQuiz();
+document.addEventListener("keydown", e => {
+  ensureAudio();
+  if (e.code === "Space") { e.preventDefault(); if (!document.getElementById("btn-next").disabled) nextQuestion(); }
+  if (e.code === "KeyR") { e.preventDefault(); revealAnswer(); }
+  if (e.code === "Escape") resetQuiz();
 });
 </script>
 </body>
