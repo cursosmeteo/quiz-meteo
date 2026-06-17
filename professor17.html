@@ -392,33 +392,39 @@ function renderScoreboard() {
 }
 
 // Final screen with bar chart
-function renderFinal(doScore=true) {
-  stopTimer(); if(doScore) scoreCurrentQuestion();
+function renderFinal(doScore) {
+  stopTimer();
+  if (doScore !== false) scoreCurrentQuestion();
   document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
-  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts);
-  const maxPts = Math.max(...sorted.map(([,s]) => s.pts), 1);
+  const sorted = Object.entries(state.scores).sort(function(a,b){ return b[1].pts - a[1].pts; });
   const medals = ["🥇","🥈","🥉"];
-  const bars = sorted.map(([,s], i) => {
-    const pct = Math.max(5, Math.round(((s.pts - Math.min(0, ...sorted.map(([,x])=>x.pts))) / (maxPts - Math.min(0, ...sorted.map(([,x])=>x.pts)) || 1)) * 180));
-    const colour = BAR_COLOURS[i % BAR_COLOURS.length];
-    return `<div class="chart-col">
-      <div class="chart-rank">${medals[i] || (i+1)+"."}</div>
-      <div class="chart-bar-wrap">
-        <div class="chart-bar" style="height:${pct}px;background:${colour};">
-          <span class="chart-pts">${s.pts}</span>
-        </div>
-      </div>
-      <div class="chart-name">${s.name}</div>
-    </div>`;
-  }).join("");
-  document.getElementById("q-panel").innerHTML = `
-    <div class="final-screen">
-      <h1>FINAL RESULT</h1>
-      <div class="chart-wrap">
-        <div class="chart-bars">${bars}</div>
-      </div>
-      <div class="debrief">Debrief topics:<br><b>${DEBRIEF_TOPICS}</b></div>
-    </div>`;
+  var barsHtml = "<p style='color:var(--steel);font-size:16px;'>No answers recorded.</p>";
+  if (sorted.length > 0) {
+    var allPts = sorted.map(function(x){ return x[1].pts; });
+    var minPts = Math.min.apply(null, allPts);
+    var maxPts = Math.max.apply(null, allPts);
+    var range = (maxPts - minPts) || 1;
+    barsHtml = sorted.map(function(entry, i) {
+      var s = entry[1];
+      var pct = Math.round(((s.pts - minPts) / range) * 160) + 20;
+      var colour = BAR_COLOURS[i % BAR_COLOURS.length];
+      var medal = medals[i] || (i+1)+".";
+      return '<div class="chart-col">'
+        + '<div class="chart-rank">' + medal + '</div>'
+        + '<div class="chart-bar-wrap">'
+        + '<div class="chart-bar" style="height:' + pct + 'px;background:' + colour + ';">'
+        + '<span class="chart-pts">' + s.pts + '</span>'
+        + '</div></div>'
+        + '<div class="chart-name">' + s.name + '</div>'
+        + '</div>';
+    }).join("");
+  }
+  document.getElementById("q-panel").innerHTML =
+    '<div class="final-screen">'
+    + '<h1>FINAL RESULT</h1>'
+    + '<div class="chart-wrap"><div class="chart-bars">' + barsHtml + '</div></div>'
+    + '<div class="debrief">Debrief topics:<br><b>' + DEBRIEF_TOPICS + '</b></div>'
+    + '</div>';
   if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
 }
 
