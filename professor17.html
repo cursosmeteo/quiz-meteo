@@ -222,7 +222,7 @@ const DEBRIEF_TOPICS = "Jet stream wind shear · Microburst (virga warning) · C
 
 const BAR_COLOURS = ["#1B4F8E","#06A77D","#F4A261","#E63946","#5A7A9C","#8B5CF6","#EC4899","#14B8A6"];
 
-let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {} };
+let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {}, registry: {} };
 let db;
 
 try {
@@ -245,6 +245,10 @@ function listenFirebase() {
   if (!db) return;
   db.ref("connected").on("value", snap => {
     state.connected = snap.val() || {};
+    // Registry: accumulate all students ever connected, never remove
+    Object.entries(state.connected).forEach(([uid, data]) => {
+      state.registry[uid] = data;
+    });
     document.getElementById("connected-num").textContent = Object.keys(state.connected).length;
     renderResponseGrid();
   });
@@ -307,11 +311,11 @@ function scoreCurrentQuestion() {
   // Build full list of participants: connected + anyone who responded
   const snap = state.lastResponses || state.responses;
   const allUids = new Set([
-    ...Object.keys(state.connected),
+    ...Object.keys(state.registry),
     ...Object.keys(snap)
   ]);
   allUids.forEach(uid => {
-    const name = (state.connected[uid] && state.connected[uid].name)
+    const name = (state.registry[uid] && state.registry[uid].name)
       || (snap[uid] && snap[uid].name)
       || uid;
     if (!state.scores[uid]) state.scores[uid] = { name: name, pts: 0 };
@@ -328,7 +332,7 @@ function scoreCurrentQuestion() {
 
 function resetQuiz() {
   if (!confirm("Restart the quiz? All scores will be lost.")) return;
-  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected };
+  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected, registry: {} };
   stopTimer();
   if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
   location.reload();
