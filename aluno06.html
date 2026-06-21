@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wind · Student</title>
+<style>
+  :root{--navy:#0B2545;--aviation:#1B4F8E;--green:#06A77D;--amber:#F4A261;--red:#E63946;--steel:#5A7A9C;--light:#F5F7FA;--border:#D0D7E0}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;font-family:'Segoe UI','Helvetica Neue',sans-serif;background:var(--light);color:#222;overscroll-behavior:none}
+  .screen{display:none;flex-direction:column;min-height:100vh}.screen.active{display:flex}
+  #screen-register{align-items:center;justify-content:center;background:var(--navy);padding:32px 24px}
+  .reg-logo{font-size:13px;letter-spacing:2px;color:#9DB4D1;font-weight:700;margin-bottom:32px;text-align:center}
+  .reg-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;text-align:center}
+  .reg-card h2{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:6px}
+  .reg-card p{font-size:14px;color:var(--steel);margin-bottom:6px}
+  .scoring-rules{font-size:12px;color:var(--steel);margin-bottom:18px;line-height:1.8}
+  .s1{color:var(--green);font-weight:700}.s2{color:var(--amber);font-weight:700}.s3{color:var(--steel);font-weight:700}.s0{color:var(--red);font-weight:700}
+  .reg-input{width:100%;padding:14px 16px;font-size:18px;border:2px solid var(--border);border-radius:10px;outline:none;text-align:center;font-weight:600;color:var(--navy);transition:border-color .2s}
+  .reg-input:focus{border-color:var(--aviation)}
+  .reg-btn{margin-top:16px;width:100%;padding:16px;background:var(--aviation);color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer}
+  .reg-btn:disabled{opacity:.4;cursor:not-allowed}
+  #screen-waiting{align-items:center;justify-content:center;background:var(--navy);padding:32px 24px;text-align:center}
+  .wait-name{font-size:15px;color:#9DB4D1;margin-bottom:8px}.wait-name span{color:#fff;font-weight:700}
+  .wait-icon{font-size:64px;margin:24px 0;animation:breathe 2s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .wait-title{font-size:26px;font-weight:800;color:#fff}.wait-sub{font-size:15px;color:#9DB4D1;margin-top:10px}
+  #screen-question{background:#fff}
+  .q-top{background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+  .q-top .eyebrow{font-size:11px;letter-spacing:1.5px;color:#9DB4D1;font-weight:700;flex:1}
+  .q-timer{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--navy);transition:background .3s,color .3s;flex-shrink:0}
+  .q-timer.warn{background:var(--amber);color:#fff}.q-timer.crit{background:var(--red);color:#fff;animation:pulse .5s infinite alternate}
+  @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
+  .q-body{padding:18px 18px 10px}.q-num{font-size:12px;color:var(--steel);font-weight:600;letter-spacing:1px;margin-bottom:8px}
+  .q-text{font-size:19px;font-weight:700;color:var(--navy);line-height:1.35}
+  .q-options{padding:8px 14px 24px;display:flex;flex-direction:column;gap:9px}
+  .opt-btn{width:100%;padding:14px 16px;background:#fff;border:2px solid var(--border);border-radius:12px;font-size:15px;font-weight:500;color:#222;text-align:left;display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-appearance:none}
+  .opt-btn:active:not(:disabled){transform:scale(.97)}.opt-btn:not(:disabled):hover{border-color:var(--aviation);background:#f0f4ff}
+  .opt-btn .opt-key{width:32px;height:32px;border-radius:50%;background:var(--aviation);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .opt-btn:disabled{cursor:not-allowed;opacity:.65}.opt-btn.selected{border-color:var(--aviation);background:#e8f0ff}
+  .opt-btn.correct{border-color:var(--green);background:#e8f5ee}.opt-btn.correct .opt-key{background:var(--green)}
+  .opt-btn.wrong{border-color:var(--red);background:#fce6e8}.opt-btn.wrong .opt-key{background:var(--red)}
+  #screen-answered{align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+  #screen-answered.correct{background:var(--green)}#screen-answered.wrong{background:var(--red)}#screen-answered.waiting{background:var(--navy)}
+  .ans-icon{font-size:72px;margin-bottom:14px}.ans-title{font-size:30px;font-weight:800;color:#fff}
+  .ans-pts{font-size:22px;color:rgba(255,255,255,.9);margin-top:8px;font-weight:700}
+  .ans-sub{font-size:14px;color:rgba(255,255,255,.7);margin-top:10px}.ans-total{font-size:16px;color:rgba(255,255,255,.85);margin-top:6px;font-weight:600}
+  #screen-final{align-items:center;justify-content:center;background:var(--navy);padding:32px 24px;text-align:center}
+  .final-title{font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}.final-score{font-size:80px;font-weight:800;color:var(--amber);line-height:1}
+  .final-pts-label{font-size:14px;color:#9DB4D1;letter-spacing:2px;margin-top:4px}.final-name{font-size:18px;color:#fff;margin-top:12px}
+  .final-thanks{font-size:14px;color:#9DB4D1;margin-top:20px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="screen active" id="screen-register">
+  <div class="reg-logo">METEOROLOGY · WIND · SESSION 06</div>
+  <div class="reg-card">
+    <h2>Wind — Forces, Flow &amp; Friction</h2>
+    <p>All students answer each question</p>
+    <div class="scoring-rules">
+      <span class="s1">+6</span> correct 1–5s &nbsp;·&nbsp; <span class="s1">+5</span> correct 6–10s &nbsp;·&nbsp; <span class="s2">+4</span> correct 11–15s<br>
+      <span class="s2">+3</span> correct 16–20s &nbsp;·&nbsp; <span class="s3">+2</span> correct 21–25s &nbsp;·&nbsp; <span class="s3">+1</span> correct 26–30s<br>
+      <span class="s0">−4</span> wrong &nbsp;·&nbsp; <span class="s0">−2</span> no answer
+    </div>
+    <input class="reg-input" id="name-input" type="text" placeholder="Your name" maxlength="24" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="reg-btn" id="reg-btn" onclick="register()" disabled>Join →</button>
+  </div>
+</div>
+<div class="screen" id="screen-waiting">
+  <div class="wait-name">Welcome, <span id="wait-name-display"></span></div>
+  <div class="wait-icon">✈️</div>
+  <div class="wait-title">Awaiting the instructor…</div>
+  <div class="wait-sub">The quiz starts shortly</div>
+</div>
+<div class="screen" id="screen-question">
+  <div class="q-top"><div class="eyebrow" id="q-eyebrow">METEOROLOGY</div><div class="q-timer" id="q-timer">20</div></div>
+  <div class="q-body"><div class="q-num" id="q-num">QUESTION 1 / 10</div><div class="q-text" id="q-text"></div></div>
+  <div class="q-options" id="q-options"></div>
+</div>
+<div class="screen" id="screen-answered">
+  <div class="ans-icon" id="ans-icon">⏳</div><div class="ans-title" id="ans-title">Awaiting…</div>
+  <div class="ans-pts" id="ans-pts"></div><div class="ans-sub" id="ans-sub"></div><div class="ans-total" id="ans-total"></div>
+</div>
+<div class="screen" id="screen-final">
+  <div class="final-title">Quiz complete!</div><div class="final-score" id="final-score">0</div>
+  <div class="final-pts-label">POINTS</div><div class="final-name" id="final-name"></div>
+  <div class="final-thanks">Thank you for participating.<br>The instructor will now conduct the debrief.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",authDomain:"meteorology-quiz-2b061.firebaseapp.com",databaseURL:"https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app",projectId:"meteorology-quiz-2b061",storageBucket:"meteorology-quiz-2b061.firebasestorage.app",messagingSenderId:"595212568307",appId:"1:595212568307:web:e51bc42c187f13a6359986"};
+const TIME_PER_Q=30;let db,uid,userName,totalPts=0,currentQIdx=-1,answered=false,myAnswer=-99,myTimeLeft=0,revealedQIdx=-1,timerInterval,audioCtx;
+let serverTimeOffset=0;
+function serverNow(){return Date.now()+serverTimeOffset;}
+function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(audioCtx&&audioCtx.state==='suspended'){audioCtx.resume();}}
+function tone(f,d,t,v){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;o.type=t||"sine";g.gain.setValueAtTime(v||.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}
+function tickSound(){ensureAudio();tone(880,.08,"square",.12)}
+function calcPts(timeLeft){
+  const elapsed=TIME_PER_Q-timeLeft;
+  if(elapsed<=5)return 6;
+  if(elapsed<=10)return 5;
+  if(elapsed<=15)return 4;
+  if(elapsed<=20)return 3;
+  if(elapsed<=25)return 2;
+  return 1;
+}
+try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();db.ref('.info/serverTimeOffset').on('value',snap=>{serverTimeOffset=snap.val()||0});}catch(e){console.error(e)}
+document.getElementById("name-input").addEventListener("input",function(){document.getElementById("reg-btn").disabled=this.value.trim().length<2});
+document.getElementById("name-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!document.getElementById("reg-btn").disabled)register()});
+function register(){const name=document.getElementById("name-input").value.trim();if(!name||name.length<2)return;ensureAudio();userName=name;uid="u_"+Math.random().toString(36).substr(2,9);if(db){const ref=db.ref("connected/"+uid);ref.set({name:userName,joinedAt:Date.now()});ref.onDisconnect().remove()}document.getElementById("wait-name-display").textContent=userName;showScreen("screen-waiting");listenForQuestion()}
+function listenForQuestion(){if(!db)return;db.ref("currentQuestion").on("value",snap=>{const data=snap.val();if(!data||data.idx===undefined)return;if(data.final){showFinal();return}if(data.idx===-1){showScreen("screen-waiting");return}const elapsed=Math.round((serverNow()-(data.startedAt||0))/1000);const remaining=Math.min(TIME_PER_Q,Math.max(0,(data.timeLimit||20)-elapsed));if(remaining<=0&&!data.revealed){showScreen("screen-waiting");return}if(data.idx!==currentQIdx){currentQIdx=data.idx;answered=false;myAnswer=-99;myTimeLeft=0;showQuestion(data);return}if(data.revealed&&data.correct!==undefined&&revealedQIdx!==currentQIdx){revealedQIdx=currentQIdx;clearInterval(timerInterval);showReveal(data.correct)}})}
+function showQuestion(data){const elapsed=Math.round((serverNow()-data.startedAt)/1000),remaining=Math.min(TIME_PER_Q,Math.max(0,(data.timeLimit||TIME_PER_Q)-elapsed));document.getElementById("q-eyebrow").textContent=data.eyebrow||"METEOROLOGY";document.getElementById("q-num").textContent=`QUESTION ${data.idx+1} / 10`;document.getElementById("q-text").textContent=data.q;document.getElementById("q-options").innerHTML=(data.options||[]).map((o,i)=>`<button class="opt-btn" id="opt-${i}" onclick="answer(${i},this)"><div class="opt-key">${String.fromCharCode(65+i)}</div><span>${o}</span></button>`).join("");showScreen("screen-question");startTimer(remaining)}
+function startTimer(remaining){clearInterval(timerInterval);let t=remaining;const el=document.getElementById("q-timer");const update=()=>{if(!el)return;el.textContent=t;el.classList.remove("warn","crit");if(t<=8){el.classList.add("crit");if(t>0&&t<=5)tickSound()}else if(t<=15)el.classList.add("warn");if(t<=0){clearInterval(timerInterval);if(!answered)timeOut()}};update();timerInterval=setInterval(()=>{t--;update()},1000)}
+function answer(optIdx,btn){if(answered)return;ensureAudio();answered=true;clearInterval(timerInterval);const timeLeft=parseInt(document.getElementById("q-timer")?.textContent)||0;document.querySelectorAll(".opt-btn").forEach(b=>b.disabled=true);btn.classList.add("selected");myAnswer=optIdx;myTimeLeft=timeLeft;if(db)db.ref("responses/"+uid).set({name:userName,answer:optIdx,timeLeft,answeredAt:Date.now(),qIdx:currentQIdx});const s=document.getElementById("screen-answered");s.className="screen waiting";document.getElementById("ans-icon").textContent="⏳";document.getElementById("ans-title").textContent="Answer submitted!";document.getElementById("ans-pts").textContent="Answered in "+(TIME_PER_Q-timeLeft)+"s";document.getElementById("ans-sub").textContent="Waiting for instructor to reveal…";document.getElementById("ans-total").textContent="";showScreen("screen-answered")}
+function timeOut(){answered=true;myAnswer=-1;myTimeLeft=0;if(db)db.ref("responses/"+uid).set({name:userName,answer:-1,timeLeft:0,answeredAt:Date.now(),qIdx:currentQIdx,timeout:true});totalPts-=2;const s=document.getElementById("screen-answered");s.className="screen waiting";document.getElementById("ans-icon").textContent="⏱";document.getElementById("ans-title").textContent="Time's up";document.getElementById("ans-pts").textContent="−2 points";document.getElementById("ans-sub").textContent="Awaiting next question…";document.getElementById("ans-total").textContent=`Total: ${totalPts} pts`;showScreen("screen-answered")}
+function showReveal(correctIdx){
+  const s=document.getElementById("screen-answered");
+  const correctLetter="Correct answer: "+String.fromCharCode(65+correctIdx);
+  if(myAnswer===-99||myAnswer===-1){
+    // No answer or timeout
+    if(myAnswer===-99){totalPts-=2;} // timeout already applied -2 via timeOut()
+    s.className="screen waiting";
+    document.getElementById("ans-icon").textContent="⏱";
+    document.getElementById("ans-title").textContent=myAnswer===-1?"Time's up":"No answer";
+    document.getElementById("ans-pts").textContent="−2 points";
+    document.getElementById("ans-sub").textContent=correctLetter;
+    document.getElementById("ans-total").textContent="Total: "+totalPts+" pts";
+  } else {
+    const isC=myAnswer===correctIdx;
+    const pts=isC?calcPts(myTimeLeft):-4;
+    totalPts+=pts;
+    s.className="screen "+(isC?"correct":"wrong");
+    document.getElementById("ans-icon").textContent=isC?"✓":"✗";
+    document.getElementById("ans-title").textContent=isC?"Correct!":"Wrong!";
+    document.getElementById("ans-pts").textContent=isC?"+"+pts+" points":"−4 points";
+    document.getElementById("ans-sub").textContent=correctLetter;
+    document.getElementById("ans-total").textContent="Total: "+totalPts+" pts";
+  }
+  showScreen("screen-answered");
+}
+function showFinal(){clearInterval(timerInterval);document.getElementById("final-score").textContent=totalPts;document.getElementById("final-name").textContent=userName||"";showScreen("screen-final")}
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+</script>
+</body>
+</html>
