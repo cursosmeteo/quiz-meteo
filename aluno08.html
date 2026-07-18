@@ -1,112 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quiz &#8212; Session 08 &#183; Turbulence &amp; CAT</title>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Turbulence &amp; CAT · Student</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1b2e;color:#e8f0fe;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.2rem}
-h1{font-size:1.4rem;font-weight:800;color:#93c5fd;margin-bottom:.2rem;text-align:center}
-.sub{font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:1rem;text-align:center}
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:1rem 1.2rem;width:100%;margin-bottom:.7rem}
-.qnum{font-size:.75rem;font-weight:700;color:#60a5fa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
-.qtxt{font-size:1rem;font-weight:600;line-height:1.4;margin-bottom:.7rem}
-.opt{display:flex;align-items:flex-start;gap:.5rem;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:8px;padding:.5rem .75rem;font-size:.88rem;cursor:pointer;transition:all .2s;line-height:1.35;color:inherit}
-.opt:hover:not(.lk){background:rgba(255,255,255,.1)}
-.opt.correct{background:rgba(34,197,94,.15);border-color:#22c55e;color:#86efac}
-.opt.wrong{background:rgba(239,68,68,.1);border-color:#ef4444;color:#fca5a5}
-.opt.lk{pointer-events:none}
-.letter{font-weight:800;color:#93c5fd;min-width:1rem;flex:none}
-.opt.correct .letter{color:#22c55e}
-.opt.wrong .letter{color:#ef4444}
-.exp{display:none;margin-top:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:.55rem .8rem;font-size:.82rem;color:#86efac;line-height:1.5}
-.exp.show{display:block}
-.footer{font-size:.75rem;color:rgba(255,255,255,.25);text-align:center;margin-top:.8rem;padding-bottom:1rem}
-.score-box{display:none;background:rgba(255,255,255,.07);border:2px solid #60a5fa;border-radius:14px;padding:1.5rem;text-align:center;width:100%;margin-top:.5rem}
-.score-box.show{display:block}
-.score-num{font-size:3rem;font-weight:800;color:#93c5fd}
-.score-sub{font-size:1rem;color:rgba(255,255,255,.55);margin-top:.4rem}
-</style></head>
+  :root{--navy:#0B2545;--aviation:#1B4F8E;--green:#06A77D;--amber:#F4A261;--red:#E63946;--steel:#5A7A9C;--light:#F5F7FA;--border:#D0D7E0}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;font-family:'Segoe UI','Helvetica Neue',sans-serif;background:var(--light);color:#222;overscroll-behavior:none}
+  .screen{display:none;flex-direction:column;min-height:100vh}.screen.active{display:flex}
+  #screen-register{align-items:center;justify-content:center;background:var(--navy);padding:32px 24px}
+  .reg-logo{font-size:13px;letter-spacing:2px;color:#9DB4D1;font-weight:700;margin-bottom:32px;text-align:center}
+  .reg-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;text-align:center}
+  .reg-card h2{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:6px}
+  .reg-card p{font-size:14px;color:var(--steel);margin-bottom:6px}
+  .scoring-rules{font-size:12px;color:var(--steel);margin-bottom:18px;line-height:1.8}
+  .s1{color:var(--green);font-weight:700}.s2{color:var(--amber);font-weight:700}.s3{color:var(--steel);font-weight:700}.s0{color:var(--red);font-weight:700}
+  .reg-input{width:100%;padding:14px 16px;font-size:18px;border:2px solid var(--border);border-radius:10px;outline:none;text-align:center;font-weight:600;color:var(--navy);transition:border-color .2s}
+  .reg-input:focus{border-color:var(--aviation)}
+  .reg-btn{margin-top:16px;width:100%;padding:16px;background:var(--aviation);color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer}
+  .reg-btn:disabled{opacity:.4;cursor:not-allowed}
+  #screen-waiting{align-items:center;justify-content:center;background:var(--navy);padding:32px 24px;text-align:center}
+  .wait-name{font-size:15px;color:#9DB4D1;margin-bottom:8px}.wait-name span{color:#fff;font-weight:700}
+  .wait-icon{font-size:64px;margin:24px 0;animation:breathe 2s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .wait-title{font-size:26px;font-weight:800;color:#fff}.wait-sub{font-size:15px;color:#9DB4D1;margin-top:10px}
+  #screen-question{background:#fff}
+  .q-top{background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+  .q-top .eyebrow{font-size:11px;letter-spacing:1.5px;color:#9DB4D1;font-weight:700;flex:1}
+  .q-timer{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--navy);transition:background .3s,color .3s;flex-shrink:0}
+  .q-timer.warn{background:var(--amber);color:#fff}.q-timer.crit{background:var(--red);color:#fff;animation:pulse .5s infinite alternate}
+  @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
+  .q-body{padding:18px 18px 10px}.q-num{font-size:12px;color:var(--steel);font-weight:600;letter-spacing:1px;margin-bottom:8px}
+  .q-text{font-size:19px;font-weight:700;color:var(--navy);line-height:1.35}
+  .q-options{padding:8px 14px 24px;display:flex;flex-direction:column;gap:9px}
+  .opt-btn{width:100%;padding:14px 16px;background:#fff;border:2px solid var(--border);border-radius:12px;font-size:15px;font-weight:500;color:#222;text-align:left;display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-appearance:none}
+  .opt-btn:active:not(:disabled){transform:scale(.97)}.opt-btn:not(:disabled):hover{border-color:var(--aviation);background:#f0f4ff}
+  .opt-btn .opt-key{width:32px;height:32px;border-radius:50%;background:var(--aviation);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .opt-btn:disabled{cursor:not-allowed;opacity:.65}.opt-btn.selected{border-color:var(--aviation);background:#e8f0ff}
+  .opt-btn.correct{border-color:var(--green);background:#e8f5ee}.opt-btn.correct .opt-key{background:var(--green)}
+  .opt-btn.wrong{border-color:var(--red);background:#fce6e8}.opt-btn.wrong .opt-key{background:var(--red)}
+  #screen-answered{align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+  #screen-answered.correct{background:var(--green)}#screen-answered.wrong{background:var(--red)}#screen-answered.waiting{background:var(--navy)}
+  .ans-icon{font-size:72px;margin-bottom:14px}.ans-title{font-size:30px;font-weight:800;color:#fff}
+  .ans-pts{font-size:22px;color:rgba(255,255,255,.9);margin-top:8px;font-weight:700}
+  .ans-sub{font-size:14px;color:rgba(255,255,255,.7);margin-top:10px}.ans-total{font-size:16px;color:rgba(255,255,255,.85);margin-top:6px;font-weight:600}
+  #screen-final{align-items:center;justify-content:center;background:var(--navy);padding:32px 24px;text-align:center}
+  .final-title{font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}.final-score{font-size:80px;font-weight:800;color:var(--amber);line-height:1}
+  .final-pts-label{font-size:14px;color:#9DB4D1;letter-spacing:2px;margin-top:4px}.final-name{font-size:18px;color:#fff;margin-top:12px}
+  .final-thanks{font-size:14px;color:#9DB4D1;margin-top:20px;line-height:1.6}
+</style>
+</head>
 <body>
-<h1>&#127942; Quiz &#8212; Session 08</h1>
-<div class="sub">Mountain Waves &#183; Turbulence &#183; CAT</div>
-<div class="card"><div class="qnum">Q1</div><div class="qtxt">Which condition is NOT required for the formation of mountain waves?</div><button class="opt" id="ao-1-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(1,'A')"><span class="letter">A</span>Wind speed ≥15 kt at mountain level</button>
-  <button class="opt" id="ao-1-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(1,'B')"><span class="letter">B</span>Wind direction within 30° of perpendicular to the ridge</button>
-  <button class="opt" id="ao-1-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(1,'C')"><span class="letter">C</span>Stable layer at or just above the ridge</button>
-  <button class="opt" id="ao-1-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(1,'D')"><span class="letter">D</span>Wind speed must increase with altitude above the ridge</button>
-  <div class="exp" id="ae-1">Mountain waves require wind ≥15 kt perpendicular to the ridge and a stable layer at ridge level. Increasing wind speed above the ridge is not a strict requirement.</div></div>
-<div class="card"><div class="qnum">Q2</div><div class="qtxt">A lenticular cloud (ACSL &#8212; Altocumulus Standing Lenticular) appears stationary because:</div><button class="opt" id="ao-2-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(2,'A')"><span class="letter">A</span>Air continuously flows through it, marking a fixed wave crest</button>
-  <button class="opt" id="ao-2-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(2,'B')"><span class="letter">B</span>The cloud is frozen at high altitude</button>
-  <button class="opt" id="ao-2-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(2,'C')"><span class="letter">C</span>The wave has dissipated and only the cloud remains</button>
-  <button class="opt" id="ao-2-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(2,'D')"><span class="letter">D</span>The cloud forms in the rotor zone</button>
-  <div class="exp" id="ae-2">A lenticular cloud marks a fixed wave crest — air flows through continuously, condensing upwind and evaporating downwind.</div></div>
-<div class="card"><div class="qnum">Q3</div><div class="qtxt">The MOST dangerous zone for light aircraft in mountain wave conditions is:</div><button class="opt" id="ao-3-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(3,'A')"><span class="letter">A</span>Directly above the mountain peak</button>
-  <button class="opt" id="ao-3-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(3,'B')"><span class="letter">B</span>Between the cap cloud and lenticular cloud</button>
-  <button class="opt" id="ao-3-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(3,'C')"><span class="letter">C</span>The rotor zone, below the first wave crest in the lee</button>
-  <button class="opt" id="ao-3-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(3,'D')"><span class="letter">D</span>The tropopause, where wave amplitude is highest</button>
-  <div class="exp" id="ae-3">The rotor zone contains severe chaotic turbulence with reversed surface flow. It is the most hazardous zone, especially for light aircraft.</div></div>
-<div class="card"><div class="qnum">Q4</div><div class="qtxt">Mechanical turbulence intensity depends primarily on:</div><button class="opt" id="ao-4-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(4,'A')"><span class="letter">A</span>Air temperature and humidity</button>
-  <button class="opt" id="ao-4-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(4,'B')"><span class="letter">B</span>Wind speed and surface roughness</button>
-  <button class="opt" id="ao-4-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(4,'C')"><span class="letter">C</span>Lapse rate and cloud base height</button>
-  <button class="opt" id="ao-4-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(4,'D')"><span class="letter">D</span>Pressure gradient and Coriolis force</button>
-  <div class="exp" id="ae-4">Mechanical turbulence depends on wind speed and surface roughness. Stronger wind and rougher terrain increase turbulence intensity.</div></div>
-<div class="card"><div class="qnum">Q5</div><div class="qtxt">Thermal turbulence is most severe when:</div><button class="opt" id="ao-5-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(5,'A')"><span class="letter">A</span>Surface heating is strong and the atmosphere is unstable</button>
-  <button class="opt" id="ao-5-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(5,'B')"><span class="letter">B</span>A temperature inversion is present at low level</button>
-  <button class="opt" id="ao-5-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(5,'C')"><span class="letter">C</span>Wind speed is low and relative humidity is high</button>
-  <button class="opt" id="ao-5-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(5,'D')"><span class="letter">D</span>Cloud cover is complete, preventing solar radiation</button>
-  <div class="exp" id="ae-5">Strong solar heating combined with atmospheric instability generates vigorous convective currents producing severe thermal turbulence.</div></div>
-<div class="card"><div class="qnum">Q6</div><div class="qtxt">Frontal turbulence is typically associated with:</div><button class="opt" id="ao-6-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(6,'A')"><span class="letter">A</span>Mountain ridges perpendicular to the wind</button>
-  <button class="opt" id="ao-6-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(6,'B')"><span class="letter">B</span>Wind shear along the frontal surface and embedded Cb</button>
-  <button class="opt" id="ao-6-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(6,'C')"><span class="letter">C</span>Clear air at cruise level above FL 350</button>
-  <button class="opt" id="ao-6-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(6,'D')"><span class="letter">D</span>Anticyclonic flow at the tropopause</button>
-  <div class="exp" id="ae-6">Frontal turbulence results from wind shear along the frontal boundary and embedded Cb. Cold fronts produce the most severe cases.</div></div>
-<div class="card"><div class="qnum">Q7</div><div class="qtxt">CAT (Clear Air Turbulence) is defined as turbulence:</div><button class="opt" id="ao-7-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(7,'A')"><span class="letter">A</span>Inside cumulonimbus clouds above FL 250</button>
-  <button class="opt" id="ao-7-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(7,'B')"><span class="letter">B</span>In the boundary layer, caused by surface heating</button>
-  <button class="opt" id="ao-7-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(7,'C')"><span class="letter">C</span>Above 15 000 ft in cloud-free air, associated with wind shear</button>
-  <button class="opt" id="ao-7-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(7,'D')"><span class="letter">D</span>Below the tropopause, in frontal cloud</button>
-  <div class="exp" id="ae-7">CAT occurs above 15 000 ft in clear air with no visual warning. It is caused by wind shear near the jet stream and cannot be detected by weather radar.</div></div>
-<div class="card"><div class="qnum">Q8</div><div class="qtxt">The PRIMARY CAT zone relative to the polar jet stream is located on the:</div><button class="opt" id="ao-8-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(8,'A')"><span class="letter">A</span>Warm-air side, above the jet core</button>
-  <button class="opt" id="ao-8-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(8,'B')"><span class="letter">B</span>Warm-air side, below the jet core</button>
-  <button class="opt" id="ao-8-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(8,'C')"><span class="letter">C</span>Cold-air side, above the jet core</button>
-  <button class="opt" id="ao-8-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(8,'D')"><span class="letter">D</span>Cold-air side, just below the jet core</button>
-  <div class="exp" id="ae-8">The primary CAT zone is on the cold-air (poleward) side, just below the jet core, where vertical wind shear is greatest.</div></div>
-<div class="card"><div class="qnum">Q9</div><div class="qtxt">When encountering unexpected severe turbulence in cruise, the immediate priority is to:</div><button class="opt" id="ao-9-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(9,'A')"><span class="letter">A</span>Increase speed to maintain control authority</button>
-  <button class="opt" id="ao-9-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(9,'B')"><span class="letter">B</span>Descend below the turbulence layer immediately</button>
-  <button class="opt" id="ao-9-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(9,'C')"><span class="letter">C</span>Reduce to turbulence penetration speed (VB) and inform ATC</button>
-  <button class="opt" id="ao-9-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(9,'D')"><span class="letter">D</span>Switch off autopilot and hand-fly at maximum cruise speed</button>
-  <div class="exp" id="ae-9">Reduce to VB immediately to avoid structural damage, turn on seat-belt signs, and notify ATC. Increasing speed risks overstressing the airframe.</div></div>
-<div class="card"><div class="qnum">Q10</div><div class="qtxt">Which is the best visual indicator of severe mountain wave activity?</div><button class="opt" id="ao-10-A" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(10,'A')"><span class="letter">A</span>Cumulonimbus with anvil shape</button>
-  <button class="opt" id="ao-10-B" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(10,'B')"><span class="letter">B</span>Rotor cloud below the wave crest combined with lenticular clouds above</button>
-  <button class="opt" id="ao-10-C" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(10,'C')"><span class="letter">C</span>Stratus layers covering the mountain top</button>
-  <button class="opt" id="ao-10-D" style="width:100%;text-align:left;margin-bottom:.32rem" onclick="pick(10,'D')"><span class="letter">D</span>Cirrus uncinus (mare’s tails) at high altitude</button>
-  <div class="exp" id="ae-10">The combination of rotor cloud (low, turbulent) and lenticular clouds (stationary, lens-shaped) is the classic visual signature of active mountain wave activity.</div></div>
-<div class="score-box" id="score-box">
-  <div style="font-size:2rem;margin-bottom:.4rem">&#127942;</div>
-  <div class="score-num" id="score-num">0/10</div>
-  <div class="score-sub" id="score-sub"></div>
+<div class="screen active" id="screen-register">
+  <div class="reg-logo">METEOROLOGY · TURBULENCE &amp; CAT · SESSION 08</div>
+  <div class="reg-card">
+    <h2>Turbulence &amp; CAT</h2>
+    <p>All students answer each question</p>
+    <div class="scoring-rules">
+      <span class="s1">+6</span> correct 1–5s &nbsp;·&nbsp; <span class="s1">+5</span> correct 6–10s &nbsp;·&nbsp; <span class="s2">+4</span> correct 11–15s<br>
+      <span class="s2">+3</span> correct 16–20s &nbsp;·&nbsp; <span class="s3">+2</span> correct 21–25s &nbsp;·&nbsp; <span class="s3">+1</span> correct 26–30s<br>
+      <span class="s0">−4</span> wrong &nbsp;·&nbsp; <span class="s0">−2</span> no answer
+    </div>
+    <input class="reg-input" id="name-input" type="text" placeholder="Your name" maxlength="24" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="reg-btn" id="reg-btn" onclick="register()" disabled>Join →</button>
+  </div>
 </div>
-<div class="footer">Session 08 &#183; ATPL 050 &#183; cursosmeteo.github.io/quiz-meteo</div>
+<div class="screen" id="screen-waiting">
+  <div class="wait-name">Welcome, <span id="wait-name-display"></span></div>
+  <div class="wait-icon">✈️</div>
+  <div class="wait-title">Awaiting the instructor…</div>
+  <div class="wait-sub">The quiz starts shortly</div>
+</div>
+<div class="screen" id="screen-question">
+  <div class="q-top"><div class="eyebrow" id="q-eyebrow">METEOROLOGY</div><div class="q-timer" id="q-timer">20</div></div>
+  <div class="q-body"><div class="q-num" id="q-num">QUESTION 1 / 10</div><div class="q-text" id="q-text"></div></div>
+  <div class="q-options" id="q-options"></div>
+</div>
+<div class="screen" id="screen-answered">
+  <div class="ans-icon" id="ans-icon">⏳</div><div class="ans-title" id="ans-title">Awaiting…</div>
+  <div class="ans-pts" id="ans-pts"></div><div class="ans-sub" id="ans-sub"></div><div class="ans-total" id="ans-total"></div>
+</div>
+<div class="screen" id="screen-final">
+  <div class="final-title">Quiz complete!</div><div class="final-score" id="final-score">0</div>
+  <div class="final-pts-label">POINTS</div><div class="final-name" id="final-name"></div>
+  <div class="final-thanks">Thank you for participating.<br>The instructor will now conduct the debrief.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
 <script>
-var ans=["D", "A", "C", "B", "A", "B", "C", "D", "C", "B"];
-var done=new Array(10).fill(false);
-var score=0;
-function pick(n,chosen){
-  if(done[n-1])return;
-  done[n-1]=true;
-  var c=ans[n-1];
-  ['A','B','C','D'].forEach(function(l){
-    var el=document.getElementById('ao-'+n+'-'+l);
-    el.classList.add('lk');
-    if(l===c)el.classList.add('correct');
-    else if(l===chosen&&chosen!==c)el.classList.add('wrong');
-  });
-  if(chosen===c)score++;
-  document.getElementById('ae-'+n).classList.add('show');
-  if(done.every(Boolean)){
-    var pct=Math.round(score/10*100);
-    document.getElementById('score-num').textContent=score+'/10';
-    document.getElementById('score-sub').textContent=pct+'% &#8212; '+(pct>=70?'Well done! ✓':'Keep studying &#8212; review the explanations above');
-    document.getElementById('score-box').classList.add('show');
-  }
+const FIREBASE_CONFIG={apiKey:"AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",authDomain:"meteorology-quiz-2b061.firebaseapp.com",databaseURL:"https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app",projectId:"meteorology-quiz-2b061",storageBucket:"meteorology-quiz-2b061.firebasestorage.app",messagingSenderId:"595212568307",appId:"1:595212568307:web:e51bc42c187f13a6359986"};
+const TIME_PER_Q=30;let db,uid,userName,totalPts=0,currentQIdx=-1,answered=false,myAnswer=-99,myTimeLeft=0,revealedQIdx=-1,timerInterval,audioCtx;
+let serverTimeOffset=0;
+function serverNow(){return Date.now()+serverTimeOffset;}
+function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(audioCtx&&audioCtx.state==='suspended'){audioCtx.resume();}}
+function tone(f,d,t,v){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;o.type=t||"sine";g.gain.setValueAtTime(v||.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}
+function tickSound(){ensureAudio();tone(880,.08,"square",.12)}
+function calcPts(timeLeft){
+  const elapsed=TIME_PER_Q-timeLeft;
+  if(elapsed<=5)return 6;
+  if(elapsed<=10)return 5;
+  if(elapsed<=15)return 4;
+  if(elapsed<=20)return 3;
+  if(elapsed<=25)return 2;
+  return 1;
 }
+try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();db.ref('.info/serverTimeOffset').on('value',snap=>{serverTimeOffset=snap.val()||0});}catch(e){console.error(e)}
+document.getElementById("name-input").addEventListener("input",function(){document.getElementById("reg-btn").disabled=this.value.trim().length<2});
+document.getElementById("name-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!document.getElementById("reg-btn").disabled)register()});
+function register(){const name=document.getElementById("name-input").value.trim();if(!name||name.length<2)return;ensureAudio();userName=name;uid="u_"+Math.random().toString(36).substr(2,9);if(db){const ref=db.ref("connected/"+uid);ref.set({name:userName,joinedAt:Date.now()});ref.onDisconnect().remove()}document.getElementById("wait-name-display").textContent=userName;showScreen("screen-waiting");listenForQuestion()}
+function listenForQuestion(){if(!db)return;db.ref("currentQuestion").on("value",snap=>{const data=snap.val();if(!data||data.idx===undefined)return;if(data.final){showFinal();return}if(data.idx===-1){showScreen("screen-waiting");return}const elapsed=Math.round((serverNow()-(data.startedAt||0))/1000);const remaining=Math.min(TIME_PER_Q,Math.max(0,(data.timeLimit||20)-elapsed));if(remaining<=0&&!data.revealed){showScreen("screen-waiting");return}if(data.idx!==currentQIdx){currentQIdx=data.idx;answered=false;myAnswer=-99;myTimeLeft=0;showQuestion(data);return}if(data.revealed&&data.correct!==undefined&&revealedQIdx!==currentQIdx){revealedQIdx=currentQIdx;clearInterval(timerInterval);showReveal(data.correct)}})}
+function showQuestion(data){const elapsed=Math.round((serverNow()-data.startedAt)/1000),remaining=Math.min(TIME_PER_Q,Math.max(0,(data.timeLimit||TIME_PER_Q)-elapsed));document.getElementById("q-eyebrow").textContent=data.eyebrow||"METEOROLOGY";document.getElementById("q-num").textContent=`QUESTION ${data.idx+1} / 10`;document.getElementById("q-text").textContent=data.q;document.getElementById("q-options").innerHTML=(data.options||[]).map((o,i)=>`<button class="opt-btn" id="opt-${i}" onclick="answer(${i},this)"><div class="opt-key">${String.fromCharCode(65+i)}</div><span>${o}</span></button>`).join("");showScreen("screen-question");startTimer(remaining)}
+function startTimer(remaining){clearInterval(timerInterval);let t=remaining;const el=document.getElementById("q-timer");const update=()=>{if(!el)return;el.textContent=t;el.classList.remove("warn","crit");if(t<=8){el.classList.add("crit");if(t>0&&t<=5)tickSound()}else if(t<=15)el.classList.add("warn");if(t<=0){clearInterval(timerInterval);if(!answered)timeOut()}};update();timerInterval=setInterval(()=>{t--;update()},1000)}
+function answer(optIdx,btn){if(answered)return;ensureAudio();answered=true;clearInterval(timerInterval);const timeLeft=parseInt(document.getElementById("q-timer")?.textContent)||0;document.querySelectorAll(".opt-btn").forEach(b=>b.disabled=true);btn.classList.add("selected");myAnswer=optIdx;myTimeLeft=timeLeft;if(db)db.ref("responses/"+uid).set({name:userName,answer:optIdx,timeLeft,answeredAt:Date.now(),qIdx:currentQIdx});const s=document.getElementById("screen-answered");s.className="screen waiting";document.getElementById("ans-icon").textContent="⏳";document.getElementById("ans-title").textContent="Answer submitted!";document.getElementById("ans-pts").textContent="Answered in "+(TIME_PER_Q-timeLeft)+"s";document.getElementById("ans-sub").textContent="Waiting for instructor to reveal…";document.getElementById("ans-total").textContent="";showScreen("screen-answered")}
+function timeOut(){answered=true;myAnswer=-1;myTimeLeft=0;if(db)db.ref("responses/"+uid).set({name:userName,answer:-1,timeLeft:0,answeredAt:Date.now(),qIdx:currentQIdx,timeout:true});totalPts-=2;const s=document.getElementById("screen-answered");s.className="screen waiting";document.getElementById("ans-icon").textContent="⏱";document.getElementById("ans-title").textContent="Time's up";document.getElementById("ans-pts").textContent="−2 points";document.getElementById("ans-sub").textContent="Awaiting next question…";document.getElementById("ans-total").textContent=`Total: ${totalPts} pts`;showScreen("screen-answered")}
+function showReveal(correctIdx){
+  const s=document.getElementById("screen-answered");
+  const correctLetter="Correct answer: "+String.fromCharCode(65+correctIdx);
+  if(myAnswer===-99||myAnswer===-1){
+    // No answer or timeout
+    if(myAnswer===-99){totalPts-=2;} // timeout already applied -2 via timeOut()
+    s.className="screen waiting";
+    document.getElementById("ans-icon").textContent="⏱";
+    document.getElementById("ans-title").textContent=myAnswer===-1?"Time's up":"No answer";
+    document.getElementById("ans-pts").textContent="−2 points";
+    document.getElementById("ans-sub").textContent=correctLetter;
+    document.getElementById("ans-total").textContent="Total: "+totalPts+" pts";
+  } else {
+    const isC=myAnswer===correctIdx;
+    const pts=isC?calcPts(myTimeLeft):-4;
+    totalPts+=pts;
+    s.className="screen "+(isC?"correct":"wrong");
+    document.getElementById("ans-icon").textContent=isC?"✓":"✗";
+    document.getElementById("ans-title").textContent=isC?"Correct!":"Wrong!";
+    document.getElementById("ans-pts").textContent=isC?"+"+pts+" points":"−4 points";
+    document.getElementById("ans-sub").textContent=correctLetter;
+    document.getElementById("ans-total").textContent="Total: "+totalPts+" pts";
+  }
+  showScreen("screen-answered");
+}
+function showFinal(){clearInterval(timerInterval);document.getElementById("final-score").textContent=totalPts;document.getElementById("final-name").textContent=userName||"";showScreen("screen-final")}
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
 </script>
-</body></html>
+</body>
+</html>
