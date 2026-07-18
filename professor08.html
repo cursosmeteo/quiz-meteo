@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Professor &#8212; Session 08 &#183; Turbulence &amp; CAT</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1b2e;color:#e8f0fe;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.2rem}
+h1{font-size:1.4rem;font-weight:800;color:#93c5fd;margin-bottom:.2rem;text-align:center}
+.sub{font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:1rem;text-align:center}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:1rem 1.2rem;width:100%;margin-bottom:.7rem}
+.qnum{font-size:.75rem;font-weight:700;color:#60a5fa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
+.qtxt{font-size:1rem;font-weight:600;line-height:1.4;margin-bottom:.7rem}
+.opt{display:flex;align-items:flex-start;gap:.5rem;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:8px;padding:.5rem .75rem;font-size:.88rem;cursor:pointer;transition:all .2s;line-height:1.35;color:inherit}
+.opt:hover:not(.lk){background:rgba(255,255,255,.1)}
+.opt.correct{background:rgba(34,197,94,.15);border-color:#22c55e;color:#86efac}
+.opt.wrong{background:rgba(239,68,68,.1);border-color:#ef4444;color:#fca5a5}
+.opt.lk{pointer-events:none}
+.letter{font-weight:800;color:#93c5fd;min-width:1rem;flex:none}
+.opt.correct .letter{color:#22c55e}
+.opt.wrong .letter{color:#ef4444}
+.exp{display:none;margin-top:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:.55rem .8rem;font-size:.82rem;color:#86efac;line-height:1.5}
+.exp.show{display:block}
+.footer{font-size:.75rem;color:rgba(255,255,255,.25);text-align:center;margin-top:.8rem;padding-bottom:1rem}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+</style></head>
+<body>
+<h1>&#127942; Final Quiz &#8212; Session 08</h1>
+<div class="sub">Mountain Waves &#183; Turbulence &#183; CAT &#160;&#183;&#160; Professor view</div>
+<div class="card"><div class="qnum">Question 1 / 10</div><div class="qtxt">Which condition is NOT required for the formation of mountain waves?</div><div class="opts" id="po-1"><div class="opt" id="po-1-A" onclick="reveal(1,'A')"><span class="letter">A</span>Wind speed ≥15 kt at mountain level</div>
+    <div class="opt" id="po-1-B" onclick="reveal(1,'B')"><span class="letter">B</span>Wind direction within 30° of perpendicular to the ridge</div>
+    <div class="opt" id="po-1-C" onclick="reveal(1,'C')"><span class="letter">C</span>Stable layer at or just above the ridge</div>
+    <div class="opt" id="po-1-D" onclick="reveal(1,'D')"><span class="letter">D</span>Wind speed must increase with altitude above the ridge</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(1,null)">Show answer</button></div><div class="exp" id="pe-1">Mountain waves require wind ≥15 kt perpendicular to the ridge and a stable layer at ridge level. Increasing wind speed above the ridge is not a strict requirement.</div></div>
+<div class="card"><div class="qnum">Question 2 / 10</div><div class="qtxt">A lenticular cloud (ACSL &#8212; Altocumulus Standing Lenticular) appears stationary because:</div><div class="opts" id="po-2"><div class="opt" id="po-2-A" onclick="reveal(2,'A')"><span class="letter">A</span>Air continuously flows through it, marking a fixed wave crest</div>
+    <div class="opt" id="po-2-B" onclick="reveal(2,'B')"><span class="letter">B</span>The cloud is frozen at high altitude</div>
+    <div class="opt" id="po-2-C" onclick="reveal(2,'C')"><span class="letter">C</span>The wave has dissipated and only the cloud remains</div>
+    <div class="opt" id="po-2-D" onclick="reveal(2,'D')"><span class="letter">D</span>The cloud forms in the rotor zone</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(2,null)">Show answer</button></div><div class="exp" id="pe-2">A lenticular cloud marks a fixed wave crest — air flows through continuously, condensing upwind and evaporating downwind.</div></div>
+<div class="card"><div class="qnum">Question 3 / 10</div><div class="qtxt">The MOST dangerous zone for light aircraft in mountain wave conditions is:</div><div class="opts" id="po-3"><div class="opt" id="po-3-A" onclick="reveal(3,'A')"><span class="letter">A</span>Directly above the mountain peak</div>
+    <div class="opt" id="po-3-B" onclick="reveal(3,'B')"><span class="letter">B</span>Between the cap cloud and lenticular cloud</div>
+    <div class="opt" id="po-3-C" onclick="reveal(3,'C')"><span class="letter">C</span>The rotor zone, below the first wave crest in the lee</div>
+    <div class="opt" id="po-3-D" onclick="reveal(3,'D')"><span class="letter">D</span>The tropopause, where wave amplitude is highest</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(3,null)">Show answer</button></div><div class="exp" id="pe-3">The rotor zone contains severe chaotic turbulence with reversed surface flow. It is the most hazardous zone, especially for light aircraft.</div></div>
+<div class="card"><div class="qnum">Question 4 / 10</div><div class="qtxt">Mechanical turbulence intensity depends primarily on:</div><div class="opts" id="po-4"><div class="opt" id="po-4-A" onclick="reveal(4,'A')"><span class="letter">A</span>Air temperature and humidity</div>
+    <div class="opt" id="po-4-B" onclick="reveal(4,'B')"><span class="letter">B</span>Wind speed and surface roughness</div>
+    <div class="opt" id="po-4-C" onclick="reveal(4,'C')"><span class="letter">C</span>Lapse rate and cloud base height</div>
+    <div class="opt" id="po-4-D" onclick="reveal(4,'D')"><span class="letter">D</span>Pressure gradient and Coriolis force</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(4,null)">Show answer</button></div><div class="exp" id="pe-4">Mechanical turbulence depends on wind speed and surface roughness. Stronger wind and rougher terrain increase turbulence intensity.</div></div>
+<div class="card"><div class="qnum">Question 5 / 10</div><div class="qtxt">Thermal turbulence is most severe when:</div><div class="opts" id="po-5"><div class="opt" id="po-5-A" onclick="reveal(5,'A')"><span class="letter">A</span>Surface heating is strong and the atmosphere is unstable</div>
+    <div class="opt" id="po-5-B" onclick="reveal(5,'B')"><span class="letter">B</span>A temperature inversion is present at low level</div>
+    <div class="opt" id="po-5-C" onclick="reveal(5,'C')"><span class="letter">C</span>Wind speed is low and relative humidity is high</div>
+    <div class="opt" id="po-5-D" onclick="reveal(5,'D')"><span class="letter">D</span>Cloud cover is complete, preventing solar radiation</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(5,null)">Show answer</button></div><div class="exp" id="pe-5">Strong solar heating combined with atmospheric instability generates vigorous convective currents producing severe thermal turbulence.</div></div>
+<div class="card"><div class="qnum">Question 6 / 10</div><div class="qtxt">Frontal turbulence is typically associated with:</div><div class="opts" id="po-6"><div class="opt" id="po-6-A" onclick="reveal(6,'A')"><span class="letter">A</span>Mountain ridges perpendicular to the wind</div>
+    <div class="opt" id="po-6-B" onclick="reveal(6,'B')"><span class="letter">B</span>Wind shear along the frontal surface and embedded Cb</div>
+    <div class="opt" id="po-6-C" onclick="reveal(6,'C')"><span class="letter">C</span>Clear air at cruise level above FL 350</div>
+    <div class="opt" id="po-6-D" onclick="reveal(6,'D')"><span class="letter">D</span>Anticyclonic flow at the tropopause</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(6,null)">Show answer</button></div><div class="exp" id="pe-6">Frontal turbulence results from wind shear along the frontal boundary and embedded Cb. Cold fronts produce the most severe cases.</div></div>
+<div class="card"><div class="qnum">Question 7 / 10</div><div class="qtxt">CAT (Clear Air Turbulence) is defined as turbulence:</div><div class="opts" id="po-7"><div class="opt" id="po-7-A" onclick="reveal(7,'A')"><span class="letter">A</span>Inside cumulonimbus clouds above FL 250</div>
+    <div class="opt" id="po-7-B" onclick="reveal(7,'B')"><span class="letter">B</span>In the boundary layer, caused by surface heating</div>
+    <div class="opt" id="po-7-C" onclick="reveal(7,'C')"><span class="letter">C</span>Above 15 000 ft in cloud-free air, associated with wind shear</div>
+    <div class="opt" id="po-7-D" onclick="reveal(7,'D')"><span class="letter">D</span>Below the tropopause, in frontal cloud</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(7,null)">Show answer</button></div><div class="exp" id="pe-7">CAT occurs above 15 000 ft in clear air with no visual warning. It is caused by wind shear near the jet stream and cannot be detected by weather radar.</div></div>
+<div class="card"><div class="qnum">Question 8 / 10</div><div class="qtxt">The PRIMARY CAT zone relative to the polar jet stream is located on the:</div><div class="opts" id="po-8"><div class="opt" id="po-8-A" onclick="reveal(8,'A')"><span class="letter">A</span>Warm-air side, above the jet core</div>
+    <div class="opt" id="po-8-B" onclick="reveal(8,'B')"><span class="letter">B</span>Warm-air side, below the jet core</div>
+    <div class="opt" id="po-8-C" onclick="reveal(8,'C')"><span class="letter">C</span>Cold-air side, above the jet core</div>
+    <div class="opt" id="po-8-D" onclick="reveal(8,'D')"><span class="letter">D</span>Cold-air side, just below the jet core</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(8,null)">Show answer</button></div><div class="exp" id="pe-8">The primary CAT zone is on the cold-air (poleward) side, just below the jet core, where vertical wind shear is greatest.</div></div>
+<div class="card"><div class="qnum">Question 9 / 10</div><div class="qtxt">When encountering unexpected severe turbulence in cruise, the immediate priority is to:</div><div class="opts" id="po-9"><div class="opt" id="po-9-A" onclick="reveal(9,'A')"><span class="letter">A</span>Increase speed to maintain control authority</div>
+    <div class="opt" id="po-9-B" onclick="reveal(9,'B')"><span class="letter">B</span>Descend below the turbulence layer immediately</div>
+    <div class="opt" id="po-9-C" onclick="reveal(9,'C')"><span class="letter">C</span>Reduce to turbulence penetration speed (VB) and inform ATC</div>
+    <div class="opt" id="po-9-D" onclick="reveal(9,'D')"><span class="letter">D</span>Switch off autopilot and hand-fly at maximum cruise speed</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(9,null)">Show answer</button></div><div class="exp" id="pe-9">Reduce to VB immediately to avoid structural damage, turn on seat-belt signs, and notify ATC. Increasing speed risks overstressing the airframe.</div></div>
+<div class="card"><div class="qnum">Question 10 / 10</div><div class="qtxt">Which is the best visual indicator of severe mountain wave activity?</div><div class="opts" id="po-10"><div class="opt" id="po-10-A" onclick="reveal(10,'A')"><span class="letter">A</span>Cumulonimbus with anvil shape</div>
+    <div class="opt" id="po-10-B" onclick="reveal(10,'B')"><span class="letter">B</span>Rotor cloud below the wave crest combined with lenticular clouds above</div>
+    <div class="opt" id="po-10-C" onclick="reveal(10,'C')"><span class="letter">C</span>Stratus layers covering the mountain top</div>
+    <div class="opt" id="po-10-D" onclick="reveal(10,'D')"><span class="letter">D</span>Cirrus uncinus (mare’s tails) at high altitude</div>
+    </div><div class="btns" style="margin-top:.5rem"><button style="background:#1a5fa8;color:white;border:none;border-radius:6px;padding:.4rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer" onclick="reveal(10,null)">Show answer</button></div><div class="exp" id="pe-10">The combination of rotor cloud (low, turbulent) and lenticular clouds (stationary, lens-shaped) is the classic visual signature of active mountain wave activity.</div></div>
+<div class="footer">Session 08 &#183; ATPL 050 &#183; cursosmeteo.github.io/quiz-meteo</div>
+<script>
+var ans=["D", "A", "C", "B", "A", "B", "C", "D", "C", "B"];
+function reveal(n,chosen){
+  var c=ans[n-1];
+  document.querySelectorAll('#po-'+n+' .opt').forEach(function(o){
+    var l=o.querySelector('.letter').textContent.trim();
+    if(l===c)o.classList.add('correct');
+    else if(chosen&&l===chosen&&chosen!==c)o.classList.add('wrong');
+  });
+  document.getElementById('pe-'+n).classList.add('show');
+}
+</script>
+</body></html>
