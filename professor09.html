@@ -151,11 +151,11 @@ const QUESTIONS = [
     q: "A jet stream is best defined as a narrow band of strong winds, typically found:",
     options: [
       "In the stratosphere, with core wind speeds always above 30 kt",
-      "Near the tropopause, with core wind speed of 60 kt or more",
+      "Throughout the whole troposphere, never exceeding 40 kt",
       "At the surface, associated with frontal boundaries",
-      "Throughout the whole troposphere, never exceeding 40 kt"
+      "Near the tropopause, with core wind speed of 60 kt or more"
     ],
-    correct: 1,
+    correct: 3,
     explain: "A jet stream is a narrow, quasi-horizontal current of air concentrated near the tropopause, with a core wind speed of at least 60 kt (ICAO definition), typically 2000 NM long, 200 NM wide and 2 NM deep."
   },
   {
@@ -174,12 +174,12 @@ const QUESTIONS = [
     eyebrow: "JET STREAM · POLAR FRONT", code: "050 02 07 02",
     q: "The Polar Front Jet lies:",
     options: [
-      "Parallel to the surface position of the warm and cold fronts of polar front depressions",
-      "Directly above the Intertropical Convergence Zone",
       "Only over oceans, never over continental landmasses",
+      "Directly above the Intertropical Convergence Zone",
+      "Parallel to the surface position of the warm and cold fronts of polar front depressions",
       "At a fixed latitude year-round, unaffected by season"
     ],
-    correct: 0,
+    correct: 2,
     explain: "The Polar Front Jet runs parallel to the surface fronts of polar front depressions, typically 40°–65°N in the NH and 50°–55°S in the SH, shifting equatorward and strengthening in winter."
   },
   {
@@ -198,12 +198,12 @@ const QUESTIONS = [
     eyebrow: "JET STREAM · ARCTIC", code: "050 02 07 02",
     q: "The Arctic (front) jet stream forms along the boundary between:",
     options: [
-      "Tropical air and polar air",
       "Arctic air and polar air",
+      "Tropical air and polar air",
       "Polar air and subtropical air",
       "Two polar air masses of identical temperature"
     ],
-    correct: 1,
+    correct: 0,
     explain: "The Arctic jet lies between the boundary of Arctic air and Polar air, typically around 60°N in winter (45°–50°N over the USA), core near 20 000 ft (400 hPa); it is a transient feature linked to Arctic air outbreaks."
   },
   {
@@ -223,11 +223,11 @@ const QUESTIONS = [
     q: "The primary Clear Air Turbulence (CAT) zone associated with a jet stream is located:",
     options: [
       "Above the jet axis, on the warm side",
-      "Near to, or just below, the jet axis, on the cold (low-pressure) side",
       "At the jet core itself, regardless of which side",
+      "Near to, or just below, the jet axis, on the cold (low-pressure) side",
       "Only on the warm side, well above the tropopause"
     ],
-    correct: 1,
+    correct: 2,
     explain: "The strongest CAT is found near/just below the jet axis on its cold, low-pressure side, where horizontal and vertical wind shear are greatest. A weaker, secondary CAT zone exists above the jet axis."
   },
   {
@@ -235,11 +235,11 @@ const QUESTIONS = [
     q: "On satellite imagery, the presence of a jet stream is often revealed by:",
     options: [
       "A ring of stratocumulus cloud encircling the core",
-      "Banded cirrus cloud running roughly perpendicular to the jet axis",
+      "Fog banks that track the jet core at the surface",
       "A persistent cloud-free corridor with no diagnostic signature",
-      "Fog banks that track the jet core at the surface"
+      "Banded cirrus cloud running roughly perpendicular to the jet axis"
     ],
-    correct: 1,
+    correct: 3,
     explain: "Cirrus cloud bands aligned roughly perpendicular to the flow, and an arc of cirrus on the poleward side of a jet streak, are classic satellite signatures of a jet stream."
   },
   {
@@ -247,11 +247,11 @@ const QUESTIONS = [
     q: "On upper-air or SIGWX charts, a jet stream is typically indicated by:",
     options: [
       "Widely spaced isobars only, with no wind data",
-      "Tightly packed isotachs/isohypses with a labelled jet symbol showing FL, direction and speed",
       "A single dashed line with no numerical values attached",
+      "Tightly packed isotachs/isohypses with a labelled jet symbol showing FL, direction and speed",
       "Surface pressure tendency arrows only"
     ],
-    correct: 1,
+    correct: 2,
     explain: "Jet streams appear on upper-air charts as tightly packed contour/isotach lines, and on SIGWX charts as a labelled jet symbol giving the flight level, direction and maximum wind speed of the core."
   },
   {
