@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jet Streams · Professor</title>
+<style>
+  :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; --text: #3A3A3A; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Calibri', 'Segoe UI', sans-serif; background: #fff; color: var(--text); }
+  .stage { display: flex; flex-direction: column; height: 100vh; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px; background: var(--navy); color: #fff; gap: 16px; }
+  .topbar .brand { font-size: 13px; letter-spacing: 1.2px; color: #9DB4D1; font-weight: 600; white-space: nowrap; }
+  .topbar .progress { font-size: 14px; color: #fff; font-weight: 600; }
+  .topbar .progress span { color: var(--amber); }
+  .conn { font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 700; letter-spacing: .5px; }
+  .conn.ok { background: var(--green); color: #fff; }
+  .conn.err { background: var(--red); color: #fff; }
+  .conn.wait { background: var(--steel); color: #fff; }
+  main { flex: 1; display: flex; overflow: hidden; }
+  .q-panel { flex: 1; padding: 24px 32px; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+  .cover-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; gap: 20px; }
+  .cover-center h1 { font-size: 38px; font-weight: 800; color: var(--navy); letter-spacing: -2px; }
+  .cover-center .sub { font-size: 18px; color: var(--steel); font-style: italic; }
+  .qr-link { font-size: 20px; font-weight: 800; color: var(--aviation); margin-top: 8px; }
+  .start-hint { font-size: 15px; color: var(--steel); margin-top: 12px; }
+  .start-hint kbd { background: var(--navy); color: #fff; padding: 4px 12px; border-radius: 4px; font-family: monospace; }
+  .scoring-info { background: var(--light); border: 1px solid var(--border); border-top: 3px solid var(--aviation); padding: 14px 20px; border-radius: 4px; font-size: 13px; color: var(--text); line-height: 1.9; max-width: 520px; }
+  .scoring-info b { color: var(--navy); }
+  .s1{color:var(--green);font-weight:700}.s2{color:var(--amber);font-weight:700}.s3{color:var(--steel);font-weight:700}.s0{color:var(--red);font-weight:700}
+  .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .q-meta .eyebrow { font-size: 12px; color: var(--aviation); font-weight: 700; letter-spacing: 1.5px; }
+  .q-meta .code { font-family: monospace; font-size: 11px; color: var(--steel); margin-top: 3px; }
+  .timer { width: 96px; height: 96px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; flex-direction: column; transition: background .3s; flex-shrink: 0; }
+  .timer.warn{background:var(--amber)}.timer.crit{background:var(--red);animation:pulse .5s infinite alternate}.timer.expired{background:var(--steel)}
+  .timer .n { font-size: 38px; font-weight: 800; color: #fff; line-height: 1; }
+  .timer .lbl { font-size: 9px; color: rgba(255,255,255,.85); letter-spacing: 1.5px; margin-top: 3px; }
+  @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.05)}}
+  .q-text { font-size: 22px; color: var(--navy); font-weight: 700; line-height: 1.3; margin: 10px 0 16px; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt { background: var(--light); border: 2px solid var(--border); padding: 12px 16px; font-size: 15px; color: var(--text); border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; }
+  .opt .key { background: var(--aviation); color: #fff; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .opt.correct { background: #E8F5EE; border-color: var(--green); }
+  .opt.correct .key { background: var(--green); }
+  .feedback { margin-top: 12px; padding: 12px 16px; border-radius: 6px; font-size: 14px; display: none; line-height: 1.5; }
+  .feedback.show { display: block; background: var(--navy); color: #fff; }
+  .feedback .explain { font-size: 13px; opacity: .9; margin-top: 6px; }
+  .r-panel { width: 300px; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; }
+  .r-panel h3 { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: var(--steel); text-transform: uppercase; }
+  .connected-count { font-size: 13px; color: var(--steel); margin-top: -8px; }
+  .connected-count span { font-weight: 700; color: var(--navy); }
+  /* Response indicators - YES/NO only, no letter */
+  .responses-grid { display: flex; flex-direction: column; gap: 5px; }
+  .r-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--light); border-radius: 6px; font-size: 13px; border: 1px solid var(--border); }
+  .r-item .r-name { flex: 1; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-item .r-indicator { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; background: var(--steel); color: #fff; }
+  .r-item.answered .r-indicator { background: var(--aviation); }
+  .r-item.correct .r-indicator { background: var(--green); }
+  .r-item.wrong .r-indicator { background: var(--red); }
+  .r-item .r-pts { font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; min-width: 28px; text-align: right; }
+  .r-item .r-pts.neg { color: var(--red); }
+  .scoreboard-panel { border-top: 1px solid var(--border); padding-top: 10px; }
+  .score-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border: none; }
+  .score-rank { font-size: 11px; color: var(--steel); width: 20px; text-align: center; font-weight: 700; }
+  .score-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .score-pts { font-size: 18px; font-weight: 800; color: var(--navy); min-width: 40px; text-align: right; }
+  .controls { border-top: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--light); }
+  .ctrl-btn { padding: 8px 20px; border: none; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .15s; }
+  .ctrl-btn:hover{opacity:.85}.ctrl-btn:disabled{opacity:.35;cursor:not-allowed}
+  .ctrl-btn.primary{background:var(--navy);color:#fff}.ctrl-btn.reveal{background:var(--amber);color:var(--navy)}.ctrl-btn.danger{background:var(--red);color:#fff}
+  .ctrl-hint{font-size:12px;color:var(--steel)}.ctrl-hint kbd{background:var(--navy);color:#fff;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:10px}
+  /* FINAL SCREEN WITH CHART */
+  .final-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; text-align: center; padding: 20px; }
+  .final-screen h1 { font-size: 42px; font-weight: 800; color: var(--navy); }
+  .chart-wrap { width: 100%; max-width: 700px; background: var(--light); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px 16px; }
+  .chart-bars { display: flex; align-items: flex-end; justify-content: center; gap: 20px; height: 240px; }
+  .chart-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; flex: 1; max-width: 120px; height: 100%; }
+  .chart-bar-wrap { display: flex; align-items: flex-end; width: 100%; }
+  .chart-bar { width: 100%; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: center; }
+  .chart-pts-above { font-size: 18px; font-weight: 800; color: var(--navy); }
+  .chart-pts-inside { font-size: 18px; font-weight: 800; color: #fff; }
+  .chart-name { font-size: 13px; font-weight: 700; color: var(--navy); text-align: center; line-height: 1.2; margin-top: 6px; }
+  .chart-rank { font-size: 20px; }
+  .debrief { font-size: 13px; color: var(--steel); max-width: 600px; line-height: 1.7; }
+  .debrief b { color: var(--navy); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="topbar">
+    <div class="brand">JET STREAMS · 050 02 07 00 · PROFESSOR · ALL ANSWER</div>
+    <div class="progress" id="progress">Awaiting start</div>
+    <div class="conn wait" id="conn-status">Connecting...</div>
+  </div>
+  <main>
+    <div class="q-panel" id="q-panel">
+      <div class="cover-center">
+        <h1>JET STREAMS</h1>
+        <div class="sub">Session 09 · 10 questions · 050 02 07 00</div>
+        <div class="qr-link" id="aluno-url">— loading —</div>
+        <div id="qrcode-container"></div>
+        <div class="scoring-info">
+          <b>Scoring — all answer · 30 seconds</b><br>
+          <span class="s1">+6</span> correct 1–5s &nbsp;·&nbsp; <span class="s1">+5</span> correct 6–10s &nbsp;·&nbsp; <span class="s2">+4</span> correct 11–15s<br>
+          <span class="s2">+3</span> correct 16–20s &nbsp;·&nbsp; <span class="s3">+2</span> correct 21–25s &nbsp;·&nbsp; <span class="s3">+1</span> correct 26–30s<br>
+          <span class="s0">−4</span> wrong &nbsp;·&nbsp; <span class="s0">−2</span> no answer
+        </div>
+        <div class="start-hint">Press <kbd>SPACE</kbd> to start · <kbd>F11</kbd> fullscreen</div>
+      </div>
+    </div>
+    <div class="r-panel">
+      <h3>Connected students</h3>
+      <div class="connected-count"><span id="connected-num">0</span> devices</div>
+      <div>
+        <h3>Answers <span id="answer-count" style="color:var(--navy);font-size:14px;"></span></h3>
+        <div class="responses-grid" id="responses-grid"><div style="font-size:13px;color:var(--steel);">Awaiting start</div></div>
+      </div>
+      <div class="scoreboard-panel"><h3 style="margin-bottom:8px;">Scoreboard</h3><div id="scoreboard-list"></div></div>
+    </div>
+  </main>
+  <div class="controls">
+    <div style="display:flex;gap:8px;">
+      <button class="ctrl-btn reveal" id="btn-reveal" onclick="revealAnswer()" disabled>Reveal answer</button>
+      <button class="ctrl-btn primary" id="btn-next" onclick="nextQuestion()">Start quiz</button>
+      <button class="ctrl-btn danger" onclick="resetQuiz()" style="margin-left:8px;">Restart</button>
+    </div>
+    <div class="ctrl-hint"><kbd>SPACE</kbd> next &nbsp; <kbd>R</kbd> reveal &nbsp; <kbd>ESC</kbd> restart</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68",
+  authDomain: "meteorology-quiz-2b061.firebaseapp.com",
+  databaseURL: "https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meteorology-quiz-2b061",
+  storageBucket: "meteorology-quiz-2b061.firebasestorage.app",
+  messagingSenderId: "595212568307",
+  appId: "1:595212568307:web:e51bc42c187f13a6359986"
+};
+
+const TIME_PER_Q = 30;
+
+const QUESTIONS = [
+  {
+    eyebrow: "JET STREAM · DEFINITION", code: "050 02 07 00",
+    q: "A jet stream is best defined as a narrow band of strong winds, typically found:",
+    options: [
+      "In the stratosphere, with core wind speeds always above 30 kt",
+      "Near the tropopause, with core wind speed of 60 kt or more",
+      "At the surface, associated with frontal boundaries",
+      "Throughout the whole troposphere, never exceeding 40 kt"
+    ],
+    correct: 1,
+    explain: "A jet stream is a narrow, quasi-horizontal current of air concentrated near the tropopause, with a core wind speed of at least 60 kt (ICAO definition), typically 2000 NM long, 200 NM wide and 2 NM deep."
+  },
+  {
+    eyebrow: "JET STREAM · FORMATION", code: "050 02 07 02",
+    q: "The primary cause of a jet stream is:",
+    options: [
+      "A large horizontal temperature gradient, producing a strong thermal wind",
+      "Surface friction convergence beneath a ridge",
+      "The Coriolis force acting alone, independent of any temperature gradient",
+      "Conservation of angular momentum only, unrelated to temperature gradients"
+    ],
+    correct: 0,
+    explain: "A sharp horizontal temperature gradient creates a strong thermal wind component with height; added to the surface geostrophic wind, this produces the very strong westerly flow found at the jet core. Conservation of angular momentum poleward is a secondary contributor."
+  },
+  {
+    eyebrow: "JET STREAM · POLAR FRONT", code: "050 02 07 02",
+    q: "The Polar Front Jet lies:",
+    options: [
+      "Parallel to the surface position of the warm and cold fronts of polar front depressions",
+      "Directly above the Intertropical Convergence Zone",
+      "Only over oceans, never over continental landmasses",
+      "At a fixed latitude year-round, unaffected by season"
+    ],
+    correct: 0,
+    explain: "The Polar Front Jet runs parallel to the surface fronts of polar front depressions, typically 40°–65°N in the NH and 50°–55°S in the SH, shifting equatorward and strengthening in winter."
+  },
+  {
+    eyebrow: "JET STREAM · SUBTROPICAL", code: "050 02 07 02",
+    q: "The Subtropical Jet is associated with:",
+    options: [
+      "The polar front, between polar and tropical air",
+      "The descending branch of the Hadley cell, with its core around the 200 hPa level",
+      "The boundary between Arctic and polar air",
+      "Surface anticyclogenesis only, with no upper-level signature"
+    ],
+    correct: 1,
+    explain: "The Subtropical Jet sits over the subtropical anticyclones, above the descending (dry, sinking) branch of the Hadley cell, with a core near 200 hPa; it moves seasonally with the subtropical high-pressure belt."
+  },
+  {
+    eyebrow: "JET STREAM · ARCTIC", code: "050 02 07 02",
+    q: "The Arctic (front) jet stream forms along the boundary between:",
+    options: [
+      "Tropical air and polar air",
+      "Arctic air and polar air",
+      "Polar air and subtropical air",
+      "Two polar air masses of identical temperature"
+    ],
+    correct: 1,
+    explain: "The Arctic jet lies between the boundary of Arctic air and Polar air, typically around 60°N in winter (45°–50°N over the USA), core near 20 000 ft (400 hPa); it is a transient feature linked to Arctic air outbreaks."
+  },
+  {
+    eyebrow: "JET STREAM · SEASONAL MOVEMENT", code: "050 02 07 02",
+    q: "Compared with summer, in winter the polar front jet is generally:",
+    options: [
+      "Weaker and displaced further poleward",
+      "Stronger and displaced further equatorward, at a lower level",
+      "Stronger and displaced further poleward, at a higher level",
+      "Unchanged in strength, latitude and level"
+    ],
+    correct: 1,
+    explain: "In winter the temperature contrast between polar and tropical air is greatest, so the polar front jet strengthens and shifts equatorward, descending to a slightly lower level than in summer."
+  },
+  {
+    eyebrow: "JET STREAM · CAT", code: "050 02 07 03",
+    q: "The primary Clear Air Turbulence (CAT) zone associated with a jet stream is located:",
+    options: [
+      "Above the jet axis, on the warm side",
+      "Near to, or just below, the jet axis, on the cold (low-pressure) side",
+      "At the jet core itself, regardless of which side",
+      "Only on the warm side, well above the tropopause"
+    ],
+    correct: 1,
+    explain: "The strongest CAT is found near/just below the jet axis on its cold, low-pressure side, where horizontal and vertical wind shear are greatest. A weaker, secondary CAT zone exists above the jet axis."
+  },
+  {
+    eyebrow: "JET STREAM · RECOGNITION", code: "050 02 07 02",
+    q: "On satellite imagery, the presence of a jet stream is often revealed by:",
+    options: [
+      "A ring of stratocumulus cloud encircling the core",
+      "Banded cirrus cloud running roughly perpendicular to the jet axis",
+      "A persistent cloud-free corridor with no diagnostic signature",
+      "Fog banks that track the jet core at the surface"
+    ],
+    correct: 1,
+    explain: "Cirrus cloud bands aligned roughly perpendicular to the flow, and an arc of cirrus on the poleward side of a jet streak, are classic satellite signatures of a jet stream."
+  },
+  {
+    eyebrow: "JET STREAM · CHARTS", code: "050 02 07 02",
+    q: "On upper-air or SIGWX charts, a jet stream is typically indicated by:",
+    options: [
+      "Widely spaced isobars only, with no wind data",
+      "Tightly packed isotachs/isohypses with a labelled jet symbol showing FL, direction and speed",
+      "A single dashed line with no numerical values attached",
+      "Surface pressure tendency arrows only"
+    ],
+    correct: 1,
+    explain: "Jet streams appear on upper-air charts as tightly packed contour/isotach lines, and on SIGWX charts as a labelled jet symbol giving the flight level, direction and maximum wind speed of the core."
+  },
+  {
+    eyebrow: "JET STREAM · TROPICAL EASTERLY", code: "050 02 07 02",
+    q: "The Tropical Easterly Jet occurs:",
+    options: [
+      "Year-round, across the mid-latitudes of both hemispheres",
+      "Only in the Northern Hemisphere summer, around 10°–20°N, driven by the Asian monsoon heat source",
+      "Only during the Southern Hemisphere winter, over Australia",
+      "At the same altitude and strength as the Polar Front Jet"
+    ],
+    correct: 1,
+    explain: "The Tropical Easterly Jet is a strong easterly flow confined to the NH summer monsoon season, around 10°–20°N, near the 100 hPa level, driven by the heat contrast between the Asian plateau and cooler air to the south."
+  }
+];
+const DEBRIEF_TOPICS = "Thermal wind & Buys Ballot's extended law · Jet streak convergence/divergence · Contour and isotach chart reading · SIGWX jet symbol interpretation";
+
+const BAR_COLOURS = ["#1B4F8E","#06A77D","#F4A261","#E63946","#5A7A9C","#8B5CF6","#EC4899","#14B8A6"];
+
+let state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: {}, registry: {} };
+let db;
+
+try {
+  firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
+  document.getElementById("conn-status").textContent = "Connected ✓";
+  document.getElementById("conn-status").className = "conn ok";
+} catch(e) {
+  document.getElementById("conn-status").textContent = "Firebase error";
+  document.getElementById("conn-status").className = "conn err";
+}
+
+window.addEventListener("load", () => {
+  const alunoUrl = window.location.origin + window.location.pathname.replace("professor06.html","") + "aluno06.html";
+  document.getElementById("aluno-url").textContent = alunoUrl;
+  try { new QRCode(document.getElementById("qrcode-container"), { text: alunoUrl, width: 130, height: 130, colorDark: "#0B2545", colorLight: "#ffffff" }); } catch(e) {}
+  listenFirebase();
+});
+
+function listenFirebase() {
+  if (!db) return;
+  db.ref("connected").on("value", snap => {
+    state.connected = snap.val() || {};
+    // Registry: accumulate all students ever connected, never remove
+    Object.entries(state.connected).forEach(([uid, data]) => {
+      state.registry[uid] = data;
+    });
+    document.getElementById("connected-num").textContent = Object.keys(state.connected).length;
+    renderResponseGrid();
+  });
+  db.ref("responses").on("value", snap => {
+    state.responses = snap.val() || {};
+    renderResponseGrid();
+    renderScoreboard();
+    const el = document.getElementById("answer-count");
+    if (el && state.idx >= 0) el.textContent = `(${Object.keys(state.responses).length}/${Object.keys(state.connected).length})`;
+  });
+}
+
+// New scoring: +6 to +1 based on speed, -4 wrong, -2 no answer
+function calcPts(timeLeft) {
+  const elapsed = TIME_PER_Q - timeLeft;
+  if (elapsed <= 5)  return 6;
+  if (elapsed <= 10) return 5;
+  if (elapsed <= 15) return 4;
+  if (elapsed <= 20) return 3;
+  if (elapsed <= 25) return 2;
+  return 1;
+}
+
+function pushQ(idx) {
+  if (!db) return;
+  const Q = QUESTIONS[idx];
+  db.ref("currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
+  db.ref("responses").remove();
+}
+
+function nextQuestion() {
+  if (state.idx === -1) { state.idx = 0; }
+  else if (state.revealed) {
+    state.lastResponses = Object.assign({}, state.responses); // snapshot before clearing
+    scoreCurrentQuestion();
+    renderScoreboard();
+    state.idx++;
+    state.revealed = false;
+  }
+  if (state.idx >= QUESTIONS.length) { renderFinal(false); return; }
+  state.responses = {};
+  renderQuestion(); pushQ(state.idx); startTimer();
+  document.getElementById("btn-reveal").disabled = false;
+  document.getElementById("btn-next").textContent = "Next question";
+  document.getElementById("btn-next").disabled = true;
+  document.getElementById("answer-count").textContent = "";
+}
+
+function revealAnswer() {
+  if (state.revealed) return;
+  state.revealed = true; stopTimer();
+  if (db) { db.ref("currentQuestion/revealed").set(true); db.ref("currentQuestion/correct").set(QUESTIONS[state.idx].correct); }
+  showCorrectAnswer();
+  document.getElementById("btn-reveal").disabled = true;
+  document.getElementById("btn-next").disabled = false;
+  if (state.idx >= QUESTIONS.length - 1) document.getElementById("btn-next").textContent = "View final results";
+}
+
+function scoreCurrentQuestion() {
+  const Q = QUESTIONS[state.idx];
+  // Build full list of participants: connected + anyone who responded
+  const snap = state.lastResponses || state.responses;
+  const allUids = new Set([
+    ...Object.keys(state.registry),
+    ...Object.keys(snap)
+  ]);
+  allUids.forEach(uid => {
+    const name = (state.registry[uid] && state.registry[uid].name)
+      || (snap[uid] && snap[uid].name)
+      || uid;
+    if (!state.scores[uid]) state.scores[uid] = { name: name, pts: 0 };
+    const d = snap[uid];
+    if (!d || d.answer === -1 || d.timeout) {
+      state.scores[uid].pts -= 2; // no answer or timeout
+    } else if (d.answer === Q.correct) {
+      state.scores[uid].pts += calcPts(d.timeLeft || 0); // correct
+    } else {
+      state.scores[uid].pts -= 4; // wrong
+    }
+  });
+}
+
+function resetQuiz() {
+  if (!confirm("Restart the quiz? All scores will be lost.")) return;
+  state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected, registry: {} };
+  stopTimer();
+  if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
+  location.reload();
+}
+
+function renderQuestion() {
+  const Q = QUESTIONS[state.idx];
+  document.getElementById("progress").innerHTML = `Question <span>${state.idx + 1} / ${QUESTIONS.length}</span>`;
+  document.getElementById("q-panel").innerHTML = `
+    <div class="q-header">
+      <div class="q-meta"><div class="eyebrow">${Q.eyebrow}</div><div class="code">${Q.code}</div></div>
+      <div class="timer" id="timer"><div class="n">${TIME_PER_Q}</div><div class="lbl">SECONDS</div></div>
+    </div>
+    <div class="q-text">${Q.q}</div>
+    <div class="options">${Q.options.map((o,i)=>`<div class="opt" id="opt-${i}"><div class="key">${String.fromCharCode(65+i)}</div><div>${o}</div></div>`).join("")}</div>
+    <div class="feedback" id="feedback"></div>`;
+}
+
+function showCorrectAnswer() {
+  const Q = QUESTIONS[state.idx];
+  const el = document.getElementById("opt-"+Q.correct); if (el) el.classList.add("correct");
+  const fb = document.getElementById("feedback");
+  if (fb) { fb.className = "feedback show"; fb.innerHTML = `<b>Correct answer: ${String.fromCharCode(65+Q.correct)}</b><div class="explain">${Q.explain}</div>`; }
+  renderResponseGrid();
+}
+
+// Show YES/NO indicators only — no letter shown
+function renderResponseGrid() {
+  const grid = document.getElementById("responses-grid");
+  if (!grid) return;
+  const Q = state.idx >= 0 && state.idx < QUESTIONS.length ? QUESTIONS[state.idx] : null;
+  const connectedList = Object.entries(state.connected);
+  if (!connectedList.length) {
+    grid.innerHTML = `<div style="font-size:13px;color:var(--steel);">No students connected</div>`;
+    return;
+  }
+  grid.innerHTML = connectedList.map(([uid, c]) => {
+    const r = state.responses[uid];
+    let cls = "", indicator = "—", pts = "";
+    if (r) {
+      const isC = Q && state.revealed ? r.answer === Q.correct : null;
+      if (isC === true) {
+        cls = "correct"; indicator = "✓";
+        pts = `+${calcPts(r.timeLeft||0)}`;
+      } else if (isC === false) {
+        cls = "wrong"; indicator = "✗";
+        pts = r.answer === -1 ? "−2" : "−4";
+      } else {
+        cls = "answered"; indicator = "✓";
+      }
+    }
+    const ptsClass = pts.startsWith("+") ? "" : "neg";
+    return `<div class="r-item ${cls}">
+      <div class="r-name">${c.name || uid}</div>
+      <div class="r-indicator">${indicator}</div>
+      <div class="r-pts ${ptsClass}">${state.revealed ? pts : ""}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderScoreboard() {
+  const el = document.getElementById("scoreboard-list"); if (!el) return;
+  const sorted = Object.entries(state.scores).sort((a,b) => b[1].pts - a[1].pts).slice(0,10);
+  el.innerHTML = sorted.length
+    ? sorted.map(([,s],i) => `<div class="score-row"><div class="score-rank">${i+1}</div><div class="score-name">${s.name}</div><div class="score-pts">${s.pts}</div></div>`).join("")
+    : `<div style="font-size:13px;color:var(--steel);">No scores yet</div>`;
+}
+
+// Final screen with bar chart
+function renderFinal(doScore) {
+  stopTimer();
+  if (doScore !== false) scoreCurrentQuestion();
+  document.getElementById("progress").innerHTML = "<span>FINAL RESULT</span>";
+  const sorted = Object.entries(state.scores).sort(function(a,b){ return b[1].pts - a[1].pts; });
+  const medals = ["🥇","🥈","🥉"];
+  var barsHtml = "<p style='color:var(--steel);font-size:16px;'>No answers recorded.</p>";
+  if (sorted.length > 0) {
+    var allPts = sorted.map(function(x){ return x[1].pts; });
+    var minPts = Math.min.apply(null, allPts);
+    var maxPts = Math.max.apply(null, allPts);
+    var range = (maxPts - minPts) || 1;
+    barsHtml = sorted.map(function(entry, i) {
+      var s = entry[1];
+      var pct = Math.round(((s.pts - minPts) / range) * 180);
+      var colour = BAR_COLOURS[i % BAR_COLOURS.length];
+      var medal = medals[i] || (i+1)+".";
+      var ptsAbove = '<div class="chart-pts-above">' + s.pts + '</div>';
+      var barHtml = pct > 0
+        ? '<div class="chart-bar" style="height:' + pct + 'px;background:' + colour + ';"></div>'
+        : '<div style="height:4px;width:100%;background:#ccc;border-radius:2px;"></div>';
+      return '<div class="chart-col">'
+        + '<div class="chart-rank">' + medal + '</div>'
+        + ptsAbove
+        + '<div class="chart-bar-wrap">' + barHtml + '</div>'
+        + '<div class="chart-name">' + s.name + '</div>'
+        + '</div>';
+    }).join("");
+  }
+  document.getElementById("q-panel").innerHTML =
+    '<div class="final-screen">'
+    + '<h1>FINAL RESULT</h1>'
+    + '<div class="chart-wrap"><div class="chart-bars">' + barsHtml + '</div></div>'
+    + '<div class="debrief">Debrief topics:<br><b>' + DEBRIEF_TOPICS + '</b></div>'
+    + '</div>';
+  if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
+}
+
+let audioCtx;
+function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+function tone(f,d,t,v){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;o.type=t||"sine";g.gain.setValueAtTime(v||.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}
+function tickSound(){ensureAudio();tone(880,.08,"square",.12)}
+
+function startTimer() {
+  stopTimer(); state.timeLeft = TIME_PER_Q; updateTimer();
+  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
+}
+function stopTimer() { clearInterval(state.timerInterval); }
+function updateTimer() {
+  const t = document.getElementById("timer"); if (!t) return;
+  t.querySelector(".n").textContent = state.timeLeft;
+  t.classList.remove("warn","crit","expired");
+  if (state.timeLeft <= 0) t.classList.add("expired");
+  else if (state.timeLeft <= 8) t.classList.add("crit");
+  else if (state.timeLeft <= 15) t.classList.add("warn");
+}
+document.addEventListener("keydown", e => {
+  ensureAudio();
+  if (e.code === "Space") { e.preventDefault(); if (!document.getElementById("btn-next").disabled) nextQuestion(); }
+  if (e.code === "KeyR") { e.preventDefault(); revealAnswer(); }
+  if (e.code === "Escape") resetQuiz();
+});
+</script>
+</body>
+</html>
