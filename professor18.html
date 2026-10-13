@@ -324,12 +324,12 @@ function calcPts(timeLeft) {
 function pushQ(idx) {
   if (!db) return;
   const Q = QUESTIONS[idx];
-  db.ref("currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: Date.now(), revealed: false, mode: "all" });
+  db.ref("currentQuestion").set({ idx, q: Q.q, options: Q.options, eyebrow: Q.eyebrow, code: Q.code, timeLimit: TIME_PER_Q, startedAt: firebase.database.ServerValue.TIMESTAMP, revealed: false, mode: "all" });
   db.ref("responses").remove();
 }
 
 function nextQuestion() {
-  if (state.idx === -1) { state.idx = 0; }
+  if (state.idx === -1) { state.idx = 0; if (db) db.ref("scores").remove(); }
   else if (state.revealed) {
     state.lastResponses = Object.assign({}, state.responses); // snapshot before clearing
     scoreCurrentQuestion();
@@ -369,7 +369,7 @@ function scoreCurrentQuestion() {
       || (snap[uid] && snap[uid].name)
       || uid;
     if (!state.scores[uid]) state.scores[uid] = { name: name, pts: 0 };
-    const d = snap[uid];
+    const d = (snap[uid] && (snap[uid].qIdx === undefined || snap[uid].qIdx === state.idx)) ? snap[uid] : null;
     if (!d || d.answer === -1 || d.timeout) {
       state.scores[uid].pts -= 2; // no answer or timeout
     } else if (d.answer === Q.correct) {
@@ -378,13 +378,15 @@ function scoreCurrentQuestion() {
       state.scores[uid].pts -= 4; // wrong
     }
   });
+  // publish authoritative totals so every student device shows the same score
+  if (db) db.ref("scores").set(state.scores);
 }
 
 function resetQuiz() {
   if (!confirm("Restart the quiz? All scores will be lost.")) return;
   state = { idx: -1, timerInterval: null, timeLeft: TIME_PER_Q, revealed: false, scores: {}, responses: {}, connected: state.connected, registry: {} };
   stopTimer();
-  if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); }
+  if (db) { db.ref("currentQuestion").set({ idx: -1, q: "", options: [], revealed: false, mode: "all" }); db.ref("responses").remove(); db.ref("scores").remove(); }
   location.reload();
 }
 
