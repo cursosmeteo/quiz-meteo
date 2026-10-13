@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wind Shear & Thunderstorms · Professor</title>
+<title>Flight Hazards · Professor</title>
 <style>
   :root { --navy: #0B2545; --aviation: #1B4F8E; --green: #06A77D; --amber: #F4A261; --red: #E63946; --steel: #5A7A9C; --light: #F5F7FA; --border: #D0D7E0; --text: #3A3A3A; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -89,15 +89,15 @@
 <body>
 <div class="stage">
   <div class="topbar">
-    <div class="brand">WIND SHEAR, TS & TORNADOES · 050 09 03/04/05 · PROFESSOR · ALL ANSWER</div>
+    <div class="brand">FLIGHT HAZARDS · 050 09 00 00 · PROFESSOR · ALL ANSWER</div>
     <div class="progress" id="progress">Awaiting start</div>
     <div class="conn wait" id="conn-status">Connecting...</div>
   </div>
   <main>
     <div class="q-panel" id="q-panel">
       <div class="cover-center">
-        <h1>WIND SHEAR, THUNDERSTORMS &amp; TORNADOES</h1>
-        <div class="sub">Session 17 · 10 questions · 050 09 03/04/05 00</div>
+        <h1>FLIGHT HAZARDS</h1>
+        <div class="sub">Session 17 · 10 questions · 050 09 00 00</div>
         <div class="qr-link" id="aluno-url">— loading —</div>
         <div id="qrcode-container"></div>
         <div class="scoring-info">
@@ -147,78 +147,127 @@ const TIME_PER_Q = 30;
 
 const QUESTIONS = [
   {
-    eyebrow: "WIND SHEAR · DEFINITION", code: "050 09 03 01",
-    q: "Vertical wind shear is defined as a change in wind speed and/or direction with change of height, measured in:",
-    options: ["Knots per 1 000 ft — as measured along a runway by multiple anemometers","Knots per 100 ft — as measured by anemometers at different heights on a single mast","Metres per second per kilometre — standard SI definition","Knots per 500 ft — ICAO standard measurement interval"],
-    correct: 1,
-    explain: "Vertical wind shear = change in speed/direction with height, measured in kt/100 ft (two anemometers at different heights on a mast). Horizontal wind shear = change in speed/direction in the horizontal plane, measured in kt/1 000 ft along a runway."
+    eyebrow: "WIND SHEAR \u00b7 DEFINITION", code: "050 09 03 01",
+    q: "Vertical wind shear is expressed in:",
+    options: [
+      "Knots per 1000 ft",
+      "Knots per nautical mile",
+      "Metres per second per kilometre",
+      "Knots per 100 ft"
+    ],
+    correct: 3,
+    explain: "Vertical wind shear is measured in knots per 100 ft (anemometers at different heights on one mast); horizontal wind shear in knots per 1000 ft."
   },
   {
-    eyebrow: "WIND SHEAR · CONDITIONS", code: "050 09 03 02",
+    eyebrow: "WIND SHEAR \u00b7 JET STREAM", code: "050 09 03 02",
     q: "The greatest wind shear associated with a jet stream is found:",
-    options: ["On the warm air side of the jet core, at the tropopause","On the cold air side of the jet core just below the core, and above the core into the stratosphere","At the jet stream core itself, where wind speeds are maximum","Equatorward of the jet, between FL150 and FL200"],
-    correct: 1,
-    explain: "Greatest shear is on the COLD air side just below the jet core. A secondary shear area exists above the core, extending into the stratosphere. This is a classic CAT zone."
+    options: [
+      "On the cold-air side, just below the core",
+      "On the warm-air side, well above the core",
+      "Exactly at the centre of the core",
+      "Near the surface, below the jet axis"
+    ],
+    correct: 0,
+    explain: "Maximum shear lies on the cold (polar) side of the jet, just below the core; a secondary area lies above the core, extending into the stratosphere."
   },
   {
-    eyebrow: "WIND SHEAR · MICROBURST", code: "050 09 03 02",
-    q: "A microburst warning sign that can be seen visually from the cockpit is:",
-    options: ["Lenticular clouds downwind of a mountain range","Virga — precipitation below a cloud that evaporates before reaching the ground","St Elmo's fire around the nose and wing tips","A roll of stratocumulus ahead of the storm gust front"],
-    correct: 1,
-    explain: "Virga is precipitation that evaporates before reaching the ground. As it evaporates it cools the air, intensifying the downdraft. It is a key visual warning of potential microburst activity."
+    eyebrow: "DOWNBURSTS \u00b7 EFFECTS", code: "050 09 04 04",
+    q: "On approach, an aircraft enters a microburst. The first effect is usually:",
+    options: [
+      "An increasing tailwind and loss of IAS",
+      "A strong downdraft with no change in IAS",
+      "An increasing headwind \u2014 IAS increases and the aircraft goes above the glide path",
+      "A sudden rise in outside air temperature"
+    ],
+    correct: 2,
+    explain: "The outflow first gives an increasing headwind (IAS up, above the path). The downdraft and the dangerous increasing tailwind follow \u2014 reducing thrust in the first phase makes it worse."
   },
   {
-    eyebrow: "THUNDERSTORMS · CONDITIONS", code: "050 09 04 01",
-    q: "Which THREE conditions are required for thunderstorm development?",
-    options: ["Frontal uplift, a stable lapse rate, and sufficient moisture","A lapse rate greater than SALR through 10 000+ ft above the freezing level, sufficient moisture, and a trigger mechanism","Cold advection above FL200, anticyclonic conditions, and a deep moist layer","A jet stream at FL300, a tropopause above FL500, and orographic forcing"],
+    eyebrow: "THUNDERSTORMS \u00b7 CONDITIONS", code: "050 09 04 01",
+    q: "For thunderstorms to develop, the lapse rate must exceed the SALR through a layer at least:",
+    options: [
+      "3000 ft thick, below the freezing level",
+      "10,000 ft thick, extending above the freezing level",
+      "1000 ft thick, anywhere in the troposphere",
+      "30,000 ft thick, up to the tropopause"
+    ],
     correct: 1,
-    explain: "Thunderstorms need: (1) a lapse rate > SALR through at least 10 000 ft above the freezing level, (2) sufficient water vapour, and (3) a trigger (convection, orographic uplift, convergence, or frontal uplift)."
+    explain: "Instability (ELR > SALR) through a layer at least 10,000 ft thick extending above the freezing level, plus enough moisture and a trigger action."
   },
   {
-    eyebrow: "THUNDERSTORMS · LIFE CYCLE", code: "050 09 04 02",
-    q: "During the MATURE stage of a single-cell thunderstorm, which statement is correct?",
-    options: ["Only updrafts are present — no precipitation has yet formed","Updrafts of up to 10 000 fpm coexist with downdrafts; heavy precipitation, severe turbulence and microbursts are possible","All updrafts have ceased — only downdrafts and dissipating precipitation remain","The cloud is entirely in the cumulus stage, capped by a stable layer"],
-    correct: 1,
-    explain: "In the mature stage: updrafts remain very strong (up to 10 000 fpm) while rain/hail triggers downdrafts (up to 2 400 fpm). Most dangerous phase — lasts 15–20 min."
+    eyebrow: "THUNDERSTORMS \u00b7 LIFE CYCLE", code: "050 09 04 02",
+    q: "The mature stage of a single-cell thunderstorm begins when:",
+    options: [
+      "Precipitation starts to fall from the cloud",
+      "The anvil spreads out at the tropopause",
+      "Several small cumulus merge into one cell",
+      "The updrafts first reach 1000 fpm"
+    ],
+    correct: 0,
+    explain: "Precipitation marks the mature stage: rain and hail drag air down, creating downdrafts alongside the updrafts, a gust front and the strongest hazards."
   },
   {
-    eyebrow: "THUNDERSTORMS · LIGHTNING", code: "050 09 04 03",
-    q: "A lightning strike on an aircraft is most likely to occur between which temperatures?",
-    options: ["0°C and −10°C (between the freezing level and 5 000 ft above it)","+10°C and −10°C (most likely between 0°C and −10°C)","−20°C and −40°C in the upper CB anvil","Any temperature — lightning strikes are uniformly distributed in the cloud"],
+    eyebrow: "THUNDERSTORMS \u00b7 SUPERCELL", code: "050 09 04 02",
+    q: "In the Northern Hemisphere, a supercell thunderstorm usually moves:",
+    options: [
+      "With the 10,000 ft (700 hPa) wind",
+      "About 20\u00b0 to the right of the 18,000 ft (500 hPa) wind",
+      "About 20\u00b0 to the left of the surface wind",
+      "Very little \u2014 it is quasi-stationary"
+    ],
     correct: 1,
-    explain: "Aircraft lightning strikes are most likely between +10°C and −10°C, with the highest probability between 0°C and −10°C — around the freezing level where charge separation is most active."
+    explain: "Single cells move with the 700 hPa wind; supercells in the Northern Hemisphere usually move about 20\u00b0 to the right of the 500 hPa wind."
   },
   {
-    eyebrow: "THUNDERSTORMS · MICROBURST", code: "050 09 04 04",
-    q: "A microburst is particularly dangerous on approach because it produces a headwind-to-tailwind sequence that results in:",
-    options: ["A sudden increase in lift — aircraft climbs above the glidepath","First a performance gain (headwind) then a sudden and severe performance loss (tailwind) — risk of controlled flight into terrain","Severe icing on the leading edges due to rapid temperature change","A 180° wind reversal causing the aircraft to stall at cruise altitude"],
-    correct: 1,
-    explain: "On approach: increasing headwind (airspeed/lift increase), then tailwind (airspeed/lift collapse). Wind shear can be 50–90 kt. Recovery requires immediate go-around or windshear escape manoeuvre."
+    eyebrow: "THUNDERSTORMS \u00b7 ELECTRICAL DISCHARGES", code: "050 09 04 03",
+    q: "Lightning strikes on aircraft are most likely:",
+    options: [
+      "Above FL 450 only",
+      "In clear air, far away from any Cb",
+      "Within about 5000 ft of the freezing level, between +10\u00b0C and \u221210\u00b0C",
+      "At temperatures below \u221240\u00b0C"
+    ],
+    correct: 2,
+    explain: "Strikes are most likely within \u00b1 5000 ft of the freezing level, at temperatures between +10\u00b0C and \u221210\u00b0C \u2014 most often between 0\u00b0C and \u221210\u00b0C."
   },
   {
-    eyebrow: "THUNDERSTORMS · AVOIDANCE", code: "050 09 04 05",
-    q: "A thunderstorm cell should NOT be overflown unless there is at least:",
-    options: ["1 000 ft clearance above the visible cloud top","5 000 ft clearance above the visible cloud top, and tops must be below 25 000 ft","10 000 ft clearance — required any time CB is forecast on route","FL200 cruise altitude — below this storms can be overflown at any separation"],
-    correct: 1,
-    explain: "A CB cell requires at least 5 000 ft vertical separation above the visible cloud top. Cells with tops above 25 000 ft should NOT be overflown. Flying around is always preferred."
+    eyebrow: "THUNDERSTORM AVOIDANCE \u00b7 RADAR", code: "050 09 04 05",
+    q: "Using airborne weather radar at FL 280, the recommended avoidance range from a thunderstorm echo is:",
+    options: [
+      "5 NM",
+      "10 NM",
+      "20 NM",
+      "15 NM"
+    ],
+    correct: 3,
+    explain: "FL 0\u2013200: 5 NM (10 NM if growing rapidly) \u00b7 FL 200\u2013250: 10 NM \u00b7 FL 250\u2013300: 15 NM \u00b7 above FL 300: 20 NM."
   },
   {
-    eyebrow: "TORNADOES · PROPERTIES", code: "050 09 05 01",
-    q: "Tornadoes are exclusively associated with:",
-    options: ["Tropical cyclones and hurricanes only","Cumulonimbus (Cb) and large Cumulus (Cu) clouds","Frontal systems in polar regions during winter","Radiation inversions over flat continental plains"],
-    correct: 1,
-    explain: "Tornadoes are exclusively associated with Cb and large Cu clouds. They form when vertical wind shear converts to horizontal — supercell thunderstorms are the primary producer of tornadoes."
+    eyebrow: "MOUNTAINS \u00b7 VALLEY INVERSION", code: "050 09 08 03",
+    q: "A valley inversion typically forms:",
+    options: [
+      "With strong winds and an overcast sky",
+      "Behind a fast-moving cold front",
+      "On clear, calm nights as cold air drains into the valley floor",
+      "Only on summer afternoons"
+    ],
+    correct: 2,
+    explain: "Terrestrial radiation cools the slopes; cold dense air drains down and pools on the valley floor under warmer air \u2014 frost and fog are likely."
   },
   {
-    eyebrow: "THUNDERSTORMS · HAZARDS", code: "050 09 04 05",
-    q: "Which effect does a lightning strike typically have on aircraft systems?",
-    options: ["Immediate structural failure of the primary airframe","Temporary pilot blindness, magnetic compass errors, and possible disruption to electrical equipment","Complete loss of all avionics requiring an immediate emergency landing","Fuel tank ignition leading to catastrophic in-flight fire"],
+    eyebrow: "VISIBILITY \u00b7 OBSCURATIONS", code: "050 09 09 01",
+    q: "Visibility 800 m, water droplets, relative humidity near 100%. This is:",
+    options: [
+      "Mist",
+      "Fog",
+      "Haze",
+      "Smoke"
+    ],
     correct: 1,
-    explain: "A lightning strike typically causes: temporary blindness, minor airframe damage, serious magnetic compass errors, and disruption to electrical/avionics equipment. Modern aircraft are designed to withstand lightning but effects can be significant operationally."
+    explain: "Fog: visibility below 1000 m with water droplets (RH near 100%). Mist is 1000 m or more with RH above 95%; haze consists of solid particles."
   }
 ];
-
-const DEBRIEF_TOPICS = "Jet stream wind shear · Microburst (virga warning) · CB 3-stage lifecycle · Lightning strike effects · Thunderstorm avoidance (5 000 ft / 20 NM)";
+const DEBRIEF_TOPICS = "Wind shear: definition, sources & recovery \u00b7 Thunderstorm development, life cycle & supercells \u00b7 Lightning & downbursts \u00b7 Thunderstorm avoidance \u00b7 Inversions, mountain hazards & visibility";
 
 const BAR_COLOURS = ["#1B4F8E","#06A77D","#F4A261","#E63946","#5A7A9C","#8B5CF6","#EC4899","#14B8A6"];
 
