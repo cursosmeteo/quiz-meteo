@@ -150,8 +150,9 @@
       <button class="ctrl-btn reveal" id="btn-reveal" onclick="revealAnswer()" disabled>Reveal answer</button>
       <button class="ctrl-btn primary" id="btn-next" onclick="nextQuestion()" disabled>Next question</button>
       <button class="ctrl-btn danger" onclick="resetQuiz()" style="margin-left:8px;">Restart</button>
+      <button class="ctrl-btn" id="btn-sound" onclick="toggleSound()" style="margin-left:8px;background:#E8EEF6;color:var(--navy)">&#128266; Sound on</button>
     </div>
-    <div class="ctrl-hint"><kbd>SPACE</kbd> next &nbsp; <kbd>R</kbd> reveal &nbsp; <kbd>ESC</kbd> restart</div>
+    <div class="ctrl-hint"><kbd>SPACE</kbd> next &nbsp; <kbd>R</kbd> reveal &nbsp; <kbd>ESC</kbd> restart &nbsp; <kbd>M</kbd> sound</div>
   </div>
 </div>
 <div class="zoom-ov" id="zoom-ov" onclick="this.style.display='none'"><img id="zoom-img" alt=""></div>
@@ -1407,6 +1408,7 @@ function listenFirebase() {
 }
 
 function startPart(p) {
+  ensureAudio();
   [1,2].forEach(k => { const inp = document.getElementById("t"+k); if (inp) state["t"+k] = parseInt(inp.value) || 90; });
   const t = state["t"+p] || 90;
   state.part = p; state.timePerQ = Math.max(20, Math.min(300, t));
@@ -1586,12 +1588,20 @@ function renderFinal() {
   if (db) db.ref("currentQuestion").set({ idx: -1, q: "END", options: [], revealed: true, final: true, mode: "all" });
 }
 
-let audioCtx;
-function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+let audioCtx, soundOn = true;
+function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();}
+function tone(f,d,type,v){if(!audioCtx||!soundOn)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t0=audioCtx.currentTime;o.frequency.value=f;o.type=type||"square";g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);o.connect(g).connect(audioCtx.destination);o.start(t0);o.stop(t0+d+0.02)}
+// last 10 s: one beep per second, higher and louder in the last 3 s; long double tone at 0
+function countdownSound(t){
+  if(t>10||t<0)return;
+  if(t===0){tone(440,0.7,"square",0.6);setTimeout(()=>tone(330,0.9,"square",0.6),250);return;}
+  if(t<=3)tone(1320,0.22,"square",0.6); else tone(988,0.15,"square",0.45);
+}
+function toggleSound(){soundOn=!soundOn;ensureAudio();const b=document.getElementById("btn-sound");if(b)b.textContent=soundOn?"\ud83d\udd0a Sound on":"\ud83d\udd07 Sound off";}
 
 function startTimer() {
   stopTimer(); state.timeLeft = state.timePerQ; updateTimer();
-  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
+  state.timerInterval = setInterval(() => { state.timeLeft--; updateTimer(); if (!state.revealed) countdownSound(state.timeLeft); if (state.timeLeft <= 0) { stopTimer(); if (!state.revealed) revealAnswer(); } }, 1000);
 }
 function stopTimer() { clearInterval(state.timerInterval); }
 function updateTimer() {
@@ -1607,6 +1617,7 @@ document.addEventListener("keydown", e => {
   ensureAudio();
   if (e.code === "Space") { e.preventDefault(); if (!document.getElementById("btn-next").disabled) nextQuestion(); }
   if (e.code === "KeyR") { e.preventDefault(); revealAnswer(); }
+  if (e.code === "KeyM") { e.preventDefault(); toggleSound(); }
   if (e.code === "Escape") { const z = document.getElementById("zoom-ov"); if (z.style.display === "flex") { z.style.display = "none"; return; } resetQuiz(); }
 });
 </script>
