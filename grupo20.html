@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KSA 20 — Group</title>
+<link rel="icon" href="data:,">
+<style>
+/* KSA ENGINE — shared theme for teacher / group / student pages */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0f1520;--bg3:#161e30;--bg4:#1f2a42;--line:#2a3650;--line2:#3a4a6a;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+  --text:#e8edf5;--text2:#9fb0c8;--text3:#5d7090;
+  --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
+textarea{resize:vertical}
+.mono{font-family:var(--mono)}
+.btn{border:1px solid var(--line2);background:var(--bg3);color:var(--text);border-radius:8px;padding:8px 14px;font-size:.88rem;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--blue);background:var(--bg4)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.go{background:var(--green);border-color:var(--green);color:#052e12}
+.btn.warn{background:var(--amber);border-color:var(--amber);color:#2a1700}
+.btn.sm{padding:4px 10px;font-size:.78rem}
+.btn.lg{padding:12px 22px;font-size:1rem}
+.btn.ghost{background:transparent}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1}
+.muted{color:var(--text3);font-size:.82rem}
+.lbl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--bg4);color:var(--text2);white-space:nowrap}
+.pill.k{background:rgba(59,130,246,.18);color:#93c5fd}.pill.s{background:rgba(34,197,94,.18);color:#86efac}.pill.a{background:rgba(168,85,247,.18);color:#d8b4fe}
+.pill.key{background:rgba(245,158,11,.18);color:#fcd34d}.pill.ind{background:rgba(6,182,212,.18);color:#67e8f9}
+.pill.ok{background:rgba(34,197,94,.18);color:#86efac}.pill.no{background:rgba(239,68,68,.18);color:#fca5a5}.pill.wait{background:rgba(245,158,11,.15);color:#fcd34d}
+.empty{border:1px dashed var(--line2);border-radius:10px;padding:26px;text-align:center;color:var(--text3)}
+.clock{font-family:var(--mono);font-weight:800;letter-spacing:.02em}
+.clock.low{color:var(--amber)}.clock.out{color:var(--red)}
+
+/* KSA bars */
+.ksa{display:flex;flex-direction:column;gap:5px;min-width:180px}
+.ksa .b{display:grid;grid-template-columns:16px 1fr 48px;gap:7px;align-items:center;font-size:.78rem;font-weight:700}
+.ksa .tr{height:7px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.ksa .fi{height:100%;border-radius:99px;transition:width .6s}
+.ksa .k .fi{background:var(--blue)}.ksa .s .fi{background:var(--green)}.ksa .a .fi{background:var(--purple)}
+.ksa .k b{color:#93c5fd}.ksa .s b{color:#86efac}.ksa .a b{color:#d8b4fe}
+.ksa .v{text-align:right;font-family:var(--mono);color:var(--text2)}
+.ksa .tot{font-size:.78rem;color:var(--text2);text-align:right}
+
+/* modal / toast / viewer */
+.modal{position:fixed;inset:0;background:rgba(2,6,15,.86);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:min(1100px,100%);max-height:94vh;display:flex;flex-direction:column}
+.modal .mh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.modal .mh b{flex:1}
+.modal .mb{padding:14px;overflow:auto}
+.viewer img{display:block;max-width:100%;margin:auto;background:#fff;cursor:zoom-in}
+.viewer.full img{max-width:none;cursor:zoom-out}
+.viewer pre{font:600 .95rem/1.6 var(--mono);white-space:pre-wrap;background:#0b1220;padding:14px;border-radius:8px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--line2);padding:10px 18px;border-radius:10px;font-weight:650;z-index:90;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+
+/* library list */
+.lib-list{display:flex;flex-direction:column;gap:6px}
+.lib-it{display:flex;gap:10px;align-items:center;background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:7px 9px;cursor:pointer;text-align:left;color:var(--text)}
+.lib-it:hover{border-color:var(--cyan)}
+.lib-it .th{width:56px;height:40px;border-radius:5px;background:#fff center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.lib-it .th.t{background:#0b1220;color:var(--cyan);font-weight:800;font-size:.62rem}
+.lib-it b{font-size:.85rem;display:block}
+.lib-it span{font-size:.72rem;color:var(--text3)}
+
+/* disclaimer */
+.disc{max-width:820px;margin:18px auto 0;font-size:.8rem;line-height:1.55;color:var(--text2);border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.06);border-radius:10px;padding:10px 14px;text-align:left}
+.disc b{color:#fbbf24}
+/* route result table */
+table.rt{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:6px}
+table.rt th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:6px 8px;border-bottom:1px solid var(--line)}
+table.rt td{padding:4px 6px;border-bottom:1px solid rgba(42,54,80,.6);vertical-align:middle}
+table.rt td:first-child{color:var(--text2);font-weight:600;width:38%}
+table.rt input{padding:5px 7px;font-size:.88rem}
+table.rt.show td{font-size:1.05rem;padding:7px 9px}
+table.rt.show td:not(:first-child){color:var(--text);font-weight:650}
+/* status bar */
+.conn{font-size:.72rem;font-weight:700}
+.conn.on{color:var(--green)}.conn.off{color:var(--red)}
+
+</style>
+<style>
+body{display:flex;flex-direction:column;min-height:100vh}
+.top{display:flex;align-items:center;gap:14px;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.brand{font-weight:900}.brand em{font-style:normal;color:var(--blue)}
+.gname{font-weight:800;color:var(--cyan)}
+.top .clock{font-size:1.5rem}
+.sp{flex:1}
+main{flex:1;padding:14px 18px 40px;max-width:1700px;width:100%;margin:0 auto}
+h1{font-size:1.45rem;font-weight:850;margin-bottom:6px}
+h2{font-size:1.05rem;font-weight:800;margin:6px 0 10px}
+.lead{color:var(--text2);margin-bottom:14px;max-width:900px}
+.wait{text-align:center;margin-top:12vh}.wait .ic{font-size:3.5rem}
+.gate{max-width:620px;margin:8vh auto;background:var(--bg2);border:2px solid var(--amber);border-radius:16px;padding:22px}
+.gate h1{color:#fcd34d}.gate .qq{font-size:1.2rem;font-weight:650;margin:10px 0 16px}
+.gate input{font-size:1.2rem;padding:10px}
+.route{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,1fr);gap:14px;height:calc(100vh - 120px)}
+.route .mapbox{min-height:0}
+.side{overflow:auto;padding-right:4px}
+.status{display:flex;gap:14px;flex-wrap:wrap;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px;position:sticky;top:0;z-index:5}
+.status .big{font:900 1.4rem var(--mono)}
+.status .muted{font-size:.7rem}
+.pcard{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.pcard.next{border:2px solid var(--cyan);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.pcard.locked{opacity:.8}
+.pcard.void{opacity:.45}
+.pcard.dv{border:2px solid #c026d3}
+.pcard .ph{display:flex;gap:8px;align-items:baseline;margin-bottom:8px}
+.pcard .ph b{font-size:1rem}.pcard .ph .muted{font-size:.75rem}
+.pcard .ph .sp{flex:1}
+.divban{background:rgba(192,38,211,.18);border:2px solid #c026d3;color:#f5d0fe;border-radius:12px;padding:10px 14px;font-weight:800;margin-bottom:10px;animation:pulse 1.2s ease-in-out 4}
+@keyframes pulse{50%{background:rgba(192,38,211,.4)}}
+.docs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.docs button{border:1px solid var(--line2);background:var(--bg3);color:var(--text);border-radius:8px;padding:5px 10px;font-size:.78rem;font-weight:650;cursor:pointer}
+.local{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.slot{border:2px dashed var(--line2);border-radius:10px;height:150px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;background:var(--bg3) center/contain no-repeat;color:var(--text3);font-size:.85rem;position:relative}
+.slot.has{border-style:solid;border-color:var(--green);background-color:#fff;color:transparent}
+.slot .x{position:absolute;top:4px;right:4px;color:#fff;background:#0009;border-radius:6px;padding:0 6px;font-size:.8rem}
+.src a{display:block;color:var(--cyan);margin:4px 0;font-weight:650}
+.tag{font-size:.7rem;font-weight:800;padding:1px 7px;border-radius:99px}
+.tag.ok{background:rgba(34,197,94,.2);color:#86efac}.tag.part{background:rgba(245,158,11,.2);color:#fcd34d}.tag.no{background:rgba(239,68,68,.2);color:#fca5a5}.tag.void{background:var(--bg4);color:var(--text3)}.tag.open{background:rgba(6,182,212,.2);color:#67e8f9}
+@media(max-width:1000px){.route,.local{grid-template-columns:1fr;height:auto}.route .mapbox{height:65vh}}
+</style>
+<script>/* ksa-flight.js */
+/*!
+ * KSA FLIGHT — ksa-flight.js
+ * Core of the "flight along the route" KSA exercise (ATPL 050 Meteorology · Session 20).
+ *  - chart projection (cubic fit of the WAFC chart graticule) and great-circle positions
+ *  - flight timeline: pre-flight, 10 legs, diversion + holding
+ *  - grading of answer cells: wind (dddffGggKT), number range, choice
+ *  - pre-test speed scoring (end-of-session quiz rules), group formation (best + last)
+ *  - K / S / A scores
+ * Carlos Paizinho · cursos.meteo@gmail.com · Developed with Claude (Anthropic)
+ */
+(function (root) {
+'use strict';
+const D2R = Math.PI / 180;
+
+// ── projection & geometry ──────────────────────────────────────────────
+function project(T, lon, lat) {
+  const a = lon / T.scale, b = lat / T.scale;
+  let x = 0, y = 0, k = 0;
+  for (let i = 0; i <= T.deg; i++) for (let j = 0; j <= T.deg - i; j++) { const f = Math.pow(a, i) * Math.pow(b, j); x += f * T.cx[k]; y += f * T.cy[k]; k++; }
+  return [x - T.x0, y - T.y0];
+}
+function gcPoint(A, B, f) {             // A,B = [lat,lon]
+  const [p1, l1, p2, l2] = [A[0] * D2R, A[1] * D2R, B[0] * D2R, B[1] * D2R];
+  const d = 2 * Math.asin(Math.sqrt(Math.sin((p2 - p1) / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin((l2 - l1) / 2) ** 2));
+  if (d < 1e-9) return A.slice();
+  const a = Math.sin((1 - f) * d) / Math.sin(d), b = Math.sin(f * d) / Math.sin(d);
+  const x = a * Math.cos(p1) * Math.cos(l1) + b * Math.cos(p2) * Math.cos(l2);
+  const y = a * Math.cos(p1) * Math.sin(l1) + b * Math.cos(p2) * Math.sin(l2);
+  const z = a * Math.sin(p1) + b * Math.sin(p2);
+  return [Math.atan2(z, Math.hypot(x, y)) / D2R, Math.atan2(y, x) / D2R];
+}
+function gcDist(A, B) {
+  const [p1, l1, p2, l2] = [A[0] * D2R, A[1] * D2R, B[0] * D2R, B[1] * D2R];
+  return 6371 * 2 * Math.asin(Math.sqrt(Math.sin((p2 - p1) / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin((l2 - l1) / 2) ** 2));
+}
+
+// ── timeline (minutes from the start of the route phase) ──────────────
+/**
+ * F = scenario.flight: preflightMin, legMin, holdMin, divertLegMin, legs (=10), divertAtLeg (fraction, e.g. 9.5)
+ * returns the state of the flight at real minute t
+ */
+function flightState(F, t, diverted) {
+  const pre = F.preflightMin, leg = F.legMin, nLegs = F.points.length - 1;
+  const tDiv = pre + F.divertAtLeg * leg;                 // diversion message
+  const tHoldEnd = tDiv + F.holdMin;
+  const tArrDiv = tHoldEnd + F.divertLegMin;
+  const tArr = pre + nLegs * leg;
+  const A = [F.points[0].lat, F.points[0].lon], B = [F.points[nLegs].lat, F.points[nLegs].lon];
+  const simPerMin = F.eteMin / (nLegs * leg);             // simulated minutes per real minute
+  const sim = m => { const v = ((parseInt(F.etd.slice(0, 2), 10) * 60 + parseInt(F.etd.slice(2), 10) + m) % 1440 + 1440) % 1440; return String(Math.floor(v / 60)).padStart(2, '0') + String(Math.round(v % 60) % 60).padStart(2, '0') + 'Z'; };
+  const useDiv = diverted !== false && !!F.diversion;
+  if (t < pre) return { stage: 'pre', progress: 0, pos: A, sim: sim(0), simMin: 0, leftToTakeoff: pre - t };
+  if (!useDiv || t < tDiv) {
+    const p = Math.min(1, (t - pre) / (nLegs * leg));
+    return { stage: p >= 1 ? 'arrived' : 'cruise', progress: p, pos: gcPoint(A, B, p), sim: sim((t - pre) * simPerMin), simMin: (t - pre) * simPerMin, leg: Math.min(nLegs, Math.floor((t - pre) / leg) + 1) };
+  }
+  const pDiv = (tDiv - pre) / (nLegs * leg);
+  const D = gcPoint(A, B, pDiv);
+  const Z = [F.diversion.lat, F.diversion.lon];
+  if (t < tHoldEnd) {
+    const ang = (t - tDiv) / F.holdMin * 2 * Math.PI * 2;  // two racetrack laps, drawn as a circle
+    return { stage: 'hold', progress: pDiv, pos: [D[0] + 0.45 * Math.sin(ang), D[1] + 0.45 * (1 - Math.cos(ang))], hold: D, sim: sim((t - pre) * simPerMin), simMin: (t - pre) * simPerMin, holdLeft: tHoldEnd - t };
+  }
+  const q = Math.min(1, (t - tHoldEnd) / F.divertLegMin);
+  return { stage: q >= 1 ? 'arrived-div' : 'divert', progress: pDiv, divProgress: q, pos: gcPoint(D, Z, q), from: D, sim: sim((t - pre) * simPerMin), simMin: (t - pre) * simPerMin };
+}
+/** lock time (real minutes) of every point, the diversion airport and the void flag */
+function lockTimes(F) {
+  const pre = F.preflightMin, leg = F.legMin, n = F.points.length - 1;
+  const out = F.points.map((p, i) => ({ id: p.id, at: pre + i * leg }));
+  if (F.diversion) {
+    const tDiv = pre + F.divertAtLeg * leg;
+    out.forEach(o => { if (o.at > tDiv) o.voidAfterDiversion = true; });
+    out.push({ id: F.diversion.id, at: tDiv + F.holdMin + F.divertLegMin, diversion: true });
+  }
+  return out;
+}
+function routeTotalMin(F) {
+  const n = F.points.length - 1;
+  return F.diversion ? F.preflightMin + F.divertAtLeg * F.legMin + F.holdMin + F.divertLegMin : F.preflightMin + n * F.legMin;
+}
+
+// ── answer parsing & grading ───────────────────────────────────────────
+function parseWind(s) {
+  const t = String(s || '').toUpperCase().replace(/\s+/g, '').replace(/KTS?$/, 'KT');
+  const m = t.match(/^(\d{3}|VRB)(\d{2,3})(?:G(\d{2,3}))?(KT)?$/);
+  if (!m) return null;
+  return { vrb: m[1] === 'VRB', dir: m[1] === 'VRB' ? null : +m[1], spd: +m[2], gust: m[3] ? +m[3] : null };
+}
+function parseNum(s) {
+  const t = String(s ?? '').replace(/[−–]/g, '-').replace(',', '.').toUpperCase();
+  const m = t.match(/[-+]?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : NaN;
+}
+function inDir(d, [a, b]) {                 // circular range a→b clockwise
+  a = ((a % 360) + 360) % 360; b = ((b % 360) + 360) % 360; d = ((d % 360) + 360) % 360;
+  return a <= b ? d >= a && d <= b : d >= a || d <= b;
+}
+/**
+ * cell: {id,label,type:'wind'|'num'|'choice'|'text', options?, unit?}
+ * key : wind {dir:[a,b]|'any', vrb:bool, spd:[a,b], gust:false|[a,b]|null(not checked)} · num {min,max} · choice {ok:[...]}
+ * → {pts, max, state:'ok'|'part'|'no'|'empty'|'ungraded', parts?}
+ */
+function gradeCell(cell, key, value) {
+  const empty = value === undefined || value === null || String(value).trim() === '';
+  if (cell.type === 'text') return { pts: 0, max: 0, state: empty ? 'empty' : 'ungraded' };
+  if (!key) return { pts: 0, max: 0, state: 'ungraded' };
+  if (cell.type === 'wind') {
+    const max = 2 + (key.gust !== null && key.gust !== undefined ? 1 : 0);
+    if (empty) return { pts: 0, max, state: 'empty' };
+    const w = parseWind(value);
+    if (!w) return { pts: 0, max, state: 'no', parts: { format: false } };
+    const parts = {};
+    parts.dir = key.dir === 'any' ? true : w.vrb ? !!key.vrb : inDir(w.dir, key.dir);
+    parts.spd = w.spd >= key.spd[0] && w.spd <= key.spd[1];
+    if (key.gust !== null && key.gust !== undefined) parts.gust = key.gust === false ? w.gust === null : (w.gust !== null && w.gust >= key.gust[0] && w.gust <= key.gust[1]);
+    const pts = Object.values(parts).filter(Boolean).length;
+    return { pts, max, state: pts === max ? 'ok' : pts ? 'part' : 'no', parts };
+  }
+  if (cell.type === 'num') {
+    if (empty) return { pts: 0, max: 1, state: 'empty' };
+    const v = parseNum(value);
+    const ok = !isNaN(v) && v >= key.min && v <= key.max;
+    return { pts: ok ? 1 : 0, max: 1, state: ok ? 'ok' : 'no' };
+  }
+  if (cell.type === 'choice') {
+    if (empty) return { pts: 0, max: 1, state: 'empty' };
+    const ok = (key.ok || []).map(String).includes(String(value));
+    return { pts: ok ? 1 : 0, max: 1, state: ok ? 'ok' : 'no' };
+  }
+  return { pts: 0, max: 0, state: 'ungraded' };
+}
+function gradeBlock(cells, keys, answers) {
+  const res = { cells: {}, pts: 0, max: 0, filled: 0, total: 0 };
+  cells.forEach(c => {
+    const g = gradeCell(c, (keys || {})[c.id], (answers || {})[c.id]);
+    res.cells[c.id] = g; res.pts += g.pts; res.max += g.max;
+    if (c.type !== 'text') { res.total++; if (g.state !== 'empty') res.filled++; }
+  });
+  return res;
+}
+function keyText(cell, key) {
+  if (!key) return '—';
+  if (cell.type === 'wind') {
+    const d = key.dir === 'any' ? 'any direction' : (key.vrb ? 'VRB or ' : '') + String(key.dir[0]).padStart(3, '0') + '–' + String(key.dir[1]).padStart(3, '0') + '°';
+    const g = key.gust === false ? ', no gust' : Array.isArray(key.gust) ? `, gust ${key.gust[0]}–${key.gust[1]} kt` : '';
+    return `${d}, ${key.spd[0]}–${key.spd[1]} kt${g}`;
+  }
+  if (cell.type === 'num') return key.min === key.max ? `${key.min}` : `${key.min} to ${key.max}`;
+  if (cell.type === 'choice') return (key.ok || []).join(' / ');
+  return '—';
+}
+
+// ── keys (gate questions) ──────────────────────────────────────────────
+function checkGate(gate, value) {
+  if (gate.type === 'num') { const v = parseNum(value); return !isNaN(v) && v >= gate.min && v <= gate.max; }
+  const norm = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return (gate.accept || []).map(norm).includes(norm(value));
+}
+const GATE_POINTS = [10, 5, 2];            // 1st, 2nd, 3rd attempt; 0 after 3 wrong
+
+// ── pre-test (end-of-session quiz rules) ───────────────────────────────
+// correct: +6 … +1 by speed (5-second steps within the 30 s), wrong −4, no answer −2
+function quizPoints(correct, answered, secs) {
+  if (!answered) return -2;
+  if (!correct) return -4;
+  return Math.max(1, 6 - Math.floor(Math.max(0, secs) / 5));
+}
+function gradePretest(questions, answers, starts) {
+  let pts = 0, correct = 0; const areas = {};
+  questions.forEach((q, i) => {
+    const a = answers ? answers[i] : undefined;
+    const answered = a !== undefined && a !== null && a.k !== undefined;
+    const ok = answered && +a.k === +q.correct;
+    const secs = answered && starts && starts[i] ? (a.t - starts[i]) / 1000 : 30;
+    pts += quizPoints(ok, answered, secs);
+    if (ok) correct++;
+    areas[q.area] = areas[q.area] || [0, 0]; areas[q.area][1]++; if (ok) areas[q.area][0]++;
+  });
+  return { pts, correct, n: questions.length, max: 6 * questions.length, areas };
+}
+
+// ── groups: best with last ─────────────────────────────────────────────
+/** ranked = ids ordered best → worst. Each group takes ⌈size/2⌉ from the top and the rest from the bottom. */
+function formGroupsTopBottom(ranked, nGroups) {
+  const n = ranked.length; nGroups = Math.max(1, Math.min(nGroups, n));
+  const sizes = Array.from({ length: nGroups }, (_, g) => Math.floor(n / nGroups) + (g < n % nGroups ? 1 : 0));
+  let i = 0, j = n - 1;
+  return sizes.map(sz => {
+    const g = [];
+    const top = Math.ceil(sz / 2);
+    for (let k = 0; k < top; k++) g.push(ranked[i++]);
+    for (let k = top; k < sz; k++) g.push(ranked[j--]);
+    return g;
+  });
+}
+
+// ── scores ─────────────────────────────────────────────────────────────
+/**
+ * D = { students:{sid:{group, pre:{pts,max}}}, groups:{gid:{gates:{k:{pts}}, res:{pid:{pts,max,void}}, local:{pts,max}, divReact}}, peer, brief }
+ */
+function computeScores(SC, D) {
+  const W = SC.scoring.weights, sp = SC.scoring.split, out = {};
+  const bScale = +SC.scoring.briefing.scale || 3, pScale = +SC.peer.scale || 5;
+  Object.entries(D.students || {}).forEach(([sid, st]) => {
+    const g = (D.groups || {})[st.group] || {};
+    const frac = (a, b) => b > 0 ? Math.max(0, Math.min(1, a / b)) : null;
+    const pre = st.pre ? frac(st.pre.pts, st.pre.max) : null;
+    const gates = Object.values(g.gates || {}).filter(x => x.done);
+    const gatesF = gates.length ? gates.reduce((a, x) => a + x.pts, 0) / (gates.length * GATE_POINTS[0]) : null;
+    const rs = Object.values(g.res || {}).filter(r => !r.void);
+    const route = rs.length ? frac(rs.reduce((a, r) => a + r.pts, 0), rs.reduce((a, r) => a + r.max, 0)) : null;
+    const local = g.lpts && g.lpts.max ? frac(g.lpts.pts, g.lpts.max) : null;
+    const br = (D.brief || {})[sid];
+    const bAvg = dim => { if (!br) return null; const v = SC.scoring.briefing.criteria.filter(c => c.dim === dim).map(c => +br[c.id]).filter(x => x > 0); return v.length ? (v.reduce((a, b) => a + b, 0) / v.length - 1) / Math.max(1, bScale - 1) : null; };
+    const recv = []; Object.entries(D.peer || {}).forEach(([r, m]) => { if (r !== sid && m && m[sid]) { const v = Object.values(m[sid]).map(Number).filter(x => x > 0); if (v.length) recv.push(v.reduce((a, b) => a + b, 0) / v.length); } });
+    const peer = recv.length ? (recv.reduce((a, b) => a + b, 0) / recv.length - 1) / Math.max(1, pScale - 1) : null;
+    const comp = { K: { pretest: pre, keys: gatesF }, S: { route, local, briefing: bAvg('S') }, A: { diversion: g.divReact ?? null, peer, briefing: bAvg('A') } };
+    const dim = {};
+    ['K', 'S', 'A'].forEach(d => { let n = 0, w = 0; Object.entries(sp[d]).forEach(([k, x]) => { const v = comp[d][k]; if (v !== null && v !== undefined) { n += x * v; w += +x; } }); dim[d] = w ? n / w : null; });
+    const r1 = v => Math.round(v * 10) / 10;
+    out[sid] = { K: dim.K === null ? null : r1(dim.K * W.K), S: dim.S === null ? null : r1(dim.S * W.S), A: dim.A === null ? null : r1(dim.A * W.A) };
+    out[sid].total = r1((out[sid].K || 0) + (out[sid].S || 0) + (out[sid].A || 0));
+    out[sid].comp = comp;
+  });
+  return out;
+}
+
+function scheduleResolved(SC) {
+  let t = 0;
+  return SC.schedule.map(m => { const o = Object.assign({}, m, { start: t, end: t + m.min }); t += m.min; return o; });
+}
+function hhmm(min) { return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(Math.round(min % 60)).padStart(2, '0'); }
+
+const KSAF = { project, gcPoint, gcDist, flightState, lockTimes, routeTotalMin, parseWind, parseNum, inDir, gradeCell, gradeBlock, keyText,
+  checkGate, GATE_POINTS, quizPoints, gradePretest, formGroupsTopBottom, computeScores, scheduleResolved, hhmm };
+if (typeof module !== 'undefined' && module.exports) module.exports = KSAF; else root.KSAF = KSAF;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>/* ksa-flight-ui.js */
+/*!
+ * KSA FLIGHT — ksa-flight-ui.js : route map (same projection and scale as the WAFC charts) + answer cells
+ */
+(function (root) {
+'use strict';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const F = root.KSAF;
+
+const CSS = `
+.fmap{display:flex;flex-direction:column;min-height:0;height:100%}
+.fmap .bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 0}
+.fmap .bar button{border:1px solid var(--line2);background:var(--bg3);color:var(--text2);border-radius:7px;padding:4px 10px;font-size:.78rem;font-weight:700;cursor:pointer}
+.fmap .bar button.on{background:var(--cyan);border-color:var(--cyan);color:#04202a}
+.fmap .bar input[type=range]{width:110px}
+.fmap .win{position:relative;flex:1;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#d6e8f5}
+.fmap .inner{position:relative}
+.fmap .inner img{position:absolute;left:0;top:0;width:100%;height:100%;user-select:none;pointer-events:none}
+.fmap .inner svg{position:absolute;left:0;top:0;width:100%;height:100%}
+.fmap .valid{font-size:.72rem;color:var(--text3);margin-left:auto}
+.fpt-lbl{font:700 15px system-ui,sans-serif;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.fpt-fir{font:600 11px system-ui,sans-serif;fill:#334155;paint-order:stroke;stroke:#fff;stroke-width:3px}
+/* cells */
+.fcells{display:grid;gap:8px}
+.fcell{display:flex;flex-direction:column;gap:4px}
+.fcell>span{font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.fcell input{font-family:var(--mono);font-size:.95rem;padding:6px 8px}
+.fcell .seg{display:flex;flex-wrap:wrap;gap:4px}
+.fcell .seg button{border:1px solid var(--line2);background:var(--bg);color:var(--text2);border-radius:7px;padding:5px 9px;font-weight:700;font-size:.8rem;cursor:pointer}
+.fcell .seg button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.fcell .fmt{font-size:.7rem}
+.fcell.ok{outline:2px solid var(--green);outline-offset:3px;border-radius:6px}
+.fcell.part{outline:2px solid var(--amber);outline-offset:3px;border-radius:6px}
+.fcell.no,.fcell.empty{outline:2px solid var(--red);outline-offset:3px;border-radius:6px}
+.fcell.locked input,.fcell.locked .seg button{opacity:.75;cursor:not-allowed}
+.fcell .ans{font-size:.74rem;color:#86efac;font-family:var(--mono)}
+`;
+
+/** map: returns controller {update(fs, opts), setOverlay(id)} */
+function createMap(el, SC, opts) {
+  opts = opts || {};
+  const T = SC.charts.proj, W = T.w, H = T.h, FL = SC.flight;
+  const P = (lat, lon) => F.project(T, lon, lat);
+  const pts = FL.points;
+  const route = []; for (let i = 0; i <= 120; i++) route.push(F.gcPoint([pts[0].lat, pts[0].lon], [pts[pts.length - 1].lat, pts[pts.length - 1].lon], i / 120));
+  const path = arr => arr.map(([la, lo], i) => (i ? 'L' : 'M') + P(la, lo).map(v => v.toFixed(1)).join(',')).join(' ');
+  const ov = [{ id: 'clean', label: 'Clean map' }].concat(SC.charts.overlays.map(o => ({ id: o.id, label: o.label, valid: o.valid })));
+  el.innerHTML = `<div class="fmap"><div class="bar">${ov.map(o => `<button data-ov="${o.id}" class="${o.id === 'clean' ? 'on' : ''}">${esc(o.label)}</button>`).join('')}
+      <span class="muted">opacity</span><input type="range" min="20" max="100" value="85" data-op>
+      <button data-z="-1">−</button><button data-z="1">＋</button><button data-follow class="on">✈ follow</button><span class="valid" data-valid></span></div>
+    <div class="win"><div class="inner" style="width:${W}px;height:${H}px">
+      <img src="${SC.charts.basemap || ''}" alt="" data-base><img alt="" data-ovl style="display:none;opacity:.85">
+      <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        <path d="${path(route)}" fill="none" stroke="#0f172a" stroke-width="3" stroke-dasharray="10 6" opacity=".9"/>
+        <path data-div fill="none" stroke="#c026d3" stroke-width="3.5" stroke-dasharray="8 5" style="display:none"/>
+        <g data-pts>${pts.map((p, i) => { const [x, y] = P(p.lat, p.lon); const left = i > 0 && i < pts.length - 1 && i % 2 === 0;
+          return `<g data-pt="${p.id}"><circle cx="${x}" cy="${y}" r="9" fill="#fff" stroke="#1d4ed8" stroke-width="3"/>
+            <text class="fpt-lbl" x="${left ? x - 14 : x + 14}" y="${y - 2}" text-anchor="${left ? 'end' : 'start'}" fill="#1d4ed8">${esc(p.id)}</text>
+            <text class="fpt-fir" x="${left ? x - 14 : x + 14}" y="${y + 13}" text-anchor="${left ? 'end' : 'start'}">${esc(p.fir || '')}</text></g>`; }).join('')}</g>
+        ${FL.diversion ? (() => { const [x, y] = P(FL.diversion.lat, FL.diversion.lon); return `<g data-dvpt style="display:none"><circle cx="${x}" cy="${y}" r="10" fill="#fff" stroke="#c026d3" stroke-width="3.5"/><text class="fpt-lbl" x="${x - 14}" y="${y + 5}" text-anchor="end" fill="#c026d3">${esc(FL.diversion.id)}</text></g>`; })() : ''}
+        <g data-plane><path d="M0,-16 L3,-5 L15,2 L15,5 L3,1 L2,10 L6,13 L6,15 L0,13 L-6,15 L-6,13 L-2,10 L-3,1 L-15,5 L-15,2 L-3,-5 Z" fill="#dc2626" stroke="#fff" stroke-width="1.5"/></g>
+      </svg></div></div></div>`;
+  const inner = el.querySelector('.inner'), win = el.querySelector('.win'), ovl = el.querySelector('[data-ovl]');
+  let zoom = null, follow = true, lastPos = null;
+  function fit() { if (zoom === null) zoom = Math.max(0.3, Math.min(1.2, (win.clientWidth - 4) / W)); applyZoom(); }
+  function applyZoom() { inner.style.width = (W * zoom) + 'px'; inner.style.height = (H * zoom) + 'px'; }
+  el.querySelectorAll('[data-ov]').forEach(b => b.onclick = () => setOverlay(b.dataset.ov));
+  el.querySelector('[data-op]').oninput = e => { ovl.style.opacity = e.target.value / 100; };
+  el.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { zoom = Math.max(0.3, Math.min(2.5, zoom * (b.dataset.z > 0 ? 1.25 : 0.8))); applyZoom(); centerOn(lastPos); });
+  el.querySelector('[data-follow]').onclick = e => { follow = !follow; e.target.classList.toggle('on', follow); if (follow) centerOn(lastPos); };
+  function setOverlay(id) {
+    el.querySelectorAll('[data-ov]').forEach(b => b.classList.toggle('on', b.dataset.ov === id));
+    const o = SC.charts.overlays.find(x => x.id === id);
+    if (!o) { ovl.style.display = 'none'; el.querySelector('[data-valid]').textContent = ''; return; }
+    ovl.src = o.data; ovl.style.display = ''; el.querySelector('[data-valid]').textContent = o.valid;
+  }
+  function centerOn(pos) {
+    if (!pos) return;
+    const [x, y] = P(pos[0], pos[1]);
+    win.scrollTo({ left: x * zoom - win.clientWidth / 2, top: y * zoom - win.clientHeight / 2, behavior: 'smooth' });
+  }
+  let lastCenter = 0;
+  function update(fs, o) {
+    o = o || {};
+    if (zoom === null) fit();
+    const pl = el.querySelector('[data-plane]');
+    const [x, y] = P(fs.pos[0], fs.pos[1]);
+    // heading: towards a point slightly ahead along the track
+    let ahead;
+    if (fs.stage === 'divert' || fs.stage === 'arrived-div') ahead = F.gcPoint(fs.from || fs.pos, [FL.diversion.lat, FL.diversion.lon], Math.min(1, (fs.divProgress || 0) + 0.05));
+    else if (fs.stage === 'hold') ahead = [fs.pos[0] + 0.1 * Math.cos(Date.now() / 600), fs.pos[1] + 0.1 * Math.sin(Date.now() / 600)];
+    else ahead = F.gcPoint([pts[0].lat, pts[0].lon], [pts[pts.length - 1].lat, pts[pts.length - 1].lon], Math.min(1, fs.progress + 0.01));
+    const [ax, ay] = P(ahead[0], ahead[1]);
+    const hdg = Math.atan2(ax - x, -(ay - y)) * 180 / Math.PI;
+    pl.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${hdg.toFixed(0)}) scale(1.3)`);
+    const diverted = !!o.diverted;
+    el.querySelector('[data-dvpt]') && (el.querySelector('[data-dvpt]').style.display = diverted ? '' : 'none');
+    const dp = el.querySelector('[data-div]');
+    if (diverted && FL.diversion) {
+      const pDiv = (FL.divertAtLeg) / (pts.length - 1);
+      const D = F.gcPoint([pts[0].lat, pts[0].lon], [pts[pts.length - 1].lat, pts[pts.length - 1].lon], pDiv);
+      const seg = []; for (let i = 0; i <= 20; i++) seg.push(F.gcPoint(D, [FL.diversion.lat, FL.diversion.lon], i / 20));
+      dp.setAttribute('d', path(seg)); dp.style.display = '';
+    } else dp.style.display = 'none';
+    // point colours
+    (o.states || []).forEach(([id, st]) => {
+      const c = el.querySelector(`[data-pt="${id}"] circle`); if (!c) return;
+      const col = { ok: '#16a34a', part: '#d97706', no: '#dc2626', void: '#94a3b8', done: '#475569', next: '#0891b2' }[st];
+      c.setAttribute('fill', col && st !== 'next' ? col : '#fff'); c.setAttribute('stroke', col || '#1d4ed8');
+      c.setAttribute('r', st === 'next' ? 12 : 9);
+    });
+    lastPos = fs.pos;
+    if (follow && Date.now() - lastCenter > 4000) { lastCenter = Date.now(); centerOn(fs.pos); }
+  }
+  setTimeout(fit, 50);
+  root.addEventListener('resize', () => { const z0 = zoom; zoom = null; fit(); if (!z0) return; });
+  return { update, setOverlay, fit };
+}
+
+/** answer cells. ro=true → read only; res = graded results {cid:{state}}; showKey = key object to print accepted answers */
+function cellsHTML(cells, values, opts) {
+  opts = opts || {};
+  values = values || {};
+  return `<div class="fcells" style="grid-template-columns:${opts.cols || '1fr 1fr'}">${cells.map(c => {
+    const v = values[c.id] ?? '';
+    const r = opts.res && opts.res[c.id];
+    const cls = ['fcell', r ? r.state : '', opts.ro ? 'locked' : ''].join(' ');
+    const dis = opts.ro ? 'disabled' : '';
+    let ctl = '';
+    if (c.type === 'choice') ctl = `<div class="seg">${c.options.map(o => `<button type="button" data-cell="${c.id}" data-v="${esc(o)}" class="${String(v) === String(o) ? 'on' : ''}" ${dis}>${esc(o)}</button>`).join('')}</div>`;
+    else if (c.type === 'text') ctl = `<input data-cell="${c.id}" value="${esc(v)}" ${dis} placeholder="free text (not graded)">`;
+    else ctl = `<input data-cell="${c.id}" value="${esc(v)}" ${dis} autocomplete="off" spellcheck="false" placeholder="${esc(c.hint || (c.unit ? c.unit : ''))}">${c.type === 'wind' && !opts.ro ? '<span class="fmt"></span>' : ''}`;
+    const key = opts.showKey && opts.showKey[c.id] ? `<span class="ans">✓ ${esc(F.keyText(c, opts.showKey[c.id]))}</span>` : '';
+    return `<label class="${cls}" style="${c.type === 'text' || (c.type === 'choice' && c.options.length > 5) ? 'grid-column:1/-1' : ''}"><span>${esc(c.label)}${c.unit ? ' (' + esc(c.unit) + ')' : ''}</span>${ctl}${key}</label>`;
+  }).join('')}</div>`;
+}
+/** wire inputs; onChange(cid, value) */
+function wireCells(el, onChange) {
+  el.querySelectorAll('input[data-cell]').forEach(i => {
+    const fmt = i.parentElement.querySelector('.fmt');
+    const chk = () => { if (!fmt) return; const v = i.value.trim(); if (!v) { fmt.textContent = ''; return; } const w = F.parseWind(v); fmt.innerHTML = w ? '<span style="color:var(--green)">✓ format OK</span>' : '<span style="color:var(--red)">✗ use dddffKT, dddffGggKT or VRBffKT</span>'; };
+    i.oninput = () => { if (fmt) i.value = i.value.toUpperCase(); chk(); onChange(i.dataset.cell, i.value); };
+    chk();
+  });
+  el.querySelectorAll('button[data-cell]').forEach(b => b.onclick = () => {
+    if (b.disabled) return;
+    b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    onChange(b.dataset.cell, b.dataset.v);
+  });
+}
+
+/** public scenario: no answer keys, no gate answers, no pre-test key, no assets (published separately) */
+function publicFlight(SC) {
+  const P = JSON.parse(JSON.stringify(SC));
+  delete P.keys; delete P.meta.summary;
+  Object.values(P.gates).forEach(g => { delete g.min; delete g.max; delete g.accept; delete g.answer; });
+  P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
+  const assets = { basemap: P.charts.basemap, overlays: {}, docs: {} };
+  P.charts.basemap = null;
+  P.charts.overlays.forEach(o => { assets.overlays[o.id] = o.data; o.data = null; });
+  P.charts.docs.forEach(d => { if (d.kind === 'image') { assets.docs[d.id] = d.data; d.data = null; } });
+  return { pub: P, assets };
+}
+function attachAssets(P, A) {
+  if (!A) return P;
+  P.charts.basemap = A.basemap;
+  P.charts.overlays.forEach(o => { o.data = (A.overlays || {})[o.id] || o.data; });
+  P.charts.docs.forEach(d => { if (d.kind === 'image') d.data = (A.docs || {})[d.id] || d.data; });
+  return P;
+}
+
+root.KSAFUI = { CSS, createMap, cellsHTML, wireCells, publicFlight, attachAssets, esc };
+})(window);
+
+</script>
+<script>/* ksa-db.js */
+/*!
+ * KSA ENGINE — ksa-db.js
+ * One small API over two back-ends:
+ *   • firebase — Firebase Realtime Database (the course project), for the real class
+ *   • local    — in-browser database shared between tabs of ONE browser (BroadcastChannel);
+ *                for testing, demos and a single-computer fallback. No internet needed.
+ * All paths are relative to  ksa/<SESSION CODE>/
+ */
+(function (root) {
+'use strict';
+
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68',
+  authDomain: 'meteorology-quiz-2b061.firebaseapp.com',
+  databaseURL: 'https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'meteorology-quiz-2b061',
+  storageBucket: 'meteorology-quiz-2b061.firebasestorage.app'
+};
+const ROOT = 'ksa';
+const SDK = 'https://www.gstatic.com/firebasejs/9.23.0/';
+
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Cannot load ' + src)); document.head.appendChild(s); });
+}
+const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+const split = p => String(p || '').split('/').filter(Boolean);
+
+// ════════════════════════════════════════════════════════════════════════
+// FIREBASE BACK-END
+// ════════════════════════════════════════════════════════════════════════
+async function firebaseDB(code) {
+  if (!root.firebase) { await loadScript(SDK + 'firebase-app-compat.js'); await loadScript(SDK + 'firebase-database-compat.js'); }
+  const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.database(app);
+  const base = `${ROOT}/${code}`;
+  const ref = p => db.ref(p ? `${base}/${p}` : base);
+  let offset = 0;
+  db.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+  return {
+    mode: 'firebase', code,
+    now: () => Date.now() + offset,
+    get: p => ref(p).once('value').then(s => s.val()),
+    set: (p, v) => ref(p).set(clean(v)),
+    update: (p, o) => ref(p).update(clean(o)),
+    push: (p, v) => { const r = ref(p).push(); return r.set(clean(v)).then(() => r.key); },
+    remove: p => ref(p).remove(),
+    on: (p, cb) => { const r = ref(p); const h = s => cb(s.val()); r.on('value', h); return () => r.off('value', h); },
+    onChild: (p, cb) => { const r = ref(p); const h = s => cb(s.key, s.val()); r.on('child_added', h); return () => r.off('child_added', h); },
+    connected: cb => db.ref('.info/connected').on('value', s => cb(!!s.val())),
+    exists: () => ref('state').once('value').then(s => s.exists())
+  };
+}
+function clean(v) {        // Firebase rejects undefined
+  return JSON.parse(JSON.stringify(v === undefined ? null : v));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// LOCAL BACK-END (tabs of the same browser)
+// ════════════════════════════════════════════════════════════════════════
+function localDB(code) {
+  const ch = new BroadcastChannel('ksa-local-' + code);
+  const me = Math.random().toString(36).slice(2);
+  let tree = {};
+  const subs = [];            // {path:[...], cb, child, seen:Set}
+  let pending = new Set(), flushT = null;
+
+  function getAt(t, parts) { let o = t; for (const k of parts) { if (o == null || typeof o !== 'object') return undefined; o = o[k]; } return o; }
+  function setAt(parts, v) {
+    if (!parts.length) { tree = v == null ? {} : v; return; }
+    let o = tree;
+    for (let i = 0; i < parts.length - 1; i++) { if (o[parts[i]] == null || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    const last = parts[parts.length - 1];
+    if (v === null || v === undefined) delete o[last]; else o[last] = v;
+  }
+  function overlap(a, b) { const n = Math.min(a.length, b.length); for (let i = 0; i < n; i++) if (a[i] !== b[i]) return false; return true; }
+  function apply(op) {
+    if (op.t === 'set') setAt(split(op.p), clone(op.v));
+    else if (op.t === 'update') Object.entries(op.v).forEach(([k, v]) => setAt(split(op.p).concat(split(k)), clone(v)));
+    const touched = op.t === 'update' ? Object.keys(op.v).map(k => split(op.p).concat(split(k))) : [split(op.p)];
+    subs.forEach(s => { if (touched.some(t => overlap(t, s.path))) pending.add(s); });
+    if (!flushT) flushT = setTimeout(flush, 0);
+  }
+  function flush() {
+    flushT = null; const list = [...pending]; pending.clear();
+    list.forEach(s => {
+      if (!subs.includes(s)) return;
+      const v = clone(getAt(tree, s.path));
+      if (s.child) {
+        Object.keys(v || {}).forEach(k => { if (!s.seen.has(k)) { s.seen.add(k); s.cb(k, v[k]); } });
+      } else s.cb(v === undefined ? null : v);
+    });
+  }
+  function write(op) { apply(op); ch.postMessage({ from: me, op }); return Promise.resolve(); }
+  let ready;
+  const readyP = new Promise(r => ready = r);
+  ch.onmessage = e => {
+    const m = e.data; if (m.from === me) return;
+    if (m.op) apply(m.op);
+    else if (m.hello) ch.postMessage({ from: me, snapshot: tree, to: m.from });
+    else if (m.snapshot && m.to === me && !ready.done) { tree = m.snapshot || {}; ready.done = true; subs.forEach(s => pending.add(s)); flush(); ready(); }
+  };
+  ch.postMessage({ from: me, hello: 1 });
+  setTimeout(() => { if (!ready.done) { ready.done = true; ready(); } }, 400);
+  let pushN = 0;
+  const api = {
+    mode: 'local', code,
+    now: () => Date.now(),
+    get: p => readyP.then(() => clone(getAt(tree, split(p))) ?? null),
+    set: (p, v) => write({ t: 'set', p, v: clone(v) }),
+    update: (p, o) => write({ t: 'update', p, v: clone(o) }),
+    push: (p, v) => { const k = Date.now().toString(36) + (pushN++).toString(36).padStart(3, '0') + me.slice(0, 4); return write({ t: 'set', p: p + '/' + k, v: clone(v) }).then(() => k); },
+    remove: p => write({ t: 'set', p, v: null }),
+    on: (p, cb) => { const s = { path: split(p), cb }; subs.push(s); readyP.then(() => { pending.add(s); flush(); }); return () => subs.splice(subs.indexOf(s), 1); },
+    onChild: (p, cb) => { const s = { path: split(p), cb, child: true, seen: new Set() }; subs.push(s); readyP.then(() => { pending.add(s); flush(); }); return () => subs.splice(subs.indexOf(s), 1); },
+    connected: cb => cb(true),
+    exists: () => readyP.then(() => !!getAt(tree, ['state']))
+  };
+  return Promise.resolve(api);
+}
+
+/** KSADB.open(code, mode) → Promise<db>. mode: 'firebase' (default) | 'local' */
+function open(code, mode) {
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+  if (!code) return Promise.reject(new Error('Session code missing'));
+  return mode === 'local' ? localDB(code) : firebaseDB(code);
+}
+root.KSADB = { open, FIREBASE_CONFIG };
+})(window);
+
+</script>
+<script>/* ksa-app.js */
+/*!
+ * KSA ENGINE — ksa-app.js : shared helpers for teacher / group / student pages
+ */
+(function (root) {
+'use strict';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const PHASES = {
+  lobby:    { label: 'Waiting to start' },
+  pretest:  { label: 'Pre-test' },
+  groups:   { label: 'Group formation' },
+  route:    { label: 'Route study' },
+  prep:     { label: 'Briefing preparation' },
+  briefing: { label: 'Briefings' },
+  break:    { label: 'Break' },
+  peer:     { label: 'Peer assessment' },
+  debrief:  { label: 'Results & debriefing' }
+};
+const PHASE_ORDER = ['lobby', 'pretest', 'groups', 'route', 'prep', 'briefing', 'break', 'peer', 'debrief'];
+
+function params() { return Object.fromEntries(new URLSearchParams(location.search)); }
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+function toast(m, ms) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms || 2600);
+}
+function modal(title, html, opts) {
+  let m = document.getElementById('modal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'modal'; m.className = 'modal';
+    m.innerHTML = '<div class="box"><div class="mh"><b id="m-title"></b><span id="m-extra"></span><button class="btn sm" id="m-close">✕ Close</button></div><div class="mb" id="m-body"></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+    m.querySelector('#m-close').onclick = closeModal;
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  }
+  m.querySelector('#m-title').innerHTML = title;
+  m.querySelector('#m-extra').innerHTML = (opts && opts.extra) || '';
+  m.querySelector('#m-body').innerHTML = html;
+  m.classList.add('on');
+  return m.querySelector('#m-body');
+}
+function closeModal() { const m = document.getElementById('modal'); if (m) m.classList.remove('on'); }
+
+let actx = null;
+function beep(n) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < (n || 2); i++) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime + i * 0.28;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.start(t); o.stop(t + 0.24);
+    }
+  } catch (e) { }
+}
+
+function fmt(ms) {
+  const neg = ms < 0; ms = Math.abs(ms);
+  const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
+  const out = h ? `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  return (neg ? '−' : '') + out;
+}
+function clockClass(ms, total) { return ms < 0 ? 'out' : ms < Math.min(120000, total * 0.15) ? 'low' : ''; }
+
+function compressImage(src, maxW, q) {
+  maxW = maxW || 1400; q = q || 0.8;
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, maxW / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+      res(c.toDataURL('image/jpeg', q));
+    };
+    img.onerror = () => res(null);
+    img.src = src;
+  });
+}
+function fileToDataURL(f) { return new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); }); }
+
+function qrImg(text, cell) {
+  if (typeof qrcode === 'undefined') return `<div class="mono" style="font-size:.75rem;word-break:break-all">${esc(text)}</div>`;
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return `<img src="${q.createDataURL(cell || 5, 2)}" alt="QR" style="image-rendering:pixelated;background:#fff;border-radius:6px">`;
+}
+
+function ksaBars(score, weights) {
+  const w = weights || { K: 30, S: 45, A: 25 };
+  const s = score || {};
+  const b = (d, cls) => {
+    const v = s[d]; const pct = v === null || v === undefined ? 0 : Math.max(0, Math.min(100, v / w[d] * 100));
+    return `<div class="b ${cls}"><b>${d}</b><div class="tr"><div class="fi" style="width:${pct}%"></div></div><span class="v">${v === null || v === undefined ? '—' : v.toFixed(1)}/${w[d]}</span></div>`;
+  };
+  return `<div class="ksa">${b('K', 'k')}${b('S', 's')}${b('A', 'a')}<div class="tot">Total <b style="color:var(--text)">${s.total !== undefined ? s.total.toFixed(1) : '—'}</b> / 100</div></div>`;
+}
+
+function libList(items) {
+  if (!items || !items.length) return '<div class="empty">No data</div>';
+  return `<div class="lib-list">${items.map(it => `<button class="lib-it" data-lib="${it.id}">
+    ${it.kind === 'image' ? (it.data ? `<span class="th" style="background-image:url('${it.data}')"></span>` : `<span class="th">🗺️</span>`) : `<span class="th t">${esc(it.category)}</span>`}
+    <span><b>${esc(it.label || it.category)}</b><span>${esc(it.valid || '')}${it.source ? ' · ' + esc(it.source) : ''}</span></span></button>`).join('')}</div>`;
+}
+let fetchLib = null;      // set by pages that load images lazily: async id → dataURL
+async function showLib(it) {
+  if (!it) return;
+  if (it.kind === 'image' && !it.data && fetchLib) { modal(esc(it.label || ''), '<div class="empty">Loading…</div>'); it.data = await fetchLib(it.id); }
+  const body = modal(esc(it.label || it.category) + (it.valid ? ` <span class="muted">${esc(it.valid)}</span>` : ''),
+    it.kind === 'image' ? `<div class="viewer"><img src="${it.data}"></div><div class="muted" style="text-align:center;margin-top:6px">Click the image to view at full size · ${esc(it.source || '')}</div>` : `<div class="viewer"><pre>${esc(it.data)}</pre></div>`);
+  const v = body.querySelector('.viewer img');
+  if (v) v.onclick = () => v.parentElement.classList.toggle('full');
+}
+
+/** Scenario as published to the students: no answers, no hints, no injections, no pre-test key. */
+function publicScenario(S) {
+  const P = JSON.parse(JSON.stringify(S));
+  P.stages.forEach(st => st.tasks.forEach(t => { delete t.answers; t.hasHint = !!(t.hint && t.hint.text); delete t.hint; }));
+  P.injections = (S.injections || []).map(i => ({ id: i.id }));
+  P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
+  delete P.meta.summary;
+  return P;
+}
+function publicTask(t) { const c = JSON.parse(JSON.stringify(t)); delete c.answers; c.hasHint = !!(t.hint && t.hint.text); delete c.hint; return c; }
+
+function newCode() {
+  const d = new Date();
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = ''; for (let i = 0; i < 3; i++) r += abc[Math.floor(Math.random() * abc.length)];
+  return 'S' + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + r;
+}
+
+/** time helpers for the route clock (pausable) */
+function routeElapsed(state, now) {
+  if (!state || !state.routeStartedAt) return 0;
+  const paused = (state.routePausedTotal || 0) + (state.routePausedAt ? now - state.routePausedAt : 0);
+  return Math.max(0, now - state.routeStartedAt - paused);
+}
+
+function disclaimer(SC) { const d = SC && SC.meta && SC.meta.disclaimer; return d ? `<div class="disc"><b>Disclaimer</b> — ${esc(d)}</div>` : ''; }
+/** route-result table. edit=true → inputs (data-rt="surface|row|col"); B = board.route */
+function routeTable(SC, B, edit) {
+  const T = (SC.briefing && SC.briefing.routeTable) || { surface: [], enroute: [] };
+  const v = (sec, i, c) => ((((B || {}).table || {})[sec] || {})[i] || {})[c] || '';
+  const cell = (sec, i, c) => edit ? `<td><input data-rt="${sec}|${i}|${c}" value="${esc(v(sec, i, c))}"></td>` : `<td>${esc(v(sec, i, c)) || '—'}</td>`;
+  const r = (SC.routes || [])[0] || {};
+  return `<table class="rt ${edit ? '' : 'show'}"><tr><th>Surface weather</th><th>Departure ${esc(r.dep || '')}</th><th>Arrival ${esc(r.dest || '')}</th></tr>
+    ${T.surface.map((l, i) => `<tr><td>${esc(l)}</td>${cell('surface', i, 'dep')}${cell('surface', i, 'arr')}</tr>`).join('')}</table>
+    <table class="rt ${edit ? '' : 'show'}" style="margin-top:10px"><tr><th>En-route weather · FL${esc(r.fl || '')}</th><th colspan="2">Route ${esc(r.dep || '')} – ${esc(r.dest || '')}</th></tr>
+    ${T.enroute.map((l, i) => `<tr><td>${esc(l)}</td>${edit ? `<td colspan="2"><input data-rt="enroute|${i}|v" value="${esc(v('enroute', i, 'v'))}"></td>` : `<td colspan="2">${esc(v('enroute', i, 'v')) || '—'}</td>`}</tr>`).join('')}</table>`;
+}
+/** split a public scenario: images travel separately (pub/libdata) so that phones only download what they open */
+function splitLibrary(P) { const data = {}; P.library.forEach(it => { if (it.kind === 'image' && it.data) { data[it.id] = it.data; it.data = null; } }); return data; }
+root.KSAPP = { disclaimer, routeTable, splitLibrary, setFetchLib: f => { fetchLib = f; }, esc, PHASES, PHASE_ORDER, params, store, toast, modal, closeModal, beep, fmt, clockClass, compressImage, fileToDataURL, qrImg, ksaBars, libList, showLib, publicScenario, publicTask, newCode, routeElapsed };
+})(window);
+
+</script>
+</head>
+<body>
+<div class="top"><div class="brand">KSA <em>20</em> · GROUP</div><div class="gname" id="g-name"></div><div class="muted" id="g-mem"></div><div class="sp"></div><b id="g-phase"></b><div class="clock" id="g-clock">--:--</div><span class="conn" id="g-conn"></span></div>
+<main id="main"><div class="wait"><div class="ic">⏳</div><h1>Connecting…</h1></div></main>
+<script>
+'use strict';
+const { esc } = KSAFUI;
+const PHL = { lobby: 'Waiting', pretest: 'Pre-test', groups: 'Groups', route: 'Flight TP281', local: 'Local flight LPCS', briefing: 'Briefing', break: 'Break', peer: 'Peer assessment', debrief: 'Debriefing' };
+let SC = null, DB = null, ST = {}, G = {}, STU = {}, SCORES = {};
+const GID = (KSAPP.params().g || '').toUpperCase();
+const UI = { map: null, sig: '', lastPh: null };
+const ANS = {}, LANS = {};          // local echo of what this laptop typed
+(function () { const s = document.createElement('style'); s.textContent = KSAFUI.CSS; document.head.appendChild(s); })();
+const A = {};
+document.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && A[b.dataset.a]) { e.preventDefault(); A[b.dataset.a](b, e); } });
+const now = () => DB.now();
+
+(async function init() {
+  const p = KSAPP.params();
+  if (!p.s || !GID) { document.getElementById('main').innerHTML = '<div class="wait"><h1>Open this page from the link or QR code shown by the instructor.</h1></div>'; return; }
+  try { DB = await KSADB.open(p.s, p.mode === 'local' ? 'local' : 'firebase'); } catch (e) { document.getElementById('main').innerHTML = `<div class="wait"><h1>Connection failed</h1><p>${esc(e.message)}</p></div>`; return; }
+  const pub = await DB.get('pub/scenario');
+  if (!pub) { document.getElementById('main').innerHTML = '<div class="wait"><h1>Session not found: ' + esc(DB.code) + '</h1></div>'; return; }
+  SC = KSAFUI.attachAssets(pub, await DB.get('pub/assets'));
+  DB.connected(on => { const c = document.getElementById('g-conn'); c.textContent = on ? '● online' : '● offline'; c.className = 'conn ' + (on ? 'on' : 'off'); });
+  DB.on('state', v => { ST = v || {}; render(); });
+  DB.on('groups/' + GID, v => { G = v || {}; pull(); render(); syncInputs(); });
+  DB.on('students', v => { STU = v || {}; head(); });
+  DB.on('scores', v => { SCORES = v || {}; if (ST.phase === 'debrief') render(); });
+  setInterval(tick, 1000);
+})();
+function head() {
+  document.getElementById('g-name').textContent = G.name || GID;
+  document.getElementById('g-mem').textContent = (G.members || []).map(id => (STU[id] || {}).name).filter(Boolean).join(' · ');
+  document.getElementById('g-phase').textContent = PHL[ST.phase] || '';
+}
+// ── debounced saves ──
+const timers = {};
+function save(path, v) { clearTimeout(timers[path]); timers[path] = setTimeout(() => { delete timers[path]; DB.set(path, v === '' ? null : v); }, 350); }
+// several laptops of the same group stay in sync: remote values win unless this laptop is still typing that cell
+function pull() {
+  Object.keys(ANS).forEach(pid => Object.keys(ANS[pid]).forEach(c => { if (!timers[`groups/${GID}/ans/${pid}/${c}`] && !(((G.ans || {})[pid] || {})[c])) ANS[pid][c] = ''; }));
+  Object.entries(G.ans || {}).forEach(([pid, o]) => Object.entries(o || {}).forEach(([c, x]) => { if (!timers[`groups/${GID}/ans/${pid}/${c}`]) (ANS[pid] = ANS[pid] || {})[c] = x; }));
+  Object.keys(LANS).forEach(c => { if (!timers[`groups/${GID}/lans/${c}`] && !((G.lans || {})[c])) LANS[c] = ''; });
+  Object.entries(G.lans || {}).forEach(([c, x]) => { if (!timers[`groups/${GID}/lans/${c}`]) LANS[c] = x; });
+}
+function syncInputs() {
+  const val = el => { const card = el.closest('[data-card]'); return card ? ((ANS[card.dataset.card] || {})[el.dataset.cell] ?? '') : (LANS[el.dataset.cell] ?? ''); };
+  document.querySelectorAll('input[data-cell]').forEach(i => { if (i === document.activeElement || i.disabled) return; const v = String(val(i)); if (i.value !== v) i.value = v; });
+  document.querySelectorAll('button[data-cell]').forEach(b => b.classList.toggle('on', String(val(b)) === b.dataset.v));
+}
+
+// ── rendering: rebuild only when the structure changes (keeps focus while typing) ──
+function gateDone(id) { return ((G.gates || {})[id] || {}).done; }
+function sigOf() {
+  const t = routeMin(), locks = KSAF.lockTimes(SC.flight).map(l => l.id + (lockedNow(l, t) ? 1 : 0)).join('');
+  return [ST.phase, JSON.stringify(G.gates || {}), ST.phase === 'route' ? locks + (ST.div ? 'D' : '') + JSON.stringify(G.res || {}) : '', ST.phase === 'local' ? JSON.stringify(G.lres || {}) + (G.lsub || '') + Object.keys(G.limg || {}).join() : '', ST.phase === 'debrief' ? JSON.stringify(SCORES) : '', G.name || ''].join('|');
+}
+function render(force) {
+  if (!SC) return;
+  head();
+  const sig = sigOf(); if (!force && sig === UI.sig) return; UI.sig = sig;
+  const m = document.getElementById('main');
+  if (ST.phase !== UI.lastPh) { UI.lastPh = ST.phase; UI.map = null; }
+  if (!G.members) { m.innerHTML = `<div class="wait"><div class="ic">👥</div><h1>${esc(GID)}</h1><p class="lead" style="margin:auto">Groups are formed after the pre-test. Keep this screen open.</p></div>${KSAPP.disclaimer(SC)}`; return; }
+  const ph = ST.phase;
+  if (ph === 'route') { if (!gateDone('route')) return gateView('route'); return routeView(); }
+  if (ph === 'local') { if (!gateDone('local')) return gateView('local'); return localView(); }
+  if (ph === 'briefing') { if (!gateDone('briefing')) return gateView('briefing'); return briefView(); }
+  UI.map = null;
+  if (ph === 'debrief') return debriefView();
+  m.innerHTML = `<div class="wait"><div class="ic">${{ break: '☕', peer: '📱', groups: '👥' }[ph] || '⏳'}</div><h1>${esc(G.name)}</h1><p class="lead" style="margin:auto">${{ groups: 'Your group is ready. The flight phase starts soon — you will need 🔑 Key 1.', break: 'Break.', peer: 'Peer assessment on your phones.' }[ph] || 'Waiting for the instructor.'}</p></div>`;
+}
+
+// ── gates ──
+function gateView(id) {
+  const g = SC.gates[id], st = (G.gates || {})[id] || {};
+  document.getElementById('main').innerHTML = `<div class="gate"><div class="lbl">🔒 Locked</div><h1>${esc(g.title)}</h1><div class="qq">${esc(g.question)}</div>
+    <div class="row"><input id="gv" autocomplete="off" placeholder="${g.type === 'num' ? 'number' : 'answer'}" class="grow"><button class="btn pri lg" data-a="gate" data-g="${id}">Unlock</button></div>
+    <p class="muted" style="margin-top:10px">${3 - (st.tries || 0)} attempt(s) left · ${KSAF.GATE_POINTS.join(' / ')} points on the 1st / 2nd / 3rd attempt. After 3 wrong answers the instructor opens it for you (0 points).</p>
+    ${st.last === 'wrong' ? '<p style="color:var(--red);font-weight:700;margin-top:8px">✗ Not correct — try again.</p>' : ''}<p class="muted" id="gwait"></p></div>`;
+  const i = document.getElementById('gv'); i.focus(); i.onkeydown = e => { if (e.key === 'Enter') A.gate(document.querySelector('[data-a=gate]')); };
+}
+A.gate = async b => {
+  const v = document.getElementById('gv').value.trim(); if (!v) return;
+  b.disabled = true; document.getElementById('gwait').textContent = 'Checking…';
+  await DB.push('subs', { kind: 'gate', gid: GID, gate: b.dataset.g, value: v, at: now() });
+  setTimeout(() => { b.disabled = false; render(true); }, 2500);
+};
+
+// ── route ──
+function routeMin() { return KSAPP.routeElapsed(ST, now()) / 60000; }
+function lockedNow(l, t) { return t >= l.at || !!(ST.graded || {})[l.id]; }
+function docsBar() { return `<div class="docs">${SC.charts.docs.map(d => `<button data-a="doc" data-d="${d.id}">${d.kind === 'image' ? '🖼' : '📄'} ${esc(d.label)}</button>`).join('')}</div>`; }
+A.doc = b => KSAPP.showLib(SC.charts.docs.find(d => d.id === b.dataset.d));
+function routeView() {
+  const m = document.getElementById('main');
+  if (!UI.map) {
+    m.innerHTML = `<div class="route"><div class="mapbox" id="gmap"></div><div class="side"><div class="status" id="rstat"></div><div id="dvb"></div>${docsBar()}<div id="cards"></div></div></div>`;
+    UI.map = KSAFUI.createMap(document.getElementById('gmap'), SC);
+  }
+  const F = SC.flight, t = routeMin(), locks = KSAF.lockTimes(F), div = !!ST.div;
+  const next = locks.find(l => !lockedNow(l, t) && !(l.voidAfterDiversion && div) && !(l.diversion && !div));
+  document.getElementById('dvb').innerHTML = div ? `<div class="divban">⚡ ${esc(F.diversion.message)}</div>` : '';
+  const list = F.points.map(p => ({ p, l: locks.find(l => l.id === p.id) }));
+  if (div) list.splice(list.length - 1, 0, { p: F.diversion, l: locks.find(l => l.diversion), dv: true });
+  document.getElementById('cards').innerHTML = list.map(({ p, l, dv }) => {
+    const res = (G.res || {})[p.id], locked = lockedNow(l, t), isVoid = l.voidAfterDiversion && div;
+    const tag = isVoid ? '<span class="tag void">void — diversion</span>' : res ? `<span class="tag ${res.pts === res.max ? 'ok' : res.pts ? 'part' : 'no'}">${res.pts === res.max ? '✓' : res.pts ? '◐' : '✗'} ${res.pts}/${res.max}</span>` : locked ? '<span class="tag void">closed</span>' : `<span class="tag open">closes at +${l.at.toFixed(l.at % 1 ? 1 : 0)}′</span>`;
+    return `<div class="pcard ${next && next.id === p.id ? 'next' : ''} ${locked ? 'locked' : ''} ${isVoid ? 'void' : ''} ${dv ? 'dv' : ''}" data-card="${p.id}"><div class="ph"><b>${esc(p.id)}</b><span>${esc(p.name)}</span><span class="muted">${esc(p.fir || '')} · ${esc(p.ref || '')}</span><span class="sp"></span>${tag}</div>
+      ${isVoid ? '' : KSAFUI.cellsHTML(p.cells, ANS[p.id], { ro: locked, res: res ? res.cells : null })}</div>`;
+  }).join('');
+  document.querySelectorAll('[data-card]').forEach(c => KSAFUI.wireCells(c, (cid, v) => { const pid = c.dataset.card; (ANS[pid] = ANS[pid] || {})[cid] = v; save(`groups/${GID}/ans/${pid}/${cid}`, v); }));
+  routeTick();
+}
+function routeTick() {
+  if (!UI.map) return;
+  const F = SC.flight, t = routeMin(), fs = KSAF.flightState(F, t, !!ST.div), locks = KSAF.lockTimes(F), div = !!ST.div;
+  const next = locks.find(l => !lockedNow(l, t) && !(l.voidAfterDiversion && div) && !(l.diversion && !div));
+  const states = F.points.map(p => { const r = (G.res || {})[p.id], l = locks.find(x => x.id === p.id); if (l.voidAfterDiversion && div) return [p.id, 'void']; if (r) return [p.id, r.pts === r.max ? 'ok' : r.pts ? 'part' : 'no']; return [p.id, next && next.id === p.id ? 'next' : '']; });
+  UI.map.update(fs, { diverted: div, states });
+  const s = document.getElementById('rstat'); if (!s) return;
+  const stg = { pre: 'Pre-flight at LPPT — fill in P0', cruise: 'Cruise FL' + F.fl, hold: 'HOLDING', divert: 'Diverting → ' + F.diversion.id, 'arrived-div': 'Landed ' + F.diversion.id, arrived: 'Landed' }[fs.stage];
+  s.innerHTML = `<div><div class="muted">UTC (simulated)</div><div class="big">${fs.sim}</div></div><div><div class="muted">${next ? next.id + ' closes in' : ''}</div><div class="big" style="color:var(--cyan)">${next ? KSAPP.fmt((next.at - t) * 60000) : '—'}</div></div><div><div class="muted">Stage</div><b>${stg}</b></div>${ST.routePausedAt ? '<span class="pill wait">⏸ paused</span>' : ''}`;
+}
+
+// ── local flight ──
+function localView() {
+  const Lc = SC.local, res = G.lres || null, done = !!G.lpts;
+  document.getElementById('main').innerHTML = `<h1>${esc(Lc.title)}</h1><p class="lead">${esc(Lc.flight)} · ${esc(Lc.altitude)}. ${esc(Lc.note)}</p>
+   <div class="local"><div class="card">${KSAFUI.cellsHTML(Lc.cells, LANS, { ro: done, res })}
+     <div class="row" style="margin-top:12px">${done ? `<span class="pill ok">Graded: ${G.lpts.pts}/${G.lpts.max}</span>` : `<button class="btn go" data-a="lsub">${G.lsub ? '✓ Submitted — submit again' : 'Submit the table ✓'}</button>`}<span class="muted">Values are saved as you type.</span></div></div>
+   <div><div class="card src"><div class="lbl">Live sources</div>${Lc.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">↗ ${esc(s.label)}</a>`).join('')}</div>
+     <div class="card" style="margin-top:12px"><div class="lbl" style="margin-bottom:8px">Images for your briefing (screenshots / photos)</div><div class="slots">${Lc.images.map(s => `<div class="slot ${(G.limg || {})[s.id] ? 'has' : ''}" data-a="slot" data-s="${s.id}" style="${(G.limg || {})[s.id] ? `background-image:url('${G.limg[s.id]}')` : ''}">${esc(s.label)}${(G.limg || {})[s.id] ? `<span class="x" data-a="unslot" data-s="${s.id}">✕</span>` : '<br>＋ add / paste'}</div>`).join('')}</div>
+     <p class="muted" style="margin-top:6px">Click a slot to choose a file, or click it and press Ctrl+V to paste a screenshot.</p></div></div></div>`;
+  KSAFUI.wireCells(document.querySelector('.local .card'), (cid, v) => { LANS[cid] = v; save(`groups/${GID}/lans/${cid}`, v); });
+}
+let slotSel = null;
+A.slot = (b, e) => { if (e.target.closest('[data-a=unslot]')) return; slotSel = b.dataset.s; document.querySelectorAll('.slot').forEach(x => x.style.outline = x === b ? '3px solid var(--cyan)' : ''); const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => i.files[0] && putImg(b.dataset.s, i.files[0]); i.click(); };
+A.unslot = b => DB.set(`groups/${GID}/limg/${b.dataset.s}`, null);
+async function putImg(sid, file) { const d = await KSAPP.fileToDataURL(file); const c = await KSAPP.compressImage(d, 1400, 0.78); if (c) { await DB.set(`groups/${GID}/limg/${sid}`, c); KSAPP.toast('Image saved'); } }
+document.addEventListener('paste', e => { if (ST.phase !== 'local' || !slotSel) return; const it = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/')); if (it) { e.preventDefault(); putImg(slotSel, it.getAsFile()); } });
+A.lsub = async () => { await Promise.all(Object.entries(LANS).map(([c, v]) => DB.set(`groups/${GID}/lans/${c}`, v === '' ? null : v))); await DB.push('subs', { kind: 'localSubmit', gid: GID, at: now() }); KSAPP.toast('Table submitted'); };
+
+// ── briefing ──
+function briefView() {
+  const m = document.getElementById('main');
+  if (!UI.map) {
+    m.innerHTML = `<h1>Briefing — ${esc(G.name)}</h1><p class="lead">Route: ${SC.briefing.routeSeconds}″ · Local flight: ${SC.briefing.localSeconds / 60}′. Your tables and images are on the main screen; use this map and the documents to show the charts.</p>
+      <div class="route" style="height:calc(100vh - 190px)"><div class="mapbox" id="gmap"></div><div class="side">${docsBar()}<div class="card"><div class="lbl">Your local-flight table</div>${KSAFUI.cellsHTML(SC.local.cells, G.lans || {}, { ro: true, res: G.lres })}</div>
+      <div class="slots" style="margin-top:10px">${SC.local.images.filter(s => (G.limg || {})[s.id]).map(s => `<div class="slot has" data-a="zoom" data-s="${s.id}" style="background-image:url('${G.limg[s.id]}')"></div>`).join('')}</div></div></div>`;
+    UI.map = KSAFUI.createMap(document.getElementById('gmap'), SC);
+    const F = SC.flight, fs = KSAF.flightState(F, 999, !!ST.div);
+    UI.map.update(fs, { diverted: !!ST.div, states: F.points.map(p => { const r = (G.res || {})[p.id]; return [p.id, !r ? '' : r.void ? 'void' : r.pts === r.max ? 'ok' : r.pts ? 'part' : 'no']; }) });
+  }
+}
+A.zoom = b => KSAPP.showLib({ kind: 'image', data: G.limg[b.dataset.s], label: SC.local.images.find(x => x.id === b.dataset.s).label });
+
+// ── debrief ──
+function debriefView() {
+  const res = G.res || {}, rs = Object.values(res).filter(r => !r.void), tot = rs.reduce((a, r) => [a[0] + r.pts, a[1] + r.max], [0, 0]);
+  const gates = Object.entries(G.gates || {}).map(([k, v]) => `<span class="pill ${v.pts ? 'ok' : 'no'}">🔑 ${esc(k)} ${v.pts} pts</span>`).join(' ');
+  document.getElementById('main').innerHTML = `<h1>Debriefing — ${esc(G.name)}</h1><div class="row" style="margin-bottom:12px">${gates}<span class="pill">Route ${tot[0]}/${tot[1]}</span>${G.lpts ? `<span class="pill">Local ${G.lpts.pts}/${G.lpts.max}</span>` : ''}</div>
+    <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${(G.members || []).map(id => `<div class="card"><b>${esc((STU[id] || {}).name || '')}</b>${KSAPP.ksaBars(SCORES[id], SC.scoring.weights)}</div>`).join('')}</div>
+    <p class="muted" style="margin-top:12px">Training session — the scores are feedback, not assessment. The accepted values are discussed on the main screen.</p>`;
+}
+
+function tick() {
+  if (!ST.phase || !SC) return;
+  const m = KSAF.scheduleResolved(SC).find(x => x.id === ST.moment);
+  if (m) { const left = ST.moment === 'route' ? m.min * 60000 - KSAPP.routeElapsed(ST, now()) : m.min * 60000 - (now() - (ST.momentAt || now())); const c = document.getElementById('g-clock'); c.textContent = KSAPP.fmt(left); c.className = 'clock ' + KSAPP.clockClass(left, 600000); }
+  if (ST.phase === 'route' && gateDone('route')) { const sig = sigOf(); if (sig !== UI.sig) render(); else routeTick(); }
+}
+</script>
+</body>
+</html>
