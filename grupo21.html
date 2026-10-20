@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KSA 21 — Meteo Duel · Crew</title>
+<link rel="icon" href="data:,">
+<style>
+/* KSA ENGINE — shared theme for teacher / group / student pages */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0f1520;--bg3:#161e30;--bg4:#1f2a42;--line:#2a3650;--line2:#3a4a6a;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+  --text:#e8edf5;--text2:#9fb0c8;--text3:#5d7090;
+  --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
+textarea{resize:vertical}
+.mono{font-family:var(--mono)}
+.btn{border:1px solid var(--line2);background:var(--bg3);color:var(--text);border-radius:8px;padding:8px 14px;font-size:.88rem;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--blue);background:var(--bg4)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.go{background:var(--green);border-color:var(--green);color:#052e12}
+.btn.warn{background:var(--amber);border-color:var(--amber);color:#2a1700}
+.btn.sm{padding:4px 10px;font-size:.78rem}
+.btn.lg{padding:12px 22px;font-size:1rem}
+.btn.ghost{background:transparent}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1}
+.muted{color:var(--text3);font-size:.82rem}
+.lbl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--bg4);color:var(--text2);white-space:nowrap}
+.pill.k{background:rgba(59,130,246,.18);color:#93c5fd}.pill.s{background:rgba(34,197,94,.18);color:#86efac}.pill.a{background:rgba(168,85,247,.18);color:#d8b4fe}
+.pill.key{background:rgba(245,158,11,.18);color:#fcd34d}.pill.ind{background:rgba(6,182,212,.18);color:#67e8f9}
+.pill.ok{background:rgba(34,197,94,.18);color:#86efac}.pill.no{background:rgba(239,68,68,.18);color:#fca5a5}.pill.wait{background:rgba(245,158,11,.15);color:#fcd34d}
+.empty{border:1px dashed var(--line2);border-radius:10px;padding:26px;text-align:center;color:var(--text3)}
+.clock{font-family:var(--mono);font-weight:800;letter-spacing:.02em}
+.clock.low{color:var(--amber)}.clock.out{color:var(--red)}
+
+/* KSA bars */
+.ksa{display:flex;flex-direction:column;gap:5px;min-width:180px}
+.ksa .b{display:grid;grid-template-columns:16px 1fr 48px;gap:7px;align-items:center;font-size:.78rem;font-weight:700}
+.ksa .tr{height:7px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.ksa .fi{height:100%;border-radius:99px;transition:width .6s}
+.ksa .k .fi{background:var(--blue)}.ksa .s .fi{background:var(--green)}.ksa .a .fi{background:var(--purple)}
+.ksa .k b{color:#93c5fd}.ksa .s b{color:#86efac}.ksa .a b{color:#d8b4fe}
+.ksa .v{text-align:right;font-family:var(--mono);color:var(--text2)}
+.ksa .tot{font-size:.78rem;color:var(--text2);text-align:right}
+
+/* modal / toast / viewer */
+.modal{position:fixed;inset:0;background:rgba(2,6,15,.86);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:min(1100px,100%);max-height:94vh;display:flex;flex-direction:column}
+.modal .mh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.modal .mh b{flex:1}
+.modal .mb{padding:14px;overflow:auto}
+.viewer img{display:block;max-width:100%;margin:auto;background:#fff;cursor:zoom-in}
+.viewer.full img{max-width:none;cursor:zoom-out}
+.viewer pre{font:600 .95rem/1.6 var(--mono);white-space:pre-wrap;background:#0b1220;padding:14px;border-radius:8px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--line2);padding:10px 18px;border-radius:10px;font-weight:650;z-index:90;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+
+/* library list */
+.lib-list{display:flex;flex-direction:column;gap:6px}
+.lib-it{display:flex;gap:10px;align-items:center;background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:7px 9px;cursor:pointer;text-align:left;color:var(--text)}
+.lib-it:hover{border-color:var(--cyan)}
+.lib-it .th{width:56px;height:40px;border-radius:5px;background:#fff center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.lib-it .th.t{background:#0b1220;color:var(--cyan);font-weight:800;font-size:.62rem}
+.lib-it b{font-size:.85rem;display:block}
+.lib-it span{font-size:.72rem;color:var(--text3)}
+
+/* disclaimer */
+.disc{max-width:820px;margin:18px auto 0;font-size:.8rem;line-height:1.55;color:var(--text2);border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.06);border-radius:10px;padding:10px 14px;text-align:left}
+.disc b{color:#fbbf24}
+/* route result table */
+table.rt{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:6px}
+table.rt th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:6px 8px;border-bottom:1px solid var(--line)}
+table.rt td{padding:4px 6px;border-bottom:1px solid rgba(42,54,80,.6);vertical-align:middle}
+table.rt td:first-child{color:var(--text2);font-weight:600;width:38%}
+table.rt input{padding:5px 7px;font-size:.88rem}
+table.rt.show td{font-size:1.05rem;padding:7px 9px}
+table.rt.show td:not(:first-child){color:var(--text);font-weight:650}
+/* status bar */
+.conn{font-size:.72rem;font-weight:700}
+.conn.on{color:var(--green)}.conn.off{color:var(--red)}
+
+
+.btn.pri:hover:not(:disabled){background:#2563eb;border-color:#2563eb}.btn.go:hover:not(:disabled){background:#16a34a;border-color:#16a34a}.btn.warn:hover:not(:disabled){background:#d97706;border-color:#d97706}
+</style>
+<style>
+body{display:flex;flex-direction:column;min-height:100vh}
+.top{display:flex;align-items:center;gap:14px;padding:9px 18px;background:var(--bg2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;flex-wrap:wrap}
+.brand{font-weight:900}.brand em{font-style:normal;color:var(--blue)}
+.crew{font-weight:850;color:var(--cyan);font-size:1.05rem}
+.sp{flex:1}
+.top .clock{font-size:1.5rem}
+.pts{font:900 1.3rem var(--mono);color:var(--amber)}
+main{flex:1;padding:16px 20px 60px;max-width:1250px;width:100%;margin:0 auto}
+h1{font-size:1.45rem;font-weight:850;margin-bottom:6px}
+h2{font-size:1.05rem;font-weight:800;margin:6px 0 10px}
+.lead{color:var(--text2);margin-bottom:14px}
+.big{text-align:center;margin-top:12vh}.big .ic{font-size:3.4rem}
+.tabsx{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabsx button{border:1px solid var(--line2);background:var(--bg2);color:var(--text2);border-radius:9px;padding:8px 14px;font-weight:750}
+.tabsx button.on{border-color:var(--blue);color:var(--text);background:rgba(59,130,246,.12)}
+.tabsx button .d{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:6px;background:var(--amber)}
+.tabsx button .d.ok{background:var(--green)}
+.form{display:grid;gap:12px}
+.form label>span{display:block;font-size:.72rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.form textarea.data{font-family:var(--mono);font-size:.95rem}
+.oprow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;margin-bottom:6px}
+.oprow .rad{display:flex;align-items:center;gap:6px;font-weight:900;cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--bg)}
+.oprow .rad.on{background:rgba(34,197,94,.18);border-color:var(--green);color:#86efac}
+.issues{font-size:.82rem;color:#fcd34d}
+.issues.ok{color:#86efac}
+.hintbox{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.85rem;color:var(--text2)}
+.hintbox b{color:var(--text)}
+.q{font-size:1.45rem;font-weight:800;line-height:1.35;margin:8px 0 12px}
+.qdata{font:700 1.05rem/1.6 var(--mono);white-space:pre-wrap;background:#0b1220;border:1px solid var(--line2);border-radius:10px;padding:12px 16px;margin:4px 0 14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.o{display:flex;gap:12px;align-items:center;text-align:left;border:2px solid var(--line);background:var(--bg2);color:var(--text);border-radius:12px;padding:14px;font-size:1.02rem;font-weight:650;cursor:pointer;width:100%}
+.o .L{width:34px;height:34px;border-radius:9px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.o.sel{border-color:var(--blue);background:rgba(59,130,246,.14)}
+.o.right{border-color:var(--green);background:rgba(34,197,94,.14)}
+.o.wrong{border-color:var(--red);background:rgba(239,68,68,.12)}
+.o:disabled{cursor:default}
+.bets{display:flex;gap:8px;align-items:center;margin:14px 0}
+.bets button{border:2px solid var(--line2);background:var(--bg2);color:var(--text);border-radius:10px;padding:10px 18px;font-weight:900;font-size:1.05rem}
+.bets button.on{border-color:var(--amber);background:rgba(245,158,11,.18);color:#fcd34d}
+.tbar{height:8px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-top:6px}.tbar div{height:100%;background:var(--blue);transition:width .5s linear}
+.ban{border-radius:12px;padding:14px 18px;font-size:1.15rem;font-weight:850;margin-bottom:12px;text-align:center}
+.ban.contest{background:rgba(245,158,11,.12);border:2px solid var(--amber);color:#fcd34d}
+.ban.stand{background:rgba(34,197,94,.12);border:2px solid var(--green);color:#86efac}
+.ban.void{background:rgba(239,68,68,.12);border:2px solid var(--red);color:#fca5a5}
+.ban.mine{background:rgba(6,182,212,.1);border:2px solid var(--cyan);color:#67e8f9}
+.just{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.4);border-radius:10px;padding:10px 14px;margin-top:12px}
+.board .r{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;background:var(--bg3);margin-bottom:5px;font-weight:700}
+.board .r .p{margin-left:auto;font:900 1.1rem var(--mono);color:var(--cyan)}
+.board .r.me{outline:2px solid var(--amber)}
+.grid{display:grid}
+.lay{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px}
+table.t{width:100%;border-collapse:collapse;font-size:.88rem}
+table.t th{text-align:left;font-size:.7rem;text-transform:uppercase;color:var(--text3);padding:6px 8px;border-bottom:1px solid var(--line)}
+table.t td{padding:6px 8px;border-bottom:1px solid rgba(42,54,80,.6)}
+@media(max-width:900px){.bgrid{grid-template-columns:1fr!important}.lay{grid-template-columns:1fr}.opts{grid-template-columns:1fr}}
+</style>
+<script>/*!
+ * KSA DUEL — ksa-duel.js
+ * Core of the "Meteo Duel" KSA exercise (ATPL 050 Meteorology · Session 21).
+ *  - pre-test speed scoring (end-of-session quiz rules) and crew formation (best + last)
+ *  - syllabus areas per crew, challenge slots and validation
+ *  - duel order, verdicts of contested challenges, game points
+ *  - K / S / A scores
+ * Carlos Paizinho · cursos.meteo@gmail.com · Developed with Claude (Anthropic)
+ */
+(function (root) {
+'use strict';
+
+// ── pre-test: +6 … +1 by speed (5-second steps), wrong −4, no answer −2 ──
+function quizPoints(correct, answered, secs) {
+  if (!answered) return -2;
+  if (!correct) return -4;
+  return Math.max(1, 6 - Math.floor(Math.max(0, secs) / 5));
+}
+function gradePretest(questions, answers, starts) {
+  let pts = 0, correct = 0;
+  questions.forEach((q, i) => {
+    const a = answers ? answers[i] : undefined;
+    const answered = a !== undefined && a !== null && a.k !== undefined;
+    const ok = answered && +a.k === +q.correct;
+    const secs = answered && starts && starts[i] ? (a.t - starts[i]) / 1000 : 30;
+    pts += quizPoints(ok, answered, secs);
+    if (ok) correct++;
+  });
+  return { pts, correct, n: questions.length, max: 6 * questions.length };
+}
+/** ranked = ids best → worst; each crew takes ⌈size/2⌉ from the top and the rest from the bottom */
+function formGroupsTopBottom(ranked, nGroups) {
+  const n = ranked.length; nGroups = Math.max(1, Math.min(nGroups, n));
+  const sizes = Array.from({ length: nGroups }, (_, g) => Math.floor(n / nGroups) + (g < n % nGroups ? 1 : 0));
+  let i = 0, j = n - 1;
+  return sizes.map(sz => {
+    const g = []; const top = Math.ceil(sz / 2);
+    for (let k = 0; k < top; k++) g.push(ranked[i++]);
+    for (let k = top; k < sz; k++) g.push(ranked[j--]);
+    return g;
+  });
+}
+/** crews of 2 to 4 (5 only if unavoidable): ⌈n/4⌉, at least 2 */
+function autoGroupCount(n) { if (n < 4) return 1; return Math.max(2, Math.ceil(n / 4)); }
+
+// ── areas & slots ─────────────────────────────────────────────────────
+/** two different areas per crew, spread over the syllabus (random start, then cyclic) */
+function assignAreas(SC, nGroups, rnd) {
+  const ids = SC.areas.map(a => a.id);
+  const r = rnd || Math.random;
+  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const out = [];
+  for (let g = 0; g < nGroups; g++) out.push([ids[(2 * g) % ids.length], ids[(2 * g + 1) % ids.length]]);
+  return out;
+}
+function slotsFor(SC, nGroups) { return nGroups <= 4 ? SC.build.slots4 : SC.build.slots3; }
+/** slot code → description */
+function slotInfo(SC, code, areas) {
+  const lab = id => (SC.areas.find(a => a.id === id) || {}).label || id;
+  if (code === 'A') return { type: 'THEORY', areas: [areas[0]], title: 'Theory — ' + lab(areas[0]) };
+  if (code === 'B') return { type: 'THEORY', areas: [areas[1]], title: 'Theory — ' + lab(areas[1]) };
+  if (code === 'AB') return { type: 'THEORY', areas: areas.slice(), title: 'Theory — either of your two areas' };
+  return { type: 'OPS', areas: SC.areas.map(a => a.id), title: 'Operational — a situation you create (METAR / TAF / SIGMET / chart reading) and a decision' };
+}
+/** list of problems that prevent a challenge from being played ([] = ready) */
+function validateChallenge(SC, ch, info) {
+  const p = [];
+  ch = ch || {};
+  const txt = v => String(v || '').trim();
+  if (txt(ch.stem).length < 12) p.push('question');
+  const opts = (ch.options || []).map(txt);
+  if (opts.length < 4 || opts.slice(0, 4).some(o => !o)) p.push('4 options');
+  else if (new Set(opts.slice(0, 4).map(o => o.toLowerCase())).size < 4) p.push('options must differ');
+  if (!(ch.correct >= 0 && ch.correct <= 3)) p.push('correct option');
+  if (txt(ch.just).length < (SC.build.minJustification || 30)) p.push('justification (≥ ' + (SC.build.minJustification || 30) + ' characters)');
+  if (info.type === 'OPS' && txt(ch.data).length < 10) p.push('data block (METAR / TAF / SIGMET / situation)');
+  if (info.type === 'THEORY' && info.areas.length > 1 && !info.areas.includes(ch.area)) p.push('choose the area');
+  return p;
+}
+
+// ── duel order: round-robin by crew, slot by slot ─────────────────────
+function buildOrder(SC, groups) {
+  const gids = Object.keys(groups || {}).sort();
+  const lists = gids.map(g => {
+    const G = groups[g], slots = slotsFor(SC, gids.length);
+    return slots.map((code, i) => ({ cid: g + '-' + i, g, i, code, info: slotInfo(SC, code, G.areas || []), ch: (G.ch || {})[i] }))
+      .filter(x => validateChallenge(SC, x.ch, x.info).length === 0)
+      .map(x => x.cid);
+  });
+  const out = []; let more = true;
+  for (let r = 0; more; r++) { more = false; lists.forEach(l => { if (l[r]) { out.push(l[r]); more = true; } }); }
+  // avoid two consecutive challenges by the same crew where possible (already guaranteed by round-robin)
+  return out;
+}
+function challengeOf(groups, cid) { const [g, i] = String(cid).split('-'); return (((groups || {})[g] || {}).ch || {})[i] || null; }
+
+// ── confidence (bet) → calibration (Brier) ────────────────────────────
+const CONF = { 1: 0.4, 2: 0.65, 3: 0.9 };
+function brier(bet, ok) { const p = CONF[bet] || CONF[1]; return 1 - Math.pow(p - (ok ? 1 : 0), 2); }
+
+/**
+ * verdict of one played challenge.
+ * D.duel = { ans:{cid:{gid:{k,bet,t}}}, contest:{cid:{gid:true}}, vote:{cid:{sid:'valid'|'flawed'}} }
+ * D.override = {cid:'valid'|'void'}
+ * returns { status:'valid'|'void', contested, contesters[], votes:{valid,flawed}, pending, by:'jury'|'teacher'|'' }
+ */
+function verdict(SC, D, cid) {
+  const author = cid.split('-')[0];
+  const ans = ((D.duel || {}).ans || {})[cid] || {};
+  const ch = challengeOf(D.groups, cid) || {};
+  const contesters = Object.keys(((D.duel || {}).contest || {})[cid] || {}).filter(g => g !== author && ans[g] && +ans[g].k !== +ch.correct);
+  const votes = { valid: 0, flawed: 0 };
+  const neutral = sid => { const s = (D.students || {})[sid]; return s && s.group && s.group !== author && !contesters.includes(s.group); };
+  Object.entries(((D.duel || {}).vote || {})[cid] || {}).forEach(([sid, v]) => { if (neutral(sid) && votes[v] !== undefined) votes[v]++; });
+  const hasNeutral = Object.values(D.students || {}).some(s => s.group && s.group !== author && !contesters.includes(s.group));
+  let status = 'valid', by = '', pending = false;
+  if (contesters.length) {
+    if (!hasNeutral) pending = true;
+    else { by = 'jury'; if (votes.flawed > votes.valid) status = 'void'; }
+  }
+  const ov = (D.override || {})[cid];
+  if (ov === 'void' || ov === 'valid') { status = ov; by = 'teacher'; pending = false; }
+  return { status, contested: contesters.length > 0, contesters, votes, pending, by };
+}
+
+/**
+ * full results: game points per crew, per-challenge table, K/S/A per student.
+ * D = { students, groups, duel:{ans,contest,vote}, played:[cid], override, quality:{cid:1..3}, peer }
+ */
+function compute(SC, D) {
+  const gids = Object.keys(D.groups || {}).sort();
+  const G = SC.game, played = D.played || [];
+  const game = {}; gids.forEach(g => game[g] = 0);
+  const per = {};                     // gid → {th:[ok], ops:[ok], cal:[score]}
+  gids.forEach(g => per[g] = { th: [], ops: [], cal: [], design: [] });
+  const items = {};
+  played.forEach(cid => {
+    const author = cid.split('-')[0], ch = challengeOf(D.groups, cid); if (!ch || !game.hasOwnProperty(author)) return;
+    const [, i] = cid.split('-');
+    const info = slotInfo(SC, slotsFor(SC, gids.length)[+i] || 'A', (D.groups[author] || {}).areas || []);
+    const ans = ((D.duel || {}).ans || {})[cid] || {};
+    const v = verdict(SC, D, cid);
+    const rows = {}; let right = 0, wrong = 0;
+    gids.filter(g => g !== author).forEach(g => {
+      const a = ans[g], answered = !!a && a.k !== undefined && a.k !== null, ok = answered && +a.k === +ch.correct;
+      const bet = answered ? Math.max(1, Math.min(3, +a.bet || 1)) : 0;
+      let pts = 0;
+      if (v.status === 'valid') {
+        pts = answered ? (ok ? bet : -bet) : G.noAnswer;
+        if (v.contesters.includes(g)) pts += G.contestLost;
+        (info.type === 'OPS' ? per[g].ops : per[g].th).push(ok ? 1 : 0);
+        if (answered) per[g].cal.push(brier(bet, ok));
+      } else if (v.contesters.includes(g)) pts = G.contestWon;
+      if (ok) right++; else wrong++;
+      game[g] += pts;
+      rows[g] = { k: answered ? +a.k : null, bet, ok, pts, contested: v.contesters.includes(g) };
+    });
+    let apts = 0;
+    if (v.status === 'valid') apts = G.authorPerMiss * wrong; else apts = G.annulAuthor;
+    game[author] += apts;
+    const disc = right > 0 && wrong > 0;
+    const q = (D.quality || {})[cid];
+    const design = v.status === 'void' ? 0 : q ? (q - 1) / 2 : 0.6 + (disc ? 0.4 : 0);
+    items[cid] = { cid, author, type: info.type, area: ch.area || info.areas[0], verdict: v, rows, right, wrong, authorPts: apts, disc, design };
+  });
+  // design score per crew: every slot counts; an incomplete slot = 0; a complete slot not played (time) is left out
+  gids.forEach(g => {
+    const slots = slotsFor(SC, gids.length), Gr = D.groups[g] || {};
+    slots.forEach((code, i) => {
+      const cid = g + '-' + i, it = items[cid];
+      if (it) per[g].design.push(it.design);
+      else if (validateChallenge(SC, (Gr.ch || {})[i], slotInfo(SC, code, Gr.areas || [])).length) per[g].design.push(0);
+    });
+  });
+  const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const W = SC.scoring.weights, sp = SC.scoring.split, pScale = +SC.peer.scale || 5;
+  const ksa = {};
+  Object.entries(D.students || {}).forEach(([sid, st]) => {
+    const g = st.group, P = per[g] || { th: [], ops: [], cal: [], design: [] };
+    const frac = (a, b) => b > 0 ? Math.max(0, Math.min(1, a / b)) : null;
+    const pre = st.pre ? frac(st.pre.pts, st.pre.max) : null;
+    const recv = []; Object.entries(D.peer || {}).forEach(([r, m]) => { if (r !== sid && m && m[sid]) { const v = Object.values(m[sid]).map(Number).filter(x => x > 0); if (v.length) recv.push(v.reduce((a, b) => a + b, 0) / v.length); } });
+    const peer = recv.length ? (mean(recv) - 1) / Math.max(1, pScale - 1) : null;
+    const comp = { K: { pretest: pre, theory: mean(P.th) }, S: { ops: mean(P.ops), design: mean(P.design) }, A: { calibration: mean(P.cal), peer } };
+    const dim = {};
+    ['K', 'S', 'A'].forEach(d => { let n = 0, w = 0; Object.entries(sp[d]).forEach(([k, x]) => { const v = comp[d][k]; if (v !== null && v !== undefined) { n += x * v; w += +x; } }); dim[d] = w ? n / w : null; });
+    const r1 = v => Math.round(v * 10) / 10;
+    ksa[sid] = { K: dim.K === null ? null : r1(dim.K * W.K), S: dim.S === null ? null : r1(dim.S * W.S), A: dim.A === null ? null : r1(dim.A * W.A), comp };
+    ksa[sid].total = r1((ksa[sid].K || 0) + (ksa[sid].S || 0) + (ksa[sid].A || 0));
+  });
+  return { game, items, ksa, per };
+}
+
+function scheduleResolved(SC) { let t = 0; return SC.schedule.map(m => { const o = Object.assign({}, m, { start: t, end: t + m.min }); t += m.min; return o; }); }
+function hhmm(min) { return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(Math.round(min % 60)).padStart(2, '0'); }
+
+/** public configuration: without the pre-test key */
+function publicConfig(SC) {
+  const P = JSON.parse(JSON.stringify(SC));
+  P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
+  return P;
+}
+
+const KSAD = { quizPoints, gradePretest, formGroupsTopBottom, autoGroupCount, assignAreas, slotsFor, slotInfo, validateChallenge,
+  buildOrder, challengeOf, CONF, brier, verdict, compute, scheduleResolved, hhmm, publicConfig };
+if (typeof module !== 'undefined' && module.exports) module.exports = KSAD; else root.KSAD = KSAD;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * KSA ENGINE — ksa-db.js
+ * One small API over two back-ends:
+ *   • firebase — Firebase Realtime Database (the course project), for the real class
+ *   • local    — in-browser database shared between tabs of ONE browser (BroadcastChannel);
+ *                for testing, demos and a single-computer fallback. No internet needed.
+ * All paths are relative to  ksa/<SESSION CODE>/
+ */
+(function (root) {
+'use strict';
+
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68',
+  authDomain: 'meteorology-quiz-2b061.firebaseapp.com',
+  databaseURL: 'https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'meteorology-quiz-2b061',
+  storageBucket: 'meteorology-quiz-2b061.firebasestorage.app'
+};
+const ROOT = 'ksa';
+const SDK = 'https://www.gstatic.com/firebasejs/9.23.0/';
+
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Cannot load ' + src)); document.head.appendChild(s); });
+}
+const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+const split = p => String(p || '').split('/').filter(Boolean);
+
+// ════════════════════════════════════════════════════════════════════════
+// FIREBASE BACK-END
+// ════════════════════════════════════════════════════════════════════════
+async function firebaseDB(code) {
+  if (!root.firebase) { await loadScript(SDK + 'firebase-app-compat.js'); await loadScript(SDK + 'firebase-database-compat.js'); }
+  const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.database(app);
+  const base = `${ROOT}/${code}`;
+  const ref = p => db.ref(p ? `${base}/${p}` : base);
+  let offset = 0;
+  db.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+  return {
+    mode: 'firebase', code,
+    now: () => Date.now() + offset,
+    get: p => ref(p).once('value').then(s => s.val()),
+    set: (p, v) => ref(p).set(clean(v)),
+    update: (p, o) => ref(p).update(clean(o)),
+    push: (p, v) => { const r = ref(p).push(); return r.set(clean(v)).then(() => r.key); },
+    remove: p => ref(p).remove(),
+    on: (p, cb) => { const r = ref(p); const h = s => cb(s.val()); r.on('value', h); return () => r.off('value', h); },
+    onChild: (p, cb) => { const r = ref(p); const h = s => cb(s.key, s.val()); r.on('child_added', h); return () => r.off('child_added', h); },
+    connected: cb => db.ref('.info/connected').on('value', s => cb(!!s.val())),
+    exists: () => ref('state').once('value').then(s => s.exists())
+  };
+}
+function clean(v) {        // Firebase rejects undefined
+  return JSON.parse(JSON.stringify(v === undefined ? null : v));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// LOCAL BACK-END (tabs of the same browser)
+// ════════════════════════════════════════════════════════════════════════
+function localDB(code) {
+  const ch = new BroadcastChannel('ksa-local-' + code);
+  const me = Math.random().toString(36).slice(2);
+  let tree = {};
+  const subs = [];            // {path:[...], cb, child, seen:Set}
+  let pending = new Set(), flushT = null;
+
+  function getAt(t, parts) { let o = t; for (const k of parts) { if (o == null || typeof o !== 'object') return undefined; o = o[k]; } return o; }
+  function setAt(parts, v) {
+    if (!parts.length) { tree = v == null ? {} : v; return; }
+    let o = tree;
+    for (let i = 0; i < parts.length - 1; i++) { if (o[parts[i]] == null || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    const last = parts[parts.length - 1];
+    if (v === null || v === undefined) delete o[last]; else o[last] = v;
+  }
+  function overlap(a, b) { const n = Math.min(a.length, b.length); for (let i = 0; i < n; i++) if (a[i] !== b[i]) return false; return true; }
+  function apply(op) {
+    if (op.t === 'set') setAt(split(op.p), clone(op.v));
+    else if (op.t === 'update') Object.entries(op.v).forEach(([k, v]) => setAt(split(op.p).concat(split(k)), clone(v)));
+    const touched = op.t === 'update' ? Object.keys(op.v).map(k => split(op.p).concat(split(k))) : [split(op.p)];
+    subs.forEach(s => { if (touched.some(t => overlap(t, s.path))) pending.add(s); });
+    if (!flushT) flushT = setTimeout(flush, 0);
+  }
+  function flush() {
+    flushT = null; const list = [...pending]; pending.clear();
+    list.forEach(s => {
+      if (!subs.includes(s)) return;
+      const v = clone(getAt(tree, s.path));
+      if (s.child) {
+        Object.keys(v || {}).forEach(k => { if (!s.seen.has(k)) { s.seen.add(k); s.cb(k, v[k]); } });
+      } else s.cb(v === undefined ? null : v);
+    });
+  }
+  function write(op) { apply(op); ch.postMessage({ from: me, op }); return Promise.resolve(); }
+  let ready;
+  const readyP = new Promise(r => ready = r);
+  ch.onmessage = e => {
+    const m = e.data; if (m.from === me) return;
+    if (m.op) apply(m.op);
+    else if (m.hello) ch.postMessage({ from: me, snapshot: tree, to: m.from });
+    else if (m.snapshot && m.to === me && !ready.done) { tree = m.snapshot || {}; ready.done = true; subs.forEach(s => pending.add(s)); flush(); ready(); }
+  };
+  ch.postMessage({ from: me, hello: 1 });
+  setTimeout(() => { if (!ready.done) { ready.done = true; ready(); } }, 400);
+  let pushN = 0;
+  const api = {
+    mode: 'local', code,
+    now: () => Date.now(),
+    get: p => readyP.then(() => clone(getAt(tree, split(p))) ?? null),
+    set: (p, v) => write({ t: 'set', p, v: clone(v) }),
+    update: (p, o) => write({ t: 'update', p, v: clone(o) }),
+    push: (p, v) => { const k = Date.now().toString(36) + (pushN++).toString(36).padStart(3, '0') + me.slice(0, 4); return write({ t: 'set', p: p + '/' + k, v: clone(v) }).then(() => k); },
+    remove: p => write({ t: 'set', p, v: null }),
+    on: (p, cb) => { const s = { path: split(p), cb }; subs.push(s); readyP.then(() => { pending.add(s); flush(); }); return () => subs.splice(subs.indexOf(s), 1); },
+    onChild: (p, cb) => { const s = { path: split(p), cb, child: true, seen: new Set() }; subs.push(s); readyP.then(() => { pending.add(s); flush(); }); return () => subs.splice(subs.indexOf(s), 1); },
+    connected: cb => cb(true),
+    exists: () => readyP.then(() => !!getAt(tree, ['state']))
+  };
+  return Promise.resolve(api);
+}
+
+/** KSADB.open(code, mode) → Promise<db>. mode: 'firebase' (default) | 'local' */
+function open(code, mode) {
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+  if (!code) return Promise.reject(new Error('Session code missing'));
+  return mode === 'local' ? localDB(code) : firebaseDB(code);
+}
+root.KSADB = { open, FIREBASE_CONFIG };
+})(window);
+
+</script>
+<script>
+/*!
+ * KSA ENGINE — ksa-app.js : shared helpers for teacher / group / student pages
+ */
+(function (root) {
+'use strict';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const PHASES = {
+  lobby:    { label: 'Waiting to start' },
+  pretest:  { label: 'Pre-test' },
+  groups:   { label: 'Group formation' },
+  route:    { label: 'Route study' },
+  prep:     { label: 'Briefing preparation' },
+  briefing: { label: 'Briefings' },
+  break:    { label: 'Break' },
+  peer:     { label: 'Peer assessment' },
+  debrief:  { label: 'Results & debriefing' }
+};
+const PHASE_ORDER = ['lobby', 'pretest', 'groups', 'route', 'prep', 'briefing', 'break', 'peer', 'debrief'];
+
+function params() { return Object.fromEntries(new URLSearchParams(location.search)); }
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+function toast(m, ms) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms || 2600);
+}
+function modal(title, html, opts) {
+  let m = document.getElementById('modal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'modal'; m.className = 'modal';
+    m.innerHTML = '<div class="box"><div class="mh"><b id="m-title"></b><span id="m-extra"></span><button class="btn sm" id="m-close">✕ Close</button></div><div class="mb" id="m-body"></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+    m.querySelector('#m-close').onclick = closeModal;
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  }
+  m.querySelector('#m-title').innerHTML = title;
+  m.querySelector('#m-extra').innerHTML = (opts && opts.extra) || '';
+  m.querySelector('#m-body').innerHTML = html;
+  m.classList.add('on');
+  return m.querySelector('#m-body');
+}
+function closeModal() { const m = document.getElementById('modal'); if (m) m.classList.remove('on'); }
+
+let actx = null;
+function beep(n) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < (n || 2); i++) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime + i * 0.28;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.start(t); o.stop(t + 0.24);
+    }
+  } catch (e) { }
+}
+
+function fmt(ms) {
+  const neg = ms < 0; ms = Math.abs(ms);
+  const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
+  const out = h ? `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  return (neg ? '+' : '') + out;
+}
+function clockClass(ms, total) { return ms < 0 ? 'out' : ms < Math.min(120000, total * 0.15) ? 'low' : ''; }
+
+function compressImage(src, maxW, q) {
+  maxW = maxW || 1400; q = q || 0.8;
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, maxW / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+      res(c.toDataURL('image/jpeg', q));
+    };
+    img.onerror = () => res(null);
+    img.src = src;
+  });
+}
+function fileToDataURL(f) { return new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); }); }
+
+function qrImg(text, cell) {
+  if (typeof qrcode === 'undefined') return `<div class="mono" style="font-size:.75rem;word-break:break-all">${esc(text)}</div>`;
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return `<img src="${q.createDataURL(cell || 5, 2)}" alt="QR" style="image-rendering:pixelated;background:#fff;border-radius:6px">`;
+}
+
+function ksaBars(score, weights) {
+  const w = weights || { K: 30, S: 45, A: 25 };
+  const s = score || {};
+  const b = (d, cls) => {
+    const v = s[d]; const pct = v === null || v === undefined ? 0 : Math.max(0, Math.min(100, v / w[d] * 100));
+    return `<div class="b ${cls}"><b>${d}</b><div class="tr"><div class="fi" style="width:${pct}%"></div></div><span class="v">${v === null || v === undefined ? '—' : v.toFixed(1)}/${w[d]}</span></div>`;
+  };
+  return `<div class="ksa">${b('K', 'k')}${b('S', 's')}${b('A', 'a')}<div class="tot">Total <b style="color:var(--text)">${s.total !== undefined ? s.total.toFixed(1) : '—'}</b> / 100</div></div>`;
+}
+
+function libList(items) {
+  if (!items || !items.length) return '<div class="empty">No data</div>';
+  return `<div class="lib-list">${items.map(it => `<button class="lib-it" data-lib="${it.id}">
+    ${it.kind === 'image' ? (it.data ? `<span class="th" style="background-image:url('${it.data}')"></span>` : `<span class="th">🗺️</span>`) : `<span class="th t">${esc(it.category)}</span>`}
+    <span><b>${esc(it.label || it.category)}</b><span>${esc(it.valid || '')}${it.source ? ' · ' + esc(it.source) : ''}</span></span></button>`).join('')}</div>`;
+}
+let fetchLib = null;      // set by pages that load images lazily: async id → dataURL
+async function showLib(it) {
+  if (!it) return;
+  if (it.kind === 'image' && !it.data && fetchLib) { modal(esc(it.label || ''), '<div class="empty">Loading…</div>'); it.data = await fetchLib(it.id); }
+  const body = modal(esc(it.label || it.category) + (it.valid ? ` <span class="muted">${esc(it.valid)}</span>` : ''),
+    it.kind === 'image' ? `<div class="viewer"><img src="${it.data}"></div><div class="muted" style="text-align:center;margin-top:6px">Click the image to view at full size · ${esc(it.source || '')}</div>` : `<div class="viewer"><pre>${esc(it.data)}</pre></div>`);
+  const v = body.querySelector('.viewer img');
+  if (v) v.onclick = () => v.parentElement.classList.toggle('full');
+}
+
+/** Scenario as published to the students: no answers, no hints, no injections, no pre-test key. */
+function publicScenario(S) {
+  const P = JSON.parse(JSON.stringify(S));
+  P.stages.forEach(st => st.tasks.forEach(t => { delete t.answers; t.hasHint = !!(t.hint && t.hint.text); delete t.hint; }));
+  P.injections = (S.injections || []).map(i => ({ id: i.id }));
+  P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
+  delete P.meta.summary;
+  return P;
+}
+function publicTask(t) { const c = JSON.parse(JSON.stringify(t)); delete c.answers; c.hasHint = !!(t.hint && t.hint.text); delete c.hint; return c; }
+
+function newCode() {
+  const d = new Date();
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = ''; for (let i = 0; i < 3; i++) r += abc[Math.floor(Math.random() * abc.length)];
+  return 'S' + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + r;
+}
+
+/** time helpers for the route clock (pausable) */
+function routeElapsed(state, now) {
+  if (!state || !state.routeStartedAt) return 0;
+  const paused = (state.routePausedTotal || 0) + (state.routePausedAt ? now - state.routePausedAt : 0);
+  return Math.max(0, now - state.routeStartedAt - paused);
+}
+
+function disclaimer(SC) { const d = SC && SC.meta && SC.meta.disclaimer; return d ? `<div class="disc"><b>Disclaimer</b> — ${esc(d)}</div>` : ''; }
+/** route-result table. edit=true → inputs (data-rt="surface|row|col"); B = board.route */
+function routeTable(SC, B, edit) {
+  const T = (SC.briefing && SC.briefing.routeTable) || { surface: [], enroute: [] };
+  const v = (sec, i, c) => ((((B || {}).table || {})[sec] || {})[i] || {})[c] || '';
+  const cell = (sec, i, c) => edit ? `<td><input data-rt="${sec}|${i}|${c}" value="${esc(v(sec, i, c))}"></td>` : `<td>${esc(v(sec, i, c)) || '—'}</td>`;
+  const r = (SC.routes || [])[0] || {};
+  return `<table class="rt ${edit ? '' : 'show'}"><tr><th>Surface weather</th><th>Departure ${esc(r.dep || '')}</th><th>Arrival ${esc(r.dest || '')}</th></tr>
+    ${T.surface.map((l, i) => `<tr><td>${esc(l)}</td>${cell('surface', i, 'dep')}${cell('surface', i, 'arr')}</tr>`).join('')}</table>
+    <table class="rt ${edit ? '' : 'show'}" style="margin-top:10px"><tr><th>En-route weather · FL${esc(r.fl || '')}</th><th colspan="2">Route ${esc(r.dep || '')} – ${esc(r.dest || '')}</th></tr>
+    ${T.enroute.map((l, i) => `<tr><td>${esc(l)}</td>${edit ? `<td colspan="2"><input data-rt="enroute|${i}|v" value="${esc(v('enroute', i, 'v'))}"></td>` : `<td colspan="2">${esc(v('enroute', i, 'v')) || '—'}</td>`}</tr>`).join('')}</table>`;
+}
+/** split a public scenario: images travel separately (pub/libdata) so that phones only download what they open */
+function splitLibrary(P) { const data = {}; P.library.forEach(it => { if (it.kind === 'image' && it.data) { data[it.id] = it.data; it.data = null; } }); return data; }
+root.KSAPP = { disclaimer, routeTable, splitLibrary, setFetchLib: f => { fetchLib = f; }, esc, PHASES, PHASE_ORDER, params, store, toast, modal, closeModal, beep, fmt, clockClass, compressImage, fileToDataURL, qrImg, ksaBars, libList, showLib, publicScenario, publicTask, newCode, routeElapsed };
+})(window);
+
+</script>
+</head>
+<body>
+<div class="top"><div class="brand">KSA <em>21</em> · METEO DUEL</div><div class="crew" id="c-name"></div><div class="muted" id="c-mem"></div><div class="sp"></div><span class="pts" id="c-pts"></span><div class="clock" id="c-clock"></div><span class="conn" id="c-conn"></span></div>
+<main id="main"><div class="big"><div class="ic">⏳</div><h1>Connecting…</h1></div></main>
+<script>
+'use strict';
+const esc = KSAPP.esc, P = KSAPP.params();
+let SC = null, DB = null, ST = {}, GRP = {}, STU = {}, BOARD = {}, MYANS = null, MYCON = null;
+const GID = (P.g || '').toUpperCase();
+const A = {};
+const L = k => String.fromCharCode(65 + k);
+document.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && A[b.dataset.a]) { e.preventDefault(); A[b.dataset.a](b, e); } });
+const M = h => document.getElementById('main').innerHTML = h;
+const now = () => DB.now();
+const ME = () => GRP[GID] || {};
+const gname = g => (GRP[g] || {}).name || g;
+const areaLabel = id => (SC.areas.find(a => a.id === id) || {}).label || id;
+const UI = { tab: 0, bet: null, pick: null, sig: '' };
+
+(async function init() {
+  if (!P.s || !GID) return M(`<div class="big"><h1>Open this page from the crew QR code</h1><p class="muted">(needs ?s=SESSION&g=G1)</p></div>`);
+  try { DB = await KSADB.open(P.s, P.mode === 'local' ? 'local' : 'firebase'); } catch (e) { return M(`<div class="big"><h1>Connection failed</h1><p>${esc(e.message)}</p></div>`); }
+  SC = await DB.get('pub/config');
+  if (!SC) return M(`<div class="big"><h1>Session ${esc(DB.code)} not found</h1></div>`);
+  DB.connected(on => { const c = document.getElementById('c-conn'); c.textContent = on ? '●' : '● offline'; c.className = 'conn ' + (on ? 'on' : 'off'); });
+  DB.on('state', v => { ST = v || {}; watchItem(); render(); });
+  DB.on('groups', v => { GRP = v || {}; head(); render(); });
+  DB.on('students', v => { STU = v || {}; head(); });
+  DB.on('board', v => { BOARD = v || {}; head(); render(); });
+  setInterval(tick, 500);
+})();
+function head() {
+  const G = ME();
+  document.getElementById('c-name').textContent = G.name || GID;
+  document.getElementById('c-mem').textContent = (G.members || []).map(id => (STU[id] || {}).name || '').join(' · ');
+  const p = (BOARD.game || {})[GID]; document.getElementById('c-pts').textContent = p !== undefined ? p + ' pts' : '';
+}
+// answers / contest of the current challenge
+let unA = null, unC = null, watched = null;
+function watchItem() {
+  const cid = ((ST.duel || {}).q || {}).cid || null;
+  if (cid === watched) return;
+  watched = cid; if (unA) unA(); if (unC) unC(); MYANS = null; MYCON = null; UI.bet = null; UI.pick = null;
+  if (!cid) return;
+  unA = DB.on(`duel/ans/${cid}/${GID}`, v => { MYANS = v; render(); });
+  unC = DB.on(`duel/contest/${cid}/${GID}`, v => { MYCON = v; render(); });
+}
+let rT = null;
+function render() { if (rT) return; rT = setTimeout(() => { rT = null; draw(); }, 120); }
+function draw() {
+  if (!ST.phase || !SC) return;
+  const G = ME();
+  if (!G.members && !['lobby', 'pretest'].includes(ST.phase)) return M(`<div class="big"><h1>${esc(GID)} does not exist in this session</h1></div>`);
+  const ph = ST.phase;
+  if (ph === 'build' && !G.locked) return buildView();
+  UI.built = false;
+  if (ph === 'lobby' || ph === 'pretest') return M(`<div class="big"><div class="ic">📱</div><h1>Pre-test on the phones</h1><p class="muted">The crews are formed after the pre-test. Keep this laptop open.</p></div>`);
+  if (ph === 'groups') return M(`<div class="big"><div class="ic">👥</div><h1>${esc(G.name)}</h1><p style="font-size:1.1rem">${(G.members || []).map(id => esc((STU[id] || {}).name || '')).join(' · ')}</p>
+    <p class="muted" style="margin-top:14px">Your two areas</p><p style="font-size:1.1rem">${(G.areas || []).map(a => `<b>${esc(a)}</b> — ${esc(areaLabel(a))}`).join('<br>')}</p><p class="muted" style="margin-top:14px">Round 1 starts in a moment: you will write your challenges here.</p></div>`);
+  if (ph === 'build') return M(`<div class="big"><div class="ic">🔒</div><h1>Challenges locked</h1><p class="muted">Wait for the other crews. The duel starts when everyone has locked or the time is up.</p></div>`);
+  if (ph === 'duel') return duelView();
+  if (ph === 'break') return M(`<div class="big"><div class="ic">☕</div><h1>Break</h1><p class="muted">Peer assessment on the phones after the break.</p></div>${resultsHTML()}`);
+  if (ph === 'peer') return M(`<div class="big"><div class="ic">📱</div><h1>Peer assessment on the phones</h1></div>${resultsHTML()}`);
+  if (ph === 'debrief') return M(`<h1>Debriefing</h1>${resultsHTML()}`);
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// ROUND 1 — BUILD
+// ════════════════════════════════════════════════════════════════════════
+function slots() { const G = ME(); return KSAD.slotsFor(SC, Object.keys(GRP).length).map((code, i) => ({ i, code, info: KSAD.slotInfo(SC, code, G.areas || []) })); }
+function chOf(i) { return ((ME().ch || {})[i]) || {}; }
+const DRAFT = {};       // local copy while typing (the database copy may lag behind)
+function draft(i) { if (!DRAFT[i]) DRAFT[i] = JSON.parse(JSON.stringify(chOf(i))); const d = DRAFT[i]; d.options = d.options || ['', '', '', '']; return d; }
+function buildView() {
+  const S = slots();
+  if (UI.built && UI.builtTab === UI.tab) { updIssues(); return; }
+  UI.built = true; UI.builtTab = UI.tab;
+  const s = S[UI.tab], d = draft(s.i);
+  const areaSel = s.info.type === 'THEORY' && s.info.areas.length > 1 ? `<label><span>Area</span><select data-f="area"><option value="">— choose —</option>${s.info.areas.map(a => `<option value="${a}" ${d.area === a ? 'selected' : ''}>${esc(a)} — ${esc(areaLabel(a))}</option>`).join('')}</select></label>` : '';
+  M(`<div class="row between"><h1>Round 1 — build your challenges</h1><div class="muted">${(ME().areas || []).map(a => `<b>${esc(a)}</b> ${esc(areaLabel(a))}`).join(' · ')}</div></div>
+   <div class="tabsx">${S.map((x, k) => `<button class="${k === UI.tab ? 'on' : ''}" data-a="tab" data-k="${k}">${k + 1} · ${x.info.type === 'OPS' ? 'Operational' : 'Theory'} <span class="d" data-dot="${k}"></span></button>`).join('')}</div>
+   <div class="grid bgrid" style="grid-template-columns:minmax(0,1fr) 300px;gap:16px"><div class="card form">
+     <div><span class="pill ${s.info.type === 'OPS' ? 'key' : 'k'}">${s.info.type === 'OPS' ? 'OPERATIONAL' : 'THEORY'}</span> <b>${esc(s.info.title)}</b></div>
+     ${areaSel}
+     ${s.info.type === 'OPS' ? `<label><span>Data block — the situation you create (METAR, TAF, SIGMET, wind/temp, chart description…)</span><textarea class="data" rows="4" data-f="data" placeholder="METAR LPPT 211030Z 34018G30KT 3000 +SHRA BKN008 FEW020CB 14/12 Q1008 TEMPO 1200 TSRA">${esc(d.data || '')}</textarea></label>` : `<label><span>Data block (optional)</span><textarea class="data" rows="2" data-f="data" placeholder="optional: a code or values the question refers to">${esc(d.data || '')}</textarea></label>`}
+     <label><span>Question</span><textarea rows="2" data-f="stem" placeholder="${s.info.type === 'OPS' ? 'e.g. You are the commander of a flight to LPPT, ETA 1130Z. What is the best decision?' : 'Write the question'}">${esc(d.stem || '')}</textarea></label>
+     <div><span class="lbl" style="color:var(--text3)">Options — click the letter of the correct one</span>${[0, 1, 2, 3].map(k => `<div class="oprow" style="margin-top:6px"><span class="rad ${+d.correct === k && d.correct !== undefined && d.correct !== null && d.correct !== '' ? 'on' : ''}" data-a="cor" data-k="${k}">${L(k)}</span><input data-o="${k}" value="${esc(d.options[k] || '')}" autocomplete="off"></div>`).join('')}</div>
+     <label><span>Justification — why the correct option is right (and the others wrong). You will defend it if contested.</span><textarea rows="3" data-f="just">${esc(d.just || '')}</textarea></label>
+     <label><span>Source (optional) — session, book page, question-bank reference</span><input data-f="ref" value="${esc(d.ref || '')}"></label>
+     <div class="issues" id="iss"></div>
+   </div><div>
+     <div class="card" style="text-align:center"><div class="muted">Time left</div><div class="clock" style="font-size:2.4rem" data-left></div></div>
+     <div class="hintbox" style="margin-top:12px"><b>Good challenges</b><br>• one clear idea, unambiguous wording<br>• plausible wrong options (typical misconceptions)<br>• a challenge that <b>some</b> crews get right and others not scores best for you<br>• the operational one: a realistic situation and a <b>decision</b> (go / delay / divert / change FL…)<br>• a flawed challenge can be annulled by the jury: author −3</div>
+     <button class="btn go lg" style="width:100%;margin-top:12px" data-a="lock">🔒 Lock all challenges</button>
+     <p class="muted" style="margin-top:6px">Saved automatically. When the time is up everything is locked; incomplete challenges are not played and count 0 for the quality of your challenges.</p>
+   </div></div>`);
+  const root = document.getElementById('main');
+  root.querySelectorAll('[data-f]').forEach(el => el.addEventListener('input', () => { d[el.dataset.f] = el.value; save(s.i); }));
+  root.querySelectorAll('select[data-f]').forEach(el => el.addEventListener('change', () => { d[el.dataset.f] = el.value; save(s.i); }));
+  root.querySelectorAll('[data-o]').forEach(el => el.addEventListener('input', () => { d.options[+el.dataset.o] = el.value; save(s.i); }));
+  updIssues();
+}
+const svT = {};
+function save(i) { updIssues(); clearTimeout(svT[i]); svT[i] = setTimeout(() => DB.set(`groups/${GID}/ch/${i}`, DRAFT[i]), 500); }
+function updIssues() {
+  const S = slots();
+  S.forEach((s, k) => { const d = DRAFT[s.i] || chOf(s.i); const ok = !KSAD.validateChallenge(SC, d, s.info).length; const dot = document.querySelector(`[data-dot="${k}"]`); if (dot) dot.classList.toggle('ok', ok); });
+  const s = S[UI.tab], iss = document.getElementById('iss'); if (!iss) return;
+  const p = KSAD.validateChallenge(SC, draft(s.i), s.info);
+  iss.className = 'issues' + (p.length ? '' : ' ok'); iss.textContent = p.length ? 'Missing: ' + p.join(' · ') : '✓ Ready to be played';
+}
+A.tab = b => { flush(); UI.tab = +b.dataset.k; UI.built = false; draw(); };
+A.cor = b => { const s = slots()[UI.tab], d = draft(s.i); d.correct = +b.dataset.k; document.querySelectorAll('.rad').forEach(x => x.classList.toggle('on', x === b)); save(s.i); };
+function flush() { Object.keys(svT).forEach(i => { clearTimeout(svT[i]); if (DRAFT[i]) DB.set(`groups/${GID}/ch/${i}`, DRAFT[i]); }); }
+A.lock = async () => {
+  const S = slots(), bad = S.filter(s => KSAD.validateChallenge(SC, DRAFT[s.i] || chOf(s.i), s.info).length);
+  if (!confirm(bad.length ? `${bad.length} challenge(s) incomplete — they will NOT be played. Lock anyway?` : 'Lock all challenges? You cannot change them afterwards.')) return;
+  flush(); await DB.update(`groups/${GID}`, { locked: true, lockedAt: now() });
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// ROUND 2 — DUEL
+// ════════════════════════════════════════════════════════════════════════
+function boardHTML() {
+  const rows = Object.keys(GRP).sort().map(g => [g, (BOARD.game || {})[g] || 0]).sort((a, b) => b[1] - a[1]);
+  return `<div class="card board"><div class="lbl" style="margin-bottom:8px">Scoreboard</div>${rows.map(([g, p]) => `<div class="r ${g === GID ? 'me' : ''}">${esc(gname(g))}<span class="p">${p}</span></div>`).join('')}</div>`;
+}
+function qBlock(qd, key, mine) {
+  return `<div class="row"><span class="lbl">Challenge ${qd.n} / ${qd.N}</span><span class="pill ${qd.type === 'OPS' ? 'key' : 'k'}">${qd.type === 'OPS' ? 'OPERATIONAL' : 'THEORY'}</span><span class="pill ind">${esc(qd.area)}</span><span class="pill">by ${esc(gname(qd.author))}</span></div>
+    <div class="q">${esc(qd.stem)}</div>${qd.data ? `<div class="qdata">${esc(qd.data)}</div>` : ''}`;
+}
+function duelView() {
+  const d = ST.duel || {}, qd = d.q, mine = qd && qd.author === GID;
+  const sig = JSON.stringify([d.stage, d.i, !!MYANS, MYCON, (BOARD.items || {})[qd && qd.cid], BOARD.game]);
+  if (sig === UI.sig && d.stage === 'read' && !MYANS) return;      // keep the selection while answering
+  UI.sig = sig;
+  let body = '';
+  if (d.stage === 'intro') body = `<div class="big" style="margin-top:6vh"><div class="ic">⚔</div><h1>The duel starts in <span data-left></span></h1><p class="muted">For each challenge of the other crews: discuss quickly, choose your <b>bet</b> (1–3) and your answer, then submit. Right +bet · wrong −bet · no answer ${SC.game.noAnswer}.</p></div>`;
+  else if (d.stage === 'end') body = `<div class="big" style="margin-top:6vh"><div class="ic">🏁</div><h1>End of the duel</h1><p class="muted">Break next.</p></div>`;
+  else if (!qd) body = '';
+  else if (d.stage === 'read') {
+    if (mine) body = `<div class="ban mine">This is YOUR challenge — do not answer. Prepare your defence in case it is contested.</div>${qBlock(qd)}${ownKey(qd.cid)}<div class="tbar"><div data-bar></div></div>`;
+    else if (MYANS) body = `<div class="ban mine">Answer locked: <b>${L(MYANS.k)}</b> · bet ×${MYANS.bet}</div>${qBlock(qd)}<div class="opts">${qd.options.map((o, k) => `<button class="o ${+MYANS.k === k ? 'sel' : ''}" disabled><span class="L">${L(k)}</span>${esc(o)}</button>`).join('')}</div><div class="tbar"><div data-bar></div></div>`;
+    else body = `${qBlock(qd)}<div class="opts">${qd.options.map((o, k) => `<button class="o ${UI.pick === k ? 'sel' : ''}" data-a="pick" data-k="${k}"><span class="L">${L(k)}</span>${esc(o)}</button>`).join('')}</div>
+      <div class="bets"><b>Bet</b>${[1, 2, 3].map(b => `<button class="${UI.bet === b ? 'on' : ''}" data-a="bet" data-b="${b}">×${b}</button>`).join('')}<span class="muted">${{ 1: 'unsure', 2: 'fairly sure', 3: 'certain' }[UI.bet] || 'choose how sure you are'}</span><span class="sp"></span><button class="btn go lg" data-a="send" ${UI.pick === null || !UI.bet ? 'disabled' : ''}>Submit ▶</button></div>
+      <div class="tbar"><div data-bar></div></div><p class="muted" style="margin-top:6px">Time left <b data-left></b></p>`;
+  } else {
+    const key = d.key || {}, it = (BOARD.items || {})[qd.cid] || { rows: {} }, r = it.rows[GID];
+    const wrong = !mine && MYANS && +MYANS.k !== +key.correct;
+    let ban = '';
+    if (d.stage === 'reveal') ban = mine ? `<div class="ban mine">Your challenge: ${Object.values(it.rows).filter(x => !x.ok).length} crew(s) missed → +${it.authorPts || 0}</div>` : r ? `<div class="ban ${r.ok ? 'stand' : 'void'}">${r.ok ? '✓ Right' : '✗ Wrong'} · ${r.pts > 0 ? '+' : ''}${r.pts} pts</div>` : '';
+    if (d.stage === 'defend') ban = `<div class="ban contest">⚖ Contested — ${mine ? 'YOUR spokesperson defends now (60″)' : 'the author crew defends (60″)'}</div>`;
+    if (d.stage === 'counter') ban = `<div class="ban contest">⚖ ${MYCON ? 'YOUR spokesperson argues now (60″) — why is it flawed?' : 'The contesting crew argues (60″)'}</div>`;
+    if (d.stage === 'vote') ban = `<div class="ban contest">🗳 The neutral crews vote on their phones</div>`;
+    if (d.stage === 'verdict') ban = it.pending ? `<div class="ban contest">No jury available — the instructor decides in the debriefing</div>` : it.status === 'void' ? `<div class="ban void">❌ Challenge annulled</div>` : `<div class="ban stand">✅ Challenge stands</div>`;
+    const contest = d.stage === 'reveal' && wrong ? (MYCON ? `<div class="ban contest">⚖ You contested this challenge — prepare one spokesperson (60″)</div>` : `<div class="card" style="margin-top:12px;border-color:var(--amber)"><div class="row between"><div><b>Do you think the challenge is flawed?</b><div class="muted">Ambiguous, technically wrong, two right options… Won: +${SC.game.contestWon} · lost: ${SC.game.contestLost}. Decide fast — <b data-left></b></div></div><button class="btn warn lg" data-a="contest">⚖ Contest</button></div></div>`) : '';
+    body = ban + qBlock(qd) + `<div class="opts">${qd.options.map((o, k) => `<button class="o ${k === key.correct ? 'right' : MYANS && +MYANS.k === k ? 'wrong' : ''}" disabled><span class="L">${L(k)}</span>${esc(o)}</button>`).join('')}</div>${key.just ? `<div class="just"><b>Justification —</b> ${esc(key.just)}</div>` : ''}${contest}${['defend', 'counter', 'vote'].includes(d.stage) ? `<p class="muted" style="margin-top:8px">Time left <b data-left></b></p>` : ''}`;
+  }
+  M(`<div class="lay"><div>${body}</div><div>${boardHTML()}</div></div>`);
+  tick();
+}
+function ownKey(cid) { const [, i] = cid.split('-'); const ch = chOf(i); return `<div class="just"><b>Correct: ${L(+ch.correct)}</b> — ${esc(ch.just || '')}</div>`; }
+A.pick = b => { UI.pick = +b.dataset.k; document.querySelectorAll('.o[data-a=pick]').forEach(x => x.classList.toggle('sel', x === b)); enableSend(); };
+A.bet = b => { UI.bet = +b.dataset.b; document.querySelectorAll('[data-a=bet]').forEach(x => x.classList.toggle('on', x === b)); const m = b.parentElement.querySelector('.muted'); if (m) m.textContent = { 1: 'unsure', 2: 'fairly sure', 3: 'certain' }[UI.bet]; enableSend(); };
+function enableSend() { const s = document.querySelector('[data-a=send]'); if (s) s.disabled = UI.pick === null || !UI.bet; }
+A.send = async () => {
+  const d = ST.duel || {}; if (d.stage !== 'read' || MYANS || UI.pick === null || !UI.bet) return;
+  MYANS = { k: UI.pick, bet: UI.bet, t: now() };
+  await DB.set(`duel/ans/${d.q.cid}/${GID}`, MYANS); UI.sig = ''; render();
+};
+A.contest = async () => {
+  const d = ST.duel || {}; if (d.stage !== 'reveal') return;
+  if (!confirm('Contest this challenge? One spokesperson will argue for 60″; the neutral crews decide.')) return;
+  await DB.set(`duel/contest/${d.q.cid}/${GID}`, true);
+};
+
+// ── results after the duel ──
+function resultsHTML() {
+  const it = Object.values(BOARD.items || {});
+  const mine = it.filter(x => x.rows && x.rows[GID]);
+  const right = mine.filter(x => x.status === 'valid' && x.rows[GID].ok).length, tot = mine.filter(x => x.status === 'valid').length;
+  const own = it.filter(x => x.author === GID);
+  return `<div class="lay" style="margin-top:20px"><div class="card"><h2>${esc(ME().name || GID)} — summary</h2><table class="t">
+    <tr><td>Challenges of the others answered right</td><td><b>${right} / ${tot}</b></td></tr>
+    <tr><td>Own challenges played</td><td><b>${own.length}</b> · missed by the others ${own.reduce((a, x) => a + Object.values(x.rows).filter(r => !r.ok).length, 0)} times · annulled ${own.filter(x => x.status === 'void').length}</td></tr>
+    <tr><td>Game points</td><td><b>${(BOARD.game || {})[GID] ?? 0}</b></td></tr></table><p class="muted" style="margin-top:8px">Your individual K/S/A profile is on your phone.</p></div>${boardHTML()}</div>`;
+}
+function tick() {
+  if (!ST.phase) return;
+  const t = ST.hold || now();
+  const ends = ST.phase === 'build' ? (ST.build || {}).endsAt : ST.phase === 'duel' ? (ST.duel || {}).endsAt : ST.phase === 'break' ? ST.breakEnds : ST.phase === 'peer' ? ST.peerEnds : null;
+  const c = document.getElementById('c-clock');
+  if (ends) { const left = ends - t; c.textContent = ST.hold ? '⏸ ' + KSAPP.fmt(Math.max(0, left)) : KSAPP.fmt(Math.max(0, left)); c.className = 'clock ' + KSAPP.clockClass(left, 300000); document.querySelectorAll('[data-left]').forEach(e => e.textContent = KSAPP.fmt(Math.max(0, left))); }
+  else c.textContent = '';
+  const d = ST.duel || {};
+  if (ST.phase === 'duel' && d.endsAt) document.querySelectorAll('[data-bar]').forEach(b => b.style.width = Math.max(0, Math.min(100, (d.endsAt - t) / Math.max(1, d.endsAt - d.at) * 100)) + '%');
+  if (ST.phase === 'build' && !ME().locked && ends && t > ends - 1500) flush();
+}
+</script>
+</body>
+</html>

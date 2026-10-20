@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KSA 21 — Meteo Duel</title>
+<link rel="icon" href="data:,">
+<style>
+/* KSA ENGINE — shared theme for teacher / group / student pages */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0f1520;--bg3:#161e30;--bg4:#1f2a42;--line:#2a3650;--line2:#3a4a6a;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+  --text:#e8edf5;--text2:#9fb0c8;--text3:#5d7090;
+  --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--blue)}
+textarea{resize:vertical}
+.mono{font-family:var(--mono)}
+.btn{border:1px solid var(--line2);background:var(--bg3);color:var(--text);border-radius:8px;padding:8px 14px;font-size:.88rem;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--blue);background:var(--bg4)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.go{background:var(--green);border-color:var(--green);color:#052e12}
+.btn.warn{background:var(--amber);border-color:var(--amber);color:#2a1700}
+.btn.sm{padding:4px 10px;font-size:.78rem}
+.btn.lg{padding:12px 22px;font-size:1rem}
+.btn.ghost{background:transparent}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1}
+.muted{color:var(--text3);font-size:.82rem}
+.lbl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--bg4);color:var(--text2);white-space:nowrap}
+.pill.k{background:rgba(59,130,246,.18);color:#93c5fd}.pill.s{background:rgba(34,197,94,.18);color:#86efac}.pill.a{background:rgba(168,85,247,.18);color:#d8b4fe}
+.pill.key{background:rgba(245,158,11,.18);color:#fcd34d}.pill.ind{background:rgba(6,182,212,.18);color:#67e8f9}
+.pill.ok{background:rgba(34,197,94,.18);color:#86efac}.pill.no{background:rgba(239,68,68,.18);color:#fca5a5}.pill.wait{background:rgba(245,158,11,.15);color:#fcd34d}
+.empty{border:1px dashed var(--line2);border-radius:10px;padding:26px;text-align:center;color:var(--text3)}
+.clock{font-family:var(--mono);font-weight:800;letter-spacing:.02em}
+.clock.low{color:var(--amber)}.clock.out{color:var(--red)}
+
+/* KSA bars */
+.ksa{display:flex;flex-direction:column;gap:5px;min-width:180px}
+.ksa .b{display:grid;grid-template-columns:16px 1fr 48px;gap:7px;align-items:center;font-size:.78rem;font-weight:700}
+.ksa .tr{height:7px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.ksa .fi{height:100%;border-radius:99px;transition:width .6s}
+.ksa .k .fi{background:var(--blue)}.ksa .s .fi{background:var(--green)}.ksa .a .fi{background:var(--purple)}
+.ksa .k b{color:#93c5fd}.ksa .s b{color:#86efac}.ksa .a b{color:#d8b4fe}
+.ksa .v{text-align:right;font-family:var(--mono);color:var(--text2)}
+.ksa .tot{font-size:.78rem;color:var(--text2);text-align:right}
+
+/* modal / toast / viewer */
+.modal{position:fixed;inset:0;background:rgba(2,6,15,.86);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:min(1100px,100%);max-height:94vh;display:flex;flex-direction:column}
+.modal .mh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.modal .mh b{flex:1}
+.modal .mb{padding:14px;overflow:auto}
+.viewer img{display:block;max-width:100%;margin:auto;background:#fff;cursor:zoom-in}
+.viewer.full img{max-width:none;cursor:zoom-out}
+.viewer pre{font:600 .95rem/1.6 var(--mono);white-space:pre-wrap;background:#0b1220;padding:14px;border-radius:8px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--line2);padding:10px 18px;border-radius:10px;font-weight:650;z-index:90;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+
+/* library list */
+.lib-list{display:flex;flex-direction:column;gap:6px}
+.lib-it{display:flex;gap:10px;align-items:center;background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:7px 9px;cursor:pointer;text-align:left;color:var(--text)}
+.lib-it:hover{border-color:var(--cyan)}
+.lib-it .th{width:56px;height:40px;border-radius:5px;background:#fff center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.lib-it .th.t{background:#0b1220;color:var(--cyan);font-weight:800;font-size:.62rem}
+.lib-it b{font-size:.85rem;display:block}
+.lib-it span{font-size:.72rem;color:var(--text3)}
+
+/* disclaimer */
+.disc{max-width:820px;margin:18px auto 0;font-size:.8rem;line-height:1.55;color:var(--text2);border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.06);border-radius:10px;padding:10px 14px;text-align:left}
+.disc b{color:#fbbf24}
+/* route result table */
+table.rt{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:6px}
+table.rt th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:6px 8px;border-bottom:1px solid var(--line)}
+table.rt td{padding:4px 6px;border-bottom:1px solid rgba(42,54,80,.6);vertical-align:middle}
+table.rt td:first-child{color:var(--text2);font-weight:600;width:38%}
+table.rt input{padding:5px 7px;font-size:.88rem}
+table.rt.show td{font-size:1.05rem;padding:7px 9px}
+table.rt.show td:not(:first-child){color:var(--text);font-weight:650}
+/* status bar */
+.conn{font-size:.72rem;font-weight:700}
+.conn.on{color:var(--green)}.conn.off{color:var(--red)}
+
+
+.btn.pri:hover:not(:disabled){background:#2563eb;border-color:#2563eb}.btn.go:hover:not(:disabled){background:#16a34a;border-color:#16a34a}.btn.warn:hover:not(:disabled){background:#d97706;border-color:#d97706}
+</style>
+<style>
+main{max-width:560px;margin:0 auto;padding:16px 14px 50px}
+.top{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{font-weight:900}.brand em{font-style:normal;color:var(--blue)}
+.sp{flex:1}
+h1{font-size:1.35rem;font-weight:850;margin:6px 0}
+.big{text-align:center;margin-top:10vh}.big .ic{font-size:3.4rem}
+.q{font-size:1.15rem;font-weight:700;line-height:1.35;margin:10px 0 14px}
+.qdata{font:700 .9rem/1.5 var(--mono);white-space:pre-wrap;background:#0b1220;border:1px solid var(--line2);border-radius:10px;padding:10px 12px;margin:4px 0 10px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.o{display:flex;gap:12px;align-items:center;text-align:left;border:2px solid var(--line);background:var(--bg2);color:var(--text);border-radius:12px;padding:14px;font-size:1rem;font-weight:600;cursor:pointer;width:100%}
+.o .L{width:34px;height:34px;border-radius:9px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.o.sel{border-color:var(--blue);background:rgba(59,130,246,.12)}
+.o.right{border-color:var(--green);background:rgba(34,197,94,.14)}
+.o:disabled{cursor:default}
+.ol{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.ol div{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:.92rem}
+.ol div.c{border-color:var(--green);color:#86efac;font-weight:700}
+.just{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.4);border-radius:10px;padding:9px 12px;font-size:.92rem}
+.vote{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.vote button{border:2px solid var(--line2);border-radius:12px;padding:16px;font-size:1.05rem;font-weight:850;background:var(--bg2);color:var(--text)}
+.vote button.v.on{border-color:var(--green);background:rgba(34,197,94,.18)}
+.vote button.f.on{border-color:var(--red);background:rgba(239,68,68,.18)}
+.tbar{height:8px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-top:6px}.tbar div{height:100%;background:var(--blue)}
+.peer{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.crit{margin:8px 0}.crit span{font-size:.82rem;color:var(--text2)}
+.sc{display:flex;gap:6px;margin-top:4px}.sc button{flex:1;border:1px solid var(--line2);background:var(--bg);color:var(--text);border-radius:8px;padding:9px 0;font-weight:800;cursor:pointer}.sc button.on{background:var(--blue);border-color:var(--blue)}
+input.name{font-size:1.15rem;padding:12px}
+.ban{border-radius:12px;padding:12px 14px;font-weight:800;margin:10px 0;text-align:center}
+.ban.contest{background:rgba(245,158,11,.12);border:2px solid var(--amber);color:#fcd34d}
+</style>
+<script>/*!
+ * KSA DUEL — ksa-duel.js
+ * Core of the "Meteo Duel" KSA exercise (ATPL 050 Meteorology · Session 21).
+ *  - pre-test speed scoring (end-of-session quiz rules) and crew formation (best + last)
+ *  - syllabus areas per crew, challenge slots and validation
+ *  - duel order, verdicts of contested challenges, game points
+ *  - K / S / A scores
+ * Carlos Paizinho · cursos.meteo@gmail.com · Developed with Claude (Anthropic)
+ */
+(function (root) {
+'use strict';
+
+// ── pre-test: +6 … +1 by speed (5-second steps), wrong −4, no answer −2 ──
+function quizPoints(correct, answered, secs) {
+  if (!answered) return -2;
+  if (!correct) return -4;
+  return Math.max(1, 6 - Math.floor(Math.max(0, secs) / 5));
+}
+function gradePretest(questions, answers, starts) {
+  let pts = 0, correct = 0;
+  questions.forEach((q, i) => {
+    const a = answers ? answers[i] : undefined;
+    const answered = a !== undefined && a !== null && a.k !== undefined;
+    const ok = answered && +a.k === +q.correct;
+    const secs = answered && starts && starts[i] ? (a.t - starts[i]) / 1000 : 30;
+    pts += quizPoints(ok, answered, secs);
+    if (ok) correct++;
+  });
+  return { pts, correct, n: questions.length, max: 6 * questions.length };
+}
+/** ranked = ids best → worst; each crew takes ⌈size/2⌉ from the top and the rest from the bottom */
+function formGroupsTopBottom(ranked, nGroups) {
+  const n = ranked.length; nGroups = Math.max(1, Math.min(nGroups, n));
+  const sizes = Array.from({ length: nGroups }, (_, g) => Math.floor(n / nGroups) + (g < n % nGroups ? 1 : 0));
+  let i = 0, j = n - 1;
+  return sizes.map(sz => {
+    const g = []; const top = Math.ceil(sz / 2);
+    for (let k = 0; k < top; k++) g.push(ranked[i++]);
+    for (let k = top; k < sz; k++) g.push(ranked[j--]);
+    return g;
+  });
+}
+/** crews of 2 to 4 (5 only if unavoidable): ⌈n/4⌉, at least 2 */
+function autoGroupCount(n) { if (n < 4) return 1; return Math.max(2, Math.ceil(n / 4)); }
+
+// ── areas & slots ─────────────────────────────────────────────────────
+/** two different areas per crew, spread over the syllabus (random start, then cyclic) */
+function assignAreas(SC, nGroups, rnd) {
+  const ids = SC.areas.map(a => a.id);
+  const r = rnd || Math.random;
+  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const out = [];
+  for (let g = 0; g < nGroups; g++) out.push([ids[(2 * g) % ids.length], ids[(2 * g + 1) % ids.length]]);
+  return out;
+}
+function slotsFor(SC, nGroups) { return nGroups <= 4 ? SC.build.slots4 : SC.build.slots3; }
+/** slot code → description */
+function slotInfo(SC, code, areas) {
+  const lab = id => (SC.areas.find(a => a.id === id) || {}).label || id;
+  if (code === 'A') return { type: 'THEORY', areas: [areas[0]], title: 'Theory — ' + lab(areas[0]) };
+  if (code === 'B') return { type: 'THEORY', areas: [areas[1]], title: 'Theory — ' + lab(areas[1]) };
+  if (code === 'AB') return { type: 'THEORY', areas: areas.slice(), title: 'Theory — either of your two areas' };
+  return { type: 'OPS', areas: SC.areas.map(a => a.id), title: 'Operational — a situation you create (METAR / TAF / SIGMET / chart reading) and a decision' };
+}
+/** list of problems that prevent a challenge from being played ([] = ready) */
+function validateChallenge(SC, ch, info) {
+  const p = [];
+  ch = ch || {};
+  const txt = v => String(v || '').trim();
+  if (txt(ch.stem).length < 12) p.push('question');
+  const opts = (ch.options || []).map(txt);
+  if (opts.length < 4 || opts.slice(0, 4).some(o => !o)) p.push('4 options');
+  else if (new Set(opts.slice(0, 4).map(o => o.toLowerCase())).size < 4) p.push('options must differ');
+  if (!(ch.correct >= 0 && ch.correct <= 3)) p.push('correct option');
+  if (txt(ch.just).length < (SC.build.minJustification || 30)) p.push('justification (≥ ' + (SC.build.minJustification || 30) + ' characters)');
+  if (info.type === 'OPS' && txt(ch.data).length < 10) p.push('data block (METAR / TAF / SIGMET / situation)');
+  if (info.type === 'THEORY' && info.areas.length > 1 && !info.areas.includes(ch.area)) p.push('choose the area');
+  return p;
+}
+
+// ── duel order: round-robin by crew, slot by slot ─────────────────────
+function buildOrder(SC, groups) {
+  const gids = Object.keys(groups || {}).sort();
+  const lists = gids.map(g => {
+    const G = groups[g], slots = slotsFor(SC, gids.length);
+    return slots.map((code, i) => ({ cid: g + '-' + i, g, i, code, info: slotInfo(SC, code, G.areas || []), ch: (G.ch || {})[i] }))
+      .filter(x => validateChallenge(SC, x.ch, x.info).length === 0)
+      .map(x => x.cid);
+  });
+  const out = []; let more = true;
+  for (let r = 0; more; r++) { more = false; lists.forEach(l => { if (l[r]) { out.push(l[r]); more = true; } }); }
+  // avoid two consecutive challenges by the same crew where possible (already guaranteed by round-robin)
+  return out;
+}
+function challengeOf(groups, cid) { const [g, i] = String(cid).split('-'); return (((groups || {})[g] || {}).ch || {})[i] || null; }
+
+// ── confidence (bet) → calibration (Brier) ────────────────────────────
+const CONF = { 1: 0.4, 2: 0.65, 3: 0.9 };
+function brier(bet, ok) { const p = CONF[bet] || CONF[1]; return 1 - Math.pow(p - (ok ? 1 : 0), 2); }
+
+/**
+ * verdict of one played challenge.
+ * D.duel = { ans:{cid:{gid:{k,bet,t}}}, contest:{cid:{gid:true}}, vote:{cid:{sid:'valid'|'flawed'}} }
+ * D.override = {cid:'valid'|'void'}
+ * returns { status:'valid'|'void', contested, contesters[], votes:{valid,flawed}, pending, by:'jury'|'teacher'|'' }
+ */
+function verdict(SC, D, cid) {
+  const author = cid.split('-')[0];
+  const ans = ((D.duel || {}).ans || {})[cid] || {};
+  const ch = challengeOf(D.groups, cid) || {};
+  const contesters = Object.keys(((D.duel || {}).contest || {})[cid] || {}).filter(g => g !== author && ans[g] && +ans[g].k !== +ch.correct);
+  const votes = { valid: 0, flawed: 0 };
+  const neutral = sid => { const s = (D.students || {})[sid]; return s && s.group && s.group !== author && !contesters.includes(s.group); };
+  Object.entries(((D.duel || {}).vote || {})[cid] || {}).forEach(([sid, v]) => { if (neutral(sid) && votes[v] !== undefined) votes[v]++; });
+  const hasNeutral = Object.values(D.students || {}).some(s => s.group && s.group !== author && !contesters.includes(s.group));
+  let status = 'valid', by = '', pending = false;
+  if (contesters.length) {
+    if (!hasNeutral) pending = true;
+    else { by = 'jury'; if (votes.flawed > votes.valid) status = 'void'; }
+  }
+  const ov = (D.override || {})[cid];
+  if (ov === 'void' || ov === 'valid') { status = ov; by = 'teacher'; pending = false; }
+  return { status, contested: contesters.length > 0, contesters, votes, pending, by };
+}
+
+/**
+ * full results: game points per crew, per-challenge table, K/S/A per student.
+ * D = { students, groups, duel:{ans,contest,vote}, played:[cid], override, quality:{cid:1..3}, peer }
+ */
+function compute(SC, D) {
+  const gids = Object.keys(D.groups || {}).sort();
+  const G = SC.game, played = D.played || [];
+  const game = {}; gids.forEach(g => game[g] = 0);
+  const per = {};                     // gid → {th:[ok], ops:[ok], cal:[score]}
+  gids.forEach(g => per[g] = { th: [], ops: [], cal: [], design: [] });
+  const items = {};
+  played.forEach(cid => {
+    const author = cid.split('-')[0], ch = challengeOf(D.groups, cid); if (!ch || !game.hasOwnProperty(author)) return;
+    const [, i] = cid.split('-');
+    const info = slotInfo(SC, slotsFor(SC, gids.length)[+i] || 'A', (D.groups[author] || {}).areas || []);
+    const ans = ((D.duel || {}).ans || {})[cid] || {};
+    const v = verdict(SC, D, cid);
+    const rows = {}; let right = 0, wrong = 0;
+    gids.filter(g => g !== author).forEach(g => {
+      const a = ans[g], answered = !!a && a.k !== undefined && a.k !== null, ok = answered && +a.k === +ch.correct;
+      const bet = answered ? Math.max(1, Math.min(3, +a.bet || 1)) : 0;
+      let pts = 0;
+      if (v.status === 'valid') {
+        pts = answered ? (ok ? bet : -bet) : G.noAnswer;
+        if (v.contesters.includes(g)) pts += G.contestLost;
+        (info.type === 'OPS' ? per[g].ops : per[g].th).push(ok ? 1 : 0);
+        if (answered) per[g].cal.push(brier(bet, ok));
+      } else if (v.contesters.includes(g)) pts = G.contestWon;
+      if (ok) right++; else wrong++;
+      game[g] += pts;
+      rows[g] = { k: answered ? +a.k : null, bet, ok, pts, contested: v.contesters.includes(g) };
+    });
+    let apts = 0;
+    if (v.status === 'valid') apts = G.authorPerMiss * wrong; else apts = G.annulAuthor;
+    game[author] += apts;
+    const disc = right > 0 && wrong > 0;
+    const q = (D.quality || {})[cid];
+    const design = v.status === 'void' ? 0 : q ? (q - 1) / 2 : 0.6 + (disc ? 0.4 : 0);
+    items[cid] = { cid, author, type: info.type, area: ch.area || info.areas[0], verdict: v, rows, right, wrong, authorPts: apts, disc, design };
+  });
+  // design score per crew: every slot counts; an incomplete slot = 0; a complete slot not played (time) is left out
+  gids.forEach(g => {
+    const slots = slotsFor(SC, gids.length), Gr = D.groups[g] || {};
+    slots.forEach((code, i) => {
+      const cid = g + '-' + i, it = items[cid];
+      if (it) per[g].design.push(it.design);
+      else if (validateChallenge(SC, (Gr.ch || {})[i], slotInfo(SC, code, Gr.areas || [])).length) per[g].design.push(0);
+    });
+  });
+  const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const W = SC.scoring.weights, sp = SC.scoring.split, pScale = +SC.peer.scale || 5;
+  const ksa = {};
+  Object.entries(D.students || {}).forEach(([sid, st]) => {
+    const g = st.group, P = per[g] || { th: [], ops: [], cal: [], design: [] };
+    const frac = (a, b) => b > 0 ? Math.max(0, Math.min(1, a / b)) : null;
+    const pre = st.pre ? frac(st.pre.pts, st.pre.max) : null;
+    const recv = []; Object.entries(D.peer || {}).forEach(([r, m]) => { if (r !== sid && m && m[sid]) { const v = Object.values(m[sid]).map(Number).filter(x => x > 0); if (v.length) recv.push(v.reduce((a, b) => a + b, 0) / v.length); } });
+    const peer = recv.length ? (mean(recv) - 1) / Math.max(1, pScale - 1) : null;
+    const comp = { K: { pretest: pre, theory: mean(P.th) }, S: { ops: mean(P.ops), design: mean(P.design) }, A: { calibration: mean(P.cal), peer } };
+    const dim = {};
+    ['K', 'S', 'A'].forEach(d => { let n = 0, w = 0; Object.entries(sp[d]).forEach(([k, x]) => { const v = comp[d][k]; if (v !== null && v !== undefined) { n += x * v; w += +x; } }); dim[d] = w ? n / w : null; });
+    const r1 = v => Math.round(v * 10) / 10;
+    ksa[sid] = { K: dim.K === null ? null : r1(dim.K * W.K), S: dim.S === null ? null : r1(dim.S * W.S), A: dim.A === null ? null : r1(dim.A * W.A), comp };
+    ksa[sid].total = r1((ksa[sid].K || 0) + (ksa[sid].S || 0) + (ksa[sid].A || 0));
+  });
+  return { game, items, ksa, per };
+}
+
+function scheduleResolved(SC) { let t = 0; return SC.schedule.map(m => { const o = Object.assign({}, m, { start: t, end: t + m.min }); t += m.min; return o; }); }
+function hhmm(min) { return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(Math.round(min % 60)).padStart(2, '0'); }
+
+/** public configuration: without the pre-test key */
+function publicConfig(SC) {
+  const P = JSON.parse(JSON.stringify(SC));
+  P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
+  return P;
+}
+
+const KSAD = { quizPoints, gradePretest, formGroupsTopBottom, autoGroupCount, assignAreas, slotsFor, slotInfo, validateChallenge,
+  buildOrder, challengeOf, CONF, brier, verdict, compute, scheduleResolved, hhmm, publicConfig };
+if (typeof module !== 'undefined' && module.exports) module.exports = KSAD; else root.KSAD = KSAD;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * KSA ENGINE — ksa-db.js
+ * One small API over two back-ends:
+ *   • firebase — Firebase Realtime Database (the course project), for the real class
+ *   • local    — in-browser database shared between tabs of ONE browser (BroadcastChannel);
+ *                for testing, demos and a single-computer fallback. No internet needed.
+ * All paths are relative to  ksa/<SESSION CODE>/
+ */
+(function (root) {
+'use strict';
+
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyAEfZ0FsSFhy1GhKh1jT3BJXrWDd-MwJ68',
+  authDomain: 'meteorology-quiz-2b061.firebaseapp.com',
+  databaseURL: 'https://meteorology-quiz-2b061-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'meteorology-quiz-2b061',
+  storageBucket: 'meteorology-quiz-2b061.firebasestorage.app'
+};
+const ROOT = 'ksa';
+const SDK = 'https://www.gstatic.com/firebasejs/9.23.0/';
+
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Cannot load ' + src)); document.head.appendChild(s); });
+}
+const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+const split = p => String(p || '').split('/').filter(Boolean);
+
+// ════════════════════════════════════════════════════════════════════════
+// FIREBASE BACK-END
+// ════════════════════════════════════════════════════════════════════════
+async function firebaseDB(code) {
+  if (!root.firebase) { await loadScript(SDK + 'firebase-app-compat.js'); await loadScript(SDK + 'firebase-database-compat.js'); }
+  const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.database(app);
+  const base = `${ROOT}/${code}`;
+  const ref = p => db.ref(p ? `${base}/${p}` : base);
+  let offset = 0;
+  db.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+  return {
+    mode: 'firebase', code,
+    now: () => Date.now() + offset,
+    get: p => ref(p).once('value').then(s => s.val()),
+    set: (p, v) => ref(p).set(clean(v)),
+    update: (p, o) => ref(p).update(clean(o)),
+    push: (p, v) => { const r = ref(p).push(); return r.set(clean(v)).then(() => r.key); },
+    remove: p => ref(p).remove(),
+    on: (p, cb) => { const r = ref(p); const h = s => cb(s.val()); r.on('value', h); return () => r.off('value', h); },
+    onChild: (p, cb) => { const r = ref(p); const h = s => cb(s.key, s.val()); r.on('child_added', h); return () => r.off('child_added', h); },
+    connected: cb => db.ref('.info/connected').on('value', s => cb(!!s.val())),
+    exists: () => ref('state').once('value').then(s => s.exists())
+  };
+}
+function clean(v) {        // Firebase rejects undefined
+  return JSON.parse(JSON.stringify(v === undefined ? null : v));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// LOCAL BACK-END (tabs of the same browser)
+// ════════════════════════════════════════════════════════════════════════
+function localDB(code) {
+  const ch = new BroadcastChannel('ksa-local-' + code);
+  const me = Math.random().toString(36).slice(2);
+  let tree = {};
+  const subs = [];            // {path:[...], cb, child, seen:Set}
+  let pending = new Set(), flushT = null;
+
+  function getAt(t, parts) { let o = t; for (const k of parts) { if (o == null || typeof o !== 'object') return undefined; o = o[k]; } return o; }
+  function setAt(parts, v) {
+    if (!parts.length) { tree = v == null ? {} : v; return; }
+    let o = tree;
+    for (let i = 0; i < parts.length - 1; i++) { if (o[parts[i]] == null || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    const last = parts[parts.length - 1];
+    if (v === null || v === undefined) delete o[last]; else o[last] = v;
+  }
+  function overlap(a, b) { const n = Math.min(a.length, b.length); for (let i = 0; i < n; i++) if (a[i] !== b[i]) return false; return true; }
+  function apply(op) {
+    if (op.t === 'set') setAt(split(op.p), clone(op.v));
+    else if (op.t === 'update') Object.entries(op.v).forEach(([k, v]) => setAt(split(op.p).concat(split(k)), clone(v)));
+    const touched = op.t === 'update' ? Object.keys(op.v).map(k => split(op.p).concat(split(k))) : [split(op.p)];
+    subs.forEach(s => { if (touched.some(t => overlap(t, s.path))) pending.add(s); });
+    if (!flushT) flushT = setTimeout(flush, 0);
+  }
+  function flush() {
+    flushT = null; const list = [...pending]; pending.clear();
+    list.forEach(s => {
+      if (!subs.includes(s)) return;
+      const v = clone(getAt(tree, s.path));
+      if (s.child) {
+        Object.keys(v || {}).forEach(k => { if (!s.seen.has(k)) { s.seen.add(k); s.cb(k, v[k]); } });
+      } else s.cb(v === undefined ? null : v);
+    });
+  }
+  function write(op) { apply(op); ch.postMessage({ from: me, op }); return Promise.resolve(); }
+  let ready;
+  const readyP = new Promise(r => ready = r);
+  ch.onmessage = e => {
+    const m = e.data; if (m.from === me) return;
+    if (m.op) apply(m.op);
+    else if (m.hello) ch.postMessage({ from: me, snapshot: tree, to: m.from });
+    else if (m.snapshot && m.to === me && !ready.done) { tree = m.snapshot || {}; ready.done = true; subs.forEach(s => pending.add(s)); flush(); ready(); }
+  };
+  ch.postMessage({ from: me, hello: 1 });
+  setTimeout(() => { if (!ready.done) { ready.done = true; ready(); } }, 400);
+  let pushN = 0;
+  const api = {
+    mode: 'local', code,
+    now: () => Date.now(),
+    get: p => readyP.then(() => clone(getAt(tree, split(p))) ?? null),
+    set: (p, v) => write({ t: 'set', p, v: clone(v) }),
+    update: (p, o) => write({ t: 'update', p, v: clone(o) }),
+    push: (p, v) => { const k = Date.now().toString(36) + (pushN++).toString(36).padStart(3, '0') + me.slice(0, 4); return write({ t: 'set', p: p + '/' + k, v: clone(v) }).then(() => k); },
+    remove: p => write({ t: 'set', p, v: null }),
+    on: (p, cb) => { const s = { path: split(p), cb }; subs.push(s); readyP.then(() => { pending.add(s); flush(); }); return () => subs.splice(subs.indexOf(s), 1); },
+    onChild: (p, cb) => { const s = { path: split(p), cb, child: true, seen: new Set() }; subs.push(s); readyP.then(() => { pending.add(s); flush(); }); return () => subs.splice(subs.indexOf(s), 1); },
+    connected: cb => cb(true),
+    exists: () => readyP.then(() => !!getAt(tree, ['state']))
+  };
+  return Promise.resolve(api);
+}
+
+/** KSADB.open(code, mode) → Promise<db>. mode: 'firebase' (default) | 'local' */
+function open(code, mode) {
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+  if (!code) return Promise.reject(new Error('Session code missing'));
+  return mode === 'local' ? localDB(code) : firebaseDB(code);
+}
+root.KSADB = { open, FIREBASE_CONFIG };
+})(window);
+
+</script>
+<script>
+/*!
+ * KSA ENGINE — ksa-app.js : shared helpers for teacher / group / student pages
+ */
+(function (root) {
+'use strict';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const PHASES = {
+  lobby:    { label: 'Waiting to start' },
+  pretest:  { label: 'Pre-test' },
+  groups:   { label: 'Group formation' },
+  route:    { label: 'Route study' },
+  prep:     { label: 'Briefing preparation' },
+  briefing: { label: 'Briefings' },
+  break:    { label: 'Break' },
+  peer:     { label: 'Peer assessment' },
+  debrief:  { label: 'Results & debriefing' }
+};
+const PHASE_ORDER = ['lobby', 'pretest', 'groups', 'route', 'prep', 'briefing', 'break', 'peer', 'debrief'];
+
+function params() { return Object.fromEntries(new URLSearchParams(location.search)); }
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+function toast(m, ms) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms || 2600);
+}
+function modal(title, html, opts) {
+  let m = document.getElementById('modal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'modal'; m.className = 'modal';
+    m.innerHTML = '<div class="box"><div class="mh"><b id="m-title"></b><span id="m-extra"></span><button class="btn sm" id="m-close">✕ Close</button></div><div class="mb" id="m-body"></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+    m.querySelector('#m-close').onclick = closeModal;
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  }
+  m.querySelector('#m-title').innerHTML = title;
+  m.querySelector('#m-extra').innerHTML = (opts && opts.extra) || '';
+  m.querySelector('#m-body').innerHTML = html;
+  m.classList.add('on');
+  return m.querySelector('#m-body');
+}
+function closeModal() { const m = document.getElementById('modal'); if (m) m.classList.remove('on'); }
+
+let actx = null;
+function beep(n) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < (n || 2); i++) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime + i * 0.28;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.start(t); o.stop(t + 0.24);
+    }
+  } catch (e) { }
+}
+
+function fmt(ms) {
+  const neg = ms < 0; ms = Math.abs(ms);
+  const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
+  const out = h ? `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  return (neg ? '+' : '') + out;
+}
+function clockClass(ms, total) { return ms < 0 ? 'out' : ms < Math.min(120000, total * 0.15) ? 'low' : ''; }
+
+function compressImage(src, maxW, q) {
+  maxW = maxW || 1400; q = q || 0.8;
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, maxW / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+      res(c.toDataURL('image/jpeg', q));
+    };
+    img.onerror = () => res(null);
+    img.src = src;
+  });
+}
+function fileToDataURL(f) { return new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); }); }
+
+function qrImg(text, cell) {
+  if (typeof qrcode === 'undefined') return `<div class="mono" style="font-size:.75rem;word-break:break-all">${esc(text)}</div>`;
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return `<img src="${q.createDataURL(cell || 5, 2)}" alt="QR" style="image-rendering:pixelated;background:#fff;border-radius:6px">`;
+}
+
+function ksaBars(score, weights) {
+  const w = weights || { K: 30, S: 45, A: 25 };
+  const s = score || {};
+  const b = (d, cls) => {
+    const v = s[d]; const pct = v === null || v === undefined ? 0 : Math.max(0, Math.min(100, v / w[d] * 100));
+    return `<div class="b ${cls}"><b>${d}</b><div class="tr"><div class="fi" style="width:${pct}%"></div></div><span class="v">${v === null || v === undefined ? '—' : v.toFixed(1)}/${w[d]}</span></div>`;
+  };
+  return `<div class="ksa">${b('K', 'k')}${b('S', 's')}${b('A', 'a')}<div class="tot">Total <b style="color:var(--text)">${s.total !== undefined ? s.total.toFixed(1) : '—'}</b> / 100</div></div>`;
+}
+
+function libList(items) {
+  if (!items || !items.length) return '<div class="empty">No data</div>';
+  return `<div class="lib-list">${items.map(it => `<button class="lib-it" data-lib="${it.id}">
+    ${it.kind === 'image' ? (it.data ? `<span class="th" style="background-image:url('${it.data}')"></span>` : `<span class="th">🗺️</span>`) : `<span class="th t">${esc(it.category)}</span>`}
+    <span><b>${esc(it.label || it.category)}</b><span>${esc(it.valid || '')}${it.source ? ' · ' + esc(it.source) : ''}</span></span></button>`).join('')}</div>`;
+}
+let fetchLib = null;      // set by pages that load images lazily: async id → dataURL
+async function showLib(it) {
+  if (!it) return;
+  if (it.kind === 'image' && !it.data && fetchLib) { modal(esc(it.label || ''), '<div class="empty">Loading…</div>'); it.data = await fetchLib(it.id); }
+  const body = modal(esc(it.label || it.category) + (it.valid ? ` <span class="muted">${esc(it.valid)}</span>` : ''),
+    it.kind === 'image' ? `<div class="viewer"><img src="${it.data}"></div><div class="muted" style="text-align:center;margin-top:6px">Click the image to view at full size · ${esc(it.source || '')}</div>` : `<div class="viewer"><pre>${esc(it.data)}</pre></div>`);
+  const v = body.querySelector('.viewer img');
+  if (v) v.onclick = () => v.parentElement.classList.toggle('full');
+}
+
+/** Scenario as published to the students: no answers, no hints, no injections, no pre-test key. */
+function publicScenario(S) {
+  const P = JSON.parse(JSON.stringify(S));
+  P.stages.forEach(st => st.tasks.forEach(t => { delete t.answers; t.hasHint = !!(t.hint && t.hint.text); delete t.hint; }));
+  P.injections = (S.injections || []).map(i => ({ id: i.id }));
+  P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
+  delete P.meta.summary;
+  return P;
+}
+function publicTask(t) { const c = JSON.parse(JSON.stringify(t)); delete c.answers; c.hasHint = !!(t.hint && t.hint.text); delete c.hint; return c; }
+
+function newCode() {
+  const d = new Date();
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = ''; for (let i = 0; i < 3; i++) r += abc[Math.floor(Math.random() * abc.length)];
+  return 'S' + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + r;
+}
+
+/** time helpers for the route clock (pausable) */
+function routeElapsed(state, now) {
+  if (!state || !state.routeStartedAt) return 0;
+  const paused = (state.routePausedTotal || 0) + (state.routePausedAt ? now - state.routePausedAt : 0);
+  return Math.max(0, now - state.routeStartedAt - paused);
+}
+
+function disclaimer(SC) { const d = SC && SC.meta && SC.meta.disclaimer; return d ? `<div class="disc"><b>Disclaimer</b> — ${esc(d)}</div>` : ''; }
+/** route-result table. edit=true → inputs (data-rt="surface|row|col"); B = board.route */
+function routeTable(SC, B, edit) {
+  const T = (SC.briefing && SC.briefing.routeTable) || { surface: [], enroute: [] };
+  const v = (sec, i, c) => ((((B || {}).table || {})[sec] || {})[i] || {})[c] || '';
+  const cell = (sec, i, c) => edit ? `<td><input data-rt="${sec}|${i}|${c}" value="${esc(v(sec, i, c))}"></td>` : `<td>${esc(v(sec, i, c)) || '—'}</td>`;
+  const r = (SC.routes || [])[0] || {};
+  return `<table class="rt ${edit ? '' : 'show'}"><tr><th>Surface weather</th><th>Departure ${esc(r.dep || '')}</th><th>Arrival ${esc(r.dest || '')}</th></tr>
+    ${T.surface.map((l, i) => `<tr><td>${esc(l)}</td>${cell('surface', i, 'dep')}${cell('surface', i, 'arr')}</tr>`).join('')}</table>
+    <table class="rt ${edit ? '' : 'show'}" style="margin-top:10px"><tr><th>En-route weather · FL${esc(r.fl || '')}</th><th colspan="2">Route ${esc(r.dep || '')} – ${esc(r.dest || '')}</th></tr>
+    ${T.enroute.map((l, i) => `<tr><td>${esc(l)}</td>${edit ? `<td colspan="2"><input data-rt="enroute|${i}|v" value="${esc(v('enroute', i, 'v'))}"></td>` : `<td colspan="2">${esc(v('enroute', i, 'v')) || '—'}</td>`}</tr>`).join('')}</table>`;
+}
+/** split a public scenario: images travel separately (pub/libdata) so that phones only download what they open */
+function splitLibrary(P) { const data = {}; P.library.forEach(it => { if (it.kind === 'image' && it.data) { data[it.id] = it.data; it.data = null; } }); return data; }
+root.KSAPP = { disclaimer, routeTable, splitLibrary, setFetchLib: f => { fetchLib = f; }, esc, PHASES, PHASE_ORDER, params, store, toast, modal, closeModal, beep, fmt, clockClass, compressImage, fileToDataURL, qrImg, ksaBars, libList, showLib, publicScenario, publicTask, newCode, routeElapsed };
+})(window);
+
+</script>
+</head>
+<body>
+<div class="top"><div class="brand">KSA <em>21</em> · DUEL</div><div class="muted" id="s-name"></div><div class="sp"></div><span class="conn" id="s-conn"></span></div>
+<main id="main"><div class="big"><div class="ic">⏳</div><h1>Connecting…</h1></div></main>
+<script>
+'use strict';
+const esc = KSAPP.esc;
+let SC = null, DB = null, ST = {}, MY = {}, GRP = {}, STU = {}, SCORE = null, PEER = null, BOARD = {}, MYVOTE = null, CON = {};
+let ID = null; const P = KSAPP.params();
+const idStore = { get: k => { try { return (P.mode === 'local' || P.test ? sessionStorage : localStorage).getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { (P.mode === 'local' || P.test ? sessionStorage : localStorage).setItem(k, v); } catch (e) { } } };
+const A = {};
+const L = k => String.fromCharCode(65 + k);
+document.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && A[b.dataset.a]) { e.preventDefault(); A[b.dataset.a](b, e); } });
+const M = h => document.getElementById('main').innerHTML = h;
+const now = () => DB.now();
+const gname = g => (GRP[g] || {}).name || g;
+
+(async function init() {
+  if (!P.s) return M(`<div class="big"><h1>Session code</h1><div class="row"><input id="cd" class="name" placeholder="e.g. S1021-ABC"><button class="btn pri" data-a="code">Go</button></div></div>`);
+  try { DB = await KSADB.open(P.s, P.mode === 'local' ? 'local' : 'firebase'); } catch (e) { return M(`<div class="big"><h1>Connection failed</h1><p>${esc(e.message)}</p></div>`); }
+  SC = await DB.get('pub/config');
+  if (!SC) return M(`<div class="big"><h1>Session ${esc(DB.code)} not found</h1></div>`);
+  DB.connected(on => { const c = document.getElementById('s-conn'); c.textContent = on ? '●' : '● offline'; c.className = 'conn ' + (on ? 'on' : 'off'); });
+  ID = idStore.get('ksa21-' + DB.code);
+  if (ID && !(await DB.get('students/' + ID))) ID = null;
+  if (!ID) return joinView();
+  go();
+})();
+A.code = () => { const c = document.getElementById('cd').value.trim().toUpperCase(); if (c) location.search = '?s=' + encodeURIComponent(c); };
+function joinView() {
+  M(`<h1>Meteo Duel</h1><p class="muted">KSA Activities (2 of 3) · ATPL 050 Meteorology</p><div class="card" style="margin-top:16px"><div class="lbl">Your name</div><input id="nm" class="name" maxlength="30" autocomplete="off"><button class="btn pri lg" style="width:100%;margin-top:12px" data-a="join">Join ▶</button></div>${KSAPP.disclaimer(SC)}`);
+  const i = document.getElementById('nm'); i.focus(); i.onkeydown = e => e.key === 'Enter' && A.join();
+}
+A.join = async () => {
+  const n = document.getElementById('nm').value.trim(); if (n.length < 2) return KSAPP.toast('Write your name');
+  ID = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  await DB.set('students/' + ID, { name: n, at: now() }); idStore.set('ksa21-' + DB.code, ID); go();
+};
+let unV = null, unC = null, watched = null;
+function watchItem() {
+  const cid = ((ST.duel || {}).q || {}).cid || null;
+  if (cid === watched) return; watched = cid; if (unV) unV(); if (unC) unC(); MYVOTE = null; CON = {};
+  if (!cid) return;
+  unV = DB.on(`duel/vote/${cid}/${ID}`, v => { MYVOTE = v; render(); });
+  unC = DB.on(`duel/contest/${cid}`, v => { CON = v || {}; render(); });
+}
+function go() {
+  DB.on('state', v => { ST = v || {}; watchItem(); render(); });
+  DB.on('students', v => { STU = v || {}; MY = STU[ID] || {}; if (!STU[ID] && ST.phase) { idStore.set('ksa21-' + DB.code, ''); location.reload(); return; } document.getElementById('s-name').textContent = MY.name || ''; render(); });
+  DB.on('groups', v => { GRP = v || {}; render(); });
+  DB.on('board', v => { BOARD = v || {}; render(); });
+  DB.on('scores/' + ID, v => { SCORE = v; render(); });
+  DB.on('peer/' + ID, v => { if (!PEER) PEER = v || {}; render(); });
+  setInterval(tick, 500);
+}
+let rT = null, lastSig = '';
+function render() { if (rT) return; rT = setTimeout(() => { rT = null; draw(); }, 120); }
+function neutral() {
+  const d = ST.duel || {}, qd = d.q; if (!qd || !MY.group) return false;
+  return MY.group !== qd.author && !CON[MY.group];
+}
+function draw() {
+  if (!ST.phase || !ID) return;
+  const d = ST.duel || {};
+  const sig = JSON.stringify([ST.phase, ST.pre, ST.preDone, MY.preAns && ST.pre ? MY.preAns[ST.pre.idx] : null, MY.pre, MY.group, ST.phase === 'peer' ? PEER : '', ST.phase === 'peer' ? GRP[MY.group] : '', SCORE, MY.name, d.stage, d.i, MYVOTE, CON, ST.phase === 'duel' ? (BOARD.game || {})[MY.group] : '']);
+  if (sig === lastSig) return; lastSig = sig;
+  const ph = ST.phase, g = GRP[MY.group];
+  if (ph === 'lobby') return M(`<div class="big"><div class="ic">✅</div><h1>You are in, ${esc(MY.name)}</h1><p class="muted">The pre-test starts soon: ${SC.pretest.questions.length} questions, ${SC.pretest.secondsPerQ}″ each. Faster correct answers score more (+6 … +1); wrong −4; no answer −2. The ranking forms the crews (best with the last).</p></div>`);
+  if (ph === 'pretest') return preView();
+  if (ph === 'groups') return M(`<div class="big"><div class="ic">👥</div>${MY.pre ? `<p class="muted">Pre-test</p><h1>${MY.pre.pts} pts · ${MY.pre.correct}/${MY.pre.n} correct</h1>` : ''}${g ? `<h1 style="color:var(--cyan)">${esc(g.name)}</h1><p>${g.members.map(id => esc((STU[id] || {}).name)).join(' · ')}</p><p class="muted">Areas: ${(g.areas || []).join(' · ')} — go to your crew laptop.</p>` : '<p class="muted">Crews are being formed…</p>'}</div>`);
+  if (ph === 'peer') return peerView();
+  if (ph === 'debrief') return M(`<h1>Your KSA profile</h1>${KSAPP.ksaBars(SCORE, SC.scoring.weights)}<p class="muted" style="margin-top:10px">K = pre-test + theory answers · S = operational answers + quality of your crew's challenges · A = calibration of the bets + peer assessment.<br>Training session — feedback, not assessment.</p>`);
+  if (ph === 'duel' && d.stage === 'vote' && d.q && neutral()) return voteView();
+  const txt = { build: '🛠 Round 1 — write the challenges on the crew laptop. Use your phone for the theory and the question bank.', duel: '⚔ Round 2 — the duel: answer on the crew laptop.', break: '☕ Break' }[ph] || '';
+  const extra = ph === 'duel' && d.stage === 'vote' ? `<div class="ban contest">🗳 Jury vote — your crew is involved, so you do not vote</div>` : ph === 'duel' && ['defend', 'counter'].includes(d.stage) && neutral() ? `<div class="ban contest">⚖ Listen carefully — you will be on the jury</div>` : '';
+  const pts = g && BOARD.game && BOARD.game[MY.group] !== undefined ? `<p class="muted">Crew points: <b style="color:var(--amber)">${BOARD.game[MY.group]}</b></p>` : '';
+  M(`<div class="big"><div class="ic">${g ? '👥' : '⏳'}</div><h1>${g ? esc(g.name) : ''}</h1><p>${txt}</p>${pts}</div>${extra}${SCORE ? `<div style="margin-top:20px">${KSAPP.ksaBars(SCORE, SC.scoring.weights)}</div>` : ''}`);
+}
+// ── jury ──
+function voteView() {
+  const d = ST.duel, qd = d.q, key = d.key || {};
+  M(`<div class="lbl">Jury — challenge ${qd.n} by ${esc(gname(qd.author))}</div><p class="muted">Contested by ${Object.keys(CON).map(gname).join(', ')}. Vote on the challenge, not on the crews: is it technically correct and unambiguous?</p>
+    <div class="q">${esc(qd.stem)}</div>${qd.data ? `<div class="qdata">${esc(qd.data)}</div>` : ''}
+    <div class="ol">${qd.options.map((o, k) => `<div class="${k === key.correct ? 'c' : ''}">${L(k)} — ${esc(o)}${k === key.correct ? ' ✓' : ''}</div>`).join('')}</div>
+    ${key.just ? `<div class="just"><b>Justification:</b> ${esc(key.just)}</div>` : ''}
+    <div class="vote"><button class="v ${MYVOTE === 'valid' ? 'on' : ''}" data-a="vote" data-v="valid">✅ Valid</button><button class="f ${MYVOTE === 'flawed' ? 'on' : ''}" data-a="vote" data-v="flawed">❌ Flawed</button></div>
+    <div class="tbar"><div id="vbar"></div></div><p class="muted" style="text-align:center;margin-top:8px">${MYVOTE ? 'Vote registered — you can still change it' : 'Vote before the time is up'}</p>`);
+  tick();
+}
+A.vote = async b => { const d = ST.duel; if (!d || d.stage !== 'vote') return; MYVOTE = b.dataset.v; await DB.set(`duel/vote/${d.q.cid}/${ID}`, MYVOTE); lastSig = ''; render(); };
+// ── pre-test ──
+function preView() {
+  if (ST.preDone) return M(`<div class="big"><div class="ic">🏁</div><h1>${MY.pre ? MY.pre.pts + ' pts' : 'Done'}</h1>${MY.pre ? `<p>${MY.pre.correct}/${MY.pre.n} correct</p>` : ''}<p class="muted">Crews are being formed…</p></div>`);
+  const p = ST.pre || { idx: 0 }, q = SC.pretest.questions[p.idx]; if (!q) return;
+  const a = (MY.preAns || {})[p.idx];
+  M(`<div class="row between"><span class="lbl">Question ${p.idx + 1}/${SC.pretest.questions.length}</span><b id="ptm" class="mono"></b></div><div class="tbar"><div id="pbar"></div></div>
+    <div class="q">${esc(q.text)}</div><div class="opts">${q.options.map((o, k) => `<button class="o ${a && +a.k === k ? 'sel' : ''}" data-a="ans" data-k="${k}" ${a || p.reveal ? 'disabled' : ''}><span class="L">${L(k)}</span>${esc(o)}</button>`).join('')}</div>
+    <p class="muted" style="margin-top:12px;text-align:center">${a ? 'Answer registered ✓' : p.reveal ? 'Time is up' : ''}</p>`);
+  tick();
+}
+A.ans = async b => {
+  const p = ST.pre; if (!p || p.reveal || (MY.preAns || {})[p.idx]) return;
+  document.querySelectorAll('.o').forEach(x => { x.disabled = true; x.classList.toggle('sel', x === b); });
+  MY.preAns = Object.assign({}, MY.preAns, { [p.idx]: { k: +b.dataset.k, t: now() } });
+  await DB.set(`students/${ID}/preAns/${p.idx}`, MY.preAns[p.idx]);
+};
+// ── peer ──
+function peerView() {
+  const g = GRP[MY.group]; if (!g) return M('<div class="big"><h1>No crew</h1></div>');
+  const mates = g.members.filter(id => id !== ID && STU[id]), C = SC.peer.criteria, n = SC.peer.scale;
+  PEER = PEER || {};
+  if (!mates.length) return M('<div class="big"><h1>No crew-mates to rate</h1></div>');
+  M(`<h1>Peer assessment</h1><p class="muted">Rate each crew-mate from 1 (low) to ${n} (high). Anonymous for your colleagues.</p>
+    ${mates.map(m => `<div class="peer"><b>${esc(STU[m].name)}</b>${C.map(c => `<div class="crit"><span>${esc(c.label)}</span><div class="sc">${Array.from({ length: n }, (_, k) => `<button class="${+((PEER[m] || {})[c.id]) === k + 1 ? 'on' : ''}" data-a="rate" data-m="${m}" data-c="${c.id}" data-v="${k + 1}">${k + 1}</button>`).join('')}</div></div>`).join('')}</div>`).join('')}
+    <button class="btn go lg" style="width:100%" data-a="peerSend">Send ✓</button>`);
+}
+A.rate = b => { PEER[b.dataset.m] = PEER[b.dataset.m] || {}; PEER[b.dataset.m][b.dataset.c] = +b.dataset.v; b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+A.peerSend = async () => {
+  const g = GRP[MY.group], mates = g.members.filter(id => id !== ID && STU[id]);
+  if (mates.some(m => SC.peer.criteria.some(c => !(PEER[m] || {})[c.id]))) return KSAPP.toast('Rate every criterion for every crew-mate');
+  await DB.set('peer/' + ID, PEER); KSAPP.toast('Sent — thank you');
+};
+function tick() {
+  if (ST.phase === 'pretest' && ST.pre && !ST.preDone) {
+    const lim = SC.pretest.secondsPerQ * 1000, el = (ST.hold || now()) - ST.pre.at, left = Math.max(0, lim - el);
+    const b = document.getElementById('pbar'); if (b) b.style.width = (ST.pre.reveal ? 0 : left / lim * 100) + '%';
+    const t = document.getElementById('ptm'); if (t) t.textContent = ST.pre.reveal ? '' : Math.ceil(left / 1000) + '″';
+    if (!ST.pre.reveal && left <= 0) document.querySelectorAll('.o').forEach(x => x.disabled = true);
+  }
+  const d = ST.duel || {};
+  if (ST.phase === 'duel' && d.stage === 'vote') { const b = document.getElementById('vbar'); if (b) b.style.width = Math.max(0, Math.min(100, (d.endsAt - (ST.hold || now())) / Math.max(1, d.endsAt - d.at) * 100)) + '%'; }
+}
+</script>
+</body>
+</html>
