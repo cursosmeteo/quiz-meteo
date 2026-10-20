@@ -426,7 +426,7 @@ function createMap(el, SC, opts) {
   const ov = [{ id: 'clean', label: 'Clean map' }].concat(SC.charts.overlays.map(o => ({ id: o.id, label: o.label, valid: o.valid })));
   el.innerHTML = `<div class="fmap"><div class="bar">${ov.map(o => `<button data-ov="${o.id}" class="${o.id === 'clean' ? 'on' : ''}">${esc(o.label)}</button>`).join('')}
       <span class="muted">opacity</span><input type="range" min="20" max="100" value="85" data-op>
-      <button data-z="-1">−</button><button data-z="1">＋</button><button data-follow class="on">✈ follow</button><span class="valid" data-valid></span></div>
+      <button data-z="-1">−</button><button data-z="1">＋</button><button data-follow title="Zoom in at chart scale and keep the aircraft in the centre of the view">✈ Follow aircraft</button><span class="valid" data-valid></span></div>
     <div class="win"><div class="inner" style="width:${W}px;height:${H}px">
       <img src="${SC.charts.basemap || ''}" alt="" data-base><img alt="" data-ovl style="display:none;opacity:.85">
       <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -440,23 +440,23 @@ function createMap(el, SC, opts) {
         <g data-plane><path d="M0,-16 L3,-5 L15,2 L15,5 L3,1 L2,10 L6,13 L6,15 L0,13 L-6,15 L-6,13 L-2,10 L-3,1 L-15,5 L-15,2 L-3,-5 Z" fill="#dc2626" stroke="#fff" stroke-width="1.5"/></g>
       </svg></div></div></div>`;
   const inner = el.querySelector('.inner'), win = el.querySelector('.win'), ovl = el.querySelector('[data-ovl]');
-  let zoom = null, follow = true, lastPos = null;
-  function fit() { if (zoom === null) zoom = Math.max(0.3, Math.min(1.2, (win.clientWidth - 4) / W)); applyZoom(); }
+  let zoom = null, follow = false, lastPos = null, fitZoom = 1;
+  function fit() { fitZoom = Math.max(0.3, Math.min(1.2, (win.clientWidth - 4) / W)); if (zoom === null) zoom = follow ? Math.max(1, fitZoom * 1.8) : fitZoom; applyZoom(); }
   function applyZoom() { inner.style.width = (W * zoom) + 'px'; inner.style.height = (H * zoom) + 'px'; }
   el.querySelectorAll('[data-ov]').forEach(b => b.onclick = () => setOverlay(b.dataset.ov));
   el.querySelector('[data-op]').oninput = e => { ovl.style.opacity = e.target.value / 100; };
   el.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { zoom = Math.max(0.3, Math.min(2.5, zoom * (b.dataset.z > 0 ? 1.25 : 0.8))); applyZoom(); centerOn(lastPos); });
-  el.querySelector('[data-follow]').onclick = e => { follow = !follow; e.target.classList.toggle('on', follow); if (follow) centerOn(lastPos); };
+  el.querySelector('[data-follow]').onclick = e => { follow = !follow; e.currentTarget.classList.toggle('on', follow); zoom = follow ? Math.max(1, fitZoom * 1.8) : fitZoom; applyZoom(); if (follow) { lastCenter = Date.now(); setTimeout(() => centerOn(lastPos, true), 30); } else win.scrollTo({ left: 0, top: 0 }); };
   function setOverlay(id) {
     el.querySelectorAll('[data-ov]').forEach(b => b.classList.toggle('on', b.dataset.ov === id));
     const o = SC.charts.overlays.find(x => x.id === id);
     if (!o) { ovl.style.display = 'none'; el.querySelector('[data-valid]').textContent = ''; return; }
     ovl.src = o.data; ovl.style.display = ''; el.querySelector('[data-valid]').textContent = o.valid;
   }
-  function centerOn(pos) {
+  function centerOn(pos, now) {
     if (!pos) return;
     const [x, y] = P(pos[0], pos[1]);
-    win.scrollTo({ left: x * zoom - win.clientWidth / 2, top: y * zoom - win.clientHeight / 2, behavior: 'smooth' });
+    win.scrollTo({ left: x * zoom - win.clientWidth / 2, top: y * zoom - win.clientHeight / 2, behavior: now ? 'auto' : 'smooth' });
   }
   let lastCenter = 0;
   function update(fs, o) {
@@ -492,7 +492,7 @@ function createMap(el, SC, opts) {
     if (follow && Date.now() - lastCenter > 4000) { lastCenter = Date.now(); centerOn(fs.pos); }
   }
   setTimeout(fit, 50);
-  root.addEventListener('resize', () => { const z0 = zoom; zoom = null; fit(); if (!z0) return; });
+  root.addEventListener('resize', () => { zoom = null; fit(); });
   return { update, setOverlay, fit };
 }
 
@@ -748,7 +748,7 @@ function fmt(ms) {
   const neg = ms < 0; ms = Math.abs(ms);
   const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
   const out = h ? `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-  return (neg ? '−' : '') + out;
+  return (neg ? '+' : '') + out;
 }
 function clockClass(ms, total) { return ms < 0 ? 'out' : ms < Math.min(120000, total * 0.15) ? 'low' : ''; }
 
@@ -846,7 +846,7 @@ root.KSAPP = { disclaimer, routeTable, splitLibrary, setFetchLib: f => { fetchLi
 </script>
 </head>
 <body>
-<div class="top"><div class="brand">KSA <em>20</em> · GROUP</div><div class="gname" id="g-name"></div><div class="muted" id="g-mem"></div><div class="sp"></div><b id="g-phase"></b><div class="clock" id="g-clock">--:--</div><span class="conn" id="g-conn"></span></div>
+<div class="top"><div class="brand">KSA <em>20</em> · GROUP</div><div class="gname" id="g-name"></div><div class="muted" id="g-mem"></div><div class="sp"></div><b id="g-phase"></b><div class="clock" id="g-clock"></div><span class="conn" id="g-conn"></span></div>
 <main id="main"><div class="wait"><div class="ic">⏳</div><h1>Connecting…</h1></div></main>
 <script>
 'use strict';
@@ -869,7 +869,7 @@ const now = () => DB.now();
   if (!pub) { document.getElementById('main').innerHTML = '<div class="wait"><h1>Session not found: ' + esc(DB.code) + '</h1></div>'; return; }
   SC = KSAFUI.attachAssets(pub, await DB.get('pub/assets'));
   DB.connected(on => { const c = document.getElementById('g-conn'); c.textContent = on ? '● online' : '● offline'; c.className = 'conn ' + (on ? 'on' : 'off'); });
-  DB.on('state', v => { ST = v || {}; render(); });
+  DB.on('state', v => { ST = v || {}; render(); tick(); });
   DB.on('groups/' + GID, v => { G = v || {}; pull(); render(); syncInputs(); });
   DB.on('students', v => { STU = v || {}; head(); });
   DB.on('scores', v => { SCORES = v || {}; if (ST.phase === 'debrief') render(); });
@@ -937,16 +937,17 @@ A.gate = async b => {
 // ── route ──
 function routeMin() { return KSAPP.routeElapsed(ST, now()) / 60000; }
 function lockedNow(l, t) { return t >= l.at || !!(ST.graded || {})[l.id]; }
-function docsBar() { return `<div class="docs">${SC.charts.docs.map(d => `<button data-a="doc" data-d="${d.id}">${d.kind === 'image' ? '🖼' : '📄'} ${esc(d.label)}</button>`).join('')}</div>`; }
+function docsBar() { return `<div class="docs">${SC.charts.docs.filter(d => !d.afterDiversion || ST.div).map(d => `<button data-a="doc" data-d="${d.id}">${d.kind === 'image' ? '🖼' : '📄'} ${esc(d.label)}</button>`).join('')}</div>`; }
 A.doc = b => KSAPP.showLib(SC.charts.docs.find(d => d.id === b.dataset.d));
 function routeView() {
   const m = document.getElementById('main');
   if (!UI.map) {
-    m.innerHTML = `<div class="route"><div class="mapbox" id="gmap"></div><div class="side"><div class="status" id="rstat"></div><div id="dvb"></div>${docsBar()}<div id="cards"></div></div></div>`;
+    m.innerHTML = `<div class="route"><div class="mapbox" id="gmap"></div><div class="side"><div class="status" id="rstat"></div><div id="dvb"></div><div id="docs"></div><div id="cards"></div></div></div>`;
     UI.map = KSAFUI.createMap(document.getElementById('gmap'), SC);
   }
   const F = SC.flight, t = routeMin(), locks = KSAF.lockTimes(F), div = !!ST.div;
   const next = locks.find(l => !lockedNow(l, t) && !(l.voidAfterDiversion && div) && !(l.diversion && !div));
+  document.getElementById('docs').innerHTML = docsBar();
   document.getElementById('dvb').innerHTML = div ? `<div class="divban">⚡ ${esc(F.diversion.message)}</div>` : '';
   const list = F.points.map(p => ({ p, l: locks.find(l => l.id === p.id) }));
   if (div) list.splice(list.length - 1, 0, { p: F.diversion, l: locks.find(l => l.diversion), dv: true });

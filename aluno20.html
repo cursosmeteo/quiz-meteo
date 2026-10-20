@@ -551,7 +551,7 @@ function fmt(ms) {
   const neg = ms < 0; ms = Math.abs(ms);
   const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
   const out = h ? `${h}:${String(m % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-  return (neg ? '−' : '') + out;
+  return (neg ? '+' : '') + out;
 }
 function clockClass(ms, total) { return ms < 0 ? 'out' : ms < Math.min(120000, total * 0.15) ? 'low' : ''; }
 
