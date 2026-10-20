@@ -3293,6 +3293,7 @@ function tick(onlyClock) {
   if (ends) document.querySelectorAll('[data-left]').forEach(e => { e.textContent = KSAPP.fmt(Math.max(0, ends - t)); });
   if (ST.phase === 'duel' && ST.duel && ST.duel.endsAt) { const b = document.getElementById('dbar'); if (b) b.style.width = Math.max(0, Math.min(100, (ST.duel.endsAt - t) / Math.max(1, ST.duel.endsAt - ST.duel.at) * 100)) + '%'; }
   if (onlyClock === true || ST.hold) return;
+  botTick();
   if (ST.phase === 'pretest') preTick();
   else if (ST.phase === 'groups') { if (gids().length && now() - (ST.groupsAt || 0) > secs(40) * 1000) act(startBuild); }
   else if (ST.phase === 'build') { if (now() >= ST.build.endsAt || (gids().length && gids().every(g => GRP[g].locked))) act(endBuild); }
@@ -3318,7 +3319,36 @@ function vLobby() {
   <div class="card join"><div>${KSAPP.qrImg(url, 7)}</div><div><div class="lbl">Join with your phone</div><div class="code" style="font-size:3rem">${DB.code}</div><div class="mono muted" style="margin:4px 0 12px">${esc(url)}</div>
   <div class="lbl" style="margin-bottom:6px">${S.length} student(s)</div><div class="chips">${S.map(([id, s]) => `<span class="pill">${esc(s.name)} <button class="btn sm ghost" style="padding:0 4px" data-a="kick" data-id="${id}">✕</button></span>`).join('') || '<span class="muted">Waiting…</span>'}</div></div></div>
   ${rulesHTML()}
-  <div class="row" style="margin-top:16px"><button class="btn go lg" data-a="startGame">Start ▶</button><span class="muted">From here on everything runs automatically.</span></div>${KSAPP.disclaimer(SC)}`;
+  <div class="row" style="margin-top:16px"><button class="btn go lg" data-a="startGame">Start ▶</button>${TEST || DB.mode === 'local' ? `<button class="btn warn" data-a="bots">🤖 + 4 demo students</button>` : ''}<span class="muted">From here on everything runs automatically.</span></div>${KSAPP.disclaimer(SC)}`;
+}
+// ── rehearsal: demo students (pre-test, jury and peer are answered automatically) ──
+A.bots = async () => {
+  const n = Object.values(STU).filter(x => x.bot).length, up = {};
+  for (let k = 1; k <= 4; k++) up['b' + Date.now().toString(36) + k] = { name: 'Demo ' + (n + k), bot: true, at: now() };
+  await DB.update('students', up);
+};
+const BOTDONE = new Set();
+const hash = str => { let h = 7; for (const c of str) h = (h * 31 + c.charCodeAt(0)) % 9973; return h; };
+function botTick() {
+  const bots = Object.entries(STU).filter(([, x]) => x.bot); if (!bots.length) return;
+  const t = now();
+  if (ST.phase === 'pretest' && ST.pre && !ST.pre.reveal && !ST.preDone) {
+    const i = ST.pre.idx, q = SC.pretest.questions[i];
+    bots.forEach(([id, x]) => { const key = 'p' + id + i; if (BOTDONE.has(key) || (x.preAns || {})[i]) return;
+      const h = hash(id + i); if (t - ST.pre.at < 2000 + h % 12000) return;
+      BOTDONE.add(key); DB.set(`students/${id}/preAns/${i}`, { k: h % 2 ? q.correct : h % 4, t: now() }); });
+  }
+  const d = ST.duel || {};
+  if (ST.phase === 'duel' && d.stage === 'vote' && d.q) {
+    const ns = neutralStudents(d.q.cid);
+    bots.forEach(([id]) => { const key = 'v' + id + d.q.cid; if (BOTDONE.has(key) || !ns.includes(id) || t - d.at < 3000 + hash(id) % 8000) return;
+      BOTDONE.add(key); DB.set(`duel/vote/${d.q.cid}/${id}`, hash(id + d.q.cid) % 3 ? 'valid' : 'flawed'); });
+  }
+  if (ST.phase === 'peer') {
+    bots.forEach(([id, x]) => { const key = 'r' + id; if (BOTDONE.has(key) || PEER[id] || !x.group) return; BOTDONE.add(key);
+      const r = {}; members(x.group).filter(m => m !== id).forEach(m => { r[m] = {}; SC.peer.criteria.forEach(c => r[m][c.id] = 3 + hash(id + m + c.id) % 3); });
+      DB.set('peer/' + id, Object.keys(r).length ? r : { none: { x: 3 } }); });
+  }
 }
 A.kick = b => { if (confirm('Remove ' + STU[b.dataset.id].name + '?')) DB.remove('students/' + b.dataset.id); };
 A.startGame = async () => {
