@@ -130,6 +130,9 @@ h2{font-size:1.05rem;font-weight:800;margin:6px 0 10px}
 .slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .slot{border:2px dashed var(--line2);border-radius:10px;height:150px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;background:var(--bg3) center/contain no-repeat;color:var(--text3);font-size:.85rem;position:relative}
 .slot.has{border-style:solid;border-color:var(--green);background-color:#fff;color:transparent}
+.slot .sb{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.slot .sb button{border:1px solid var(--line2);background:var(--bg);color:var(--text);border-radius:7px;padding:5px 10px;font-size:.78rem;font-weight:700;cursor:pointer}
+.slot{flex-direction:column}
 .slot .x{position:absolute;top:4px;right:4px;color:#fff;background:#0009;border-radius:6px;padding:0 6px;font-size:.8rem}
 .src a{display:block;color:var(--cyan);margin:4px 0;font-weight:650}
 .tag{font-size:.7rem;font-weight:800;padding:1px 7px;border-radius:99px}
@@ -978,12 +981,22 @@ function localView() {
    <div class="local"><div class="card">${KSAFUI.cellsHTML(Lc.cells, LANS, { ro: done, res })}
      <div class="row" style="margin-top:12px">${done ? `<span class="pill ok">Graded: ${G.lpts.pts}/${G.lpts.max}</span>` : `<button class="btn go" data-a="lsub">${G.lsub ? '✓ Submitted — submit again' : 'Submit the table ✓'}</button>`}<span class="muted">Values are saved as you type.</span></div></div>
    <div><div class="card src"><div class="lbl">Live sources</div>${Lc.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">↗ ${esc(s.label)}</a>`).join('')}</div>
-     <div class="card" style="margin-top:12px"><div class="lbl" style="margin-bottom:8px">Images for your briefing (screenshots / photos)</div><div class="slots">${Lc.images.map(s => `<div class="slot ${(G.limg || {})[s.id] ? 'has' : ''}" data-a="slot" data-s="${s.id}" style="${(G.limg || {})[s.id] ? `background-image:url('${G.limg[s.id]}')` : ''}">${esc(s.label)}${(G.limg || {})[s.id] ? `<span class="x" data-a="unslot" data-s="${s.id}">✕</span>` : '<br>＋ add / paste'}</div>`).join('')}</div>
-     <p class="muted" style="margin-top:6px">Click a slot to choose a file, or click it and press Ctrl+V to paste a screenshot.</p></div></div></div>`;
+     <div class="card" style="margin-top:12px"><div class="lbl" style="margin-bottom:8px">Images for your briefing (screenshots / photos)</div><div class="slots">${Lc.images.map(s => `<div class="slot ${(G.limg || {})[s.id] ? 'has' : ''}" data-a="slot" data-s="${s.id}" style="${(G.limg || {})[s.id] ? `background-image:url('${G.limg[s.id]}')` : ''}">${esc(s.label)}${(G.limg || {})[s.id] ? `<span class="x" data-a="unslot" data-s="${s.id}">✕</span>` : `<div class="sb"><button data-a="spaste" data-s="${s.id}">📋 Paste</button><button data-a="sfile" data-s="${s.id}">📁 File / 📷 Photo</button></div>`}</div>`).join('')}</div>
+     <p class="muted" style="margin-top:6px">Open the chart in another tab, copy it (right-click → <i>Copy image</i>) or take a screenshot (Windows: <b>Win+Shift+S</b> · Mac: <b>Cmd+Ctrl+Shift+4</b>), then press <b>📋 Paste</b> on a slot — or click the slot and press <b>Ctrl+V</b>. On a phone: take a screenshot and choose it with <b>📁 File / 📷 Photo</b>.</p></div></div></div>`;
   KSAFUI.wireCells(document.querySelector('.local .card'), (cid, v) => { LANS[cid] = v; save(`groups/${GID}/lans/${cid}`, v); });
 }
 let slotSel = null;
-A.slot = (b, e) => { if (e.target.closest('[data-a=unslot]')) return; slotSel = b.dataset.s; document.querySelectorAll('.slot').forEach(x => x.style.outline = x === b ? '3px solid var(--cyan)' : ''); const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => i.files[0] && putImg(b.dataset.s, i.files[0]); i.click(); };
+function selSlot(id) { slotSel = id; document.querySelectorAll('.slot').forEach(x => x.style.outline = x.dataset.s === id ? '3px solid var(--cyan)' : ''); }
+A.slot = b => { selSlot(b.dataset.s); KSAPP.toast('Slot selected — press Ctrl+V to paste'); };
+A.sfile = b => { selSlot(b.dataset.s); const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = () => i.files[0] && putImg(b.dataset.s, i.files[0]); i.click(); };
+A.spaste = async b => {
+  selSlot(b.dataset.s);
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.read) throw 0;
+    for (const it of await navigator.clipboard.read()) { const t = it.types.find(x => x.startsWith('image/')); if (t) return putImg(b.dataset.s, await it.getType(t)); }
+    KSAPP.toast('No image in the clipboard — copy the chart or take a screenshot first');
+  } catch (e) { KSAPP.toast('Press Ctrl+V now to paste into the selected slot', 4000); }
+};
 A.unslot = b => DB.set(`groups/${GID}/limg/${b.dataset.s}`, null);
 async function putImg(sid, file) { const d = await KSAPP.fileToDataURL(file); const c = await KSAPP.compressImage(d, 1400, 0.78); if (c) { await DB.set(`groups/${GID}/limg/${sid}`, c); KSAPP.toast('Image saved'); } }
 document.addEventListener('paste', e => { if (ST.phase !== 'local' || !slotSel) return; const it = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/')); if (it) { e.preventDefault(); putImg(slotSel, it.getAsFile()); } });
