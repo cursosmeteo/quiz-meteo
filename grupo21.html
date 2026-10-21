@@ -630,6 +630,7 @@ const SESS = [...new Map(KSA_BANK.map(q => [q.s, q.topic])).entries()];
 const TYPE = t => t === 'CHART' ? '<span class="pill key">CHART + CODE</span>' : '<span class="pill k">QUESTION</span>';
 
 (async function init() {
+  if (GID === 'ALL') return allCrews();
   if (!P.s || !GID) return M(`<div class="big"><h1>Open this page from the crew QR code</h1><p class="muted">(needs ?s=SESSION&g=G1)</p></div>`);
   try { DB = await KSADB.open(P.s, P.mode === 'local' ? 'local' : 'firebase'); } catch (e) { return M(`<div class="big"><h1>Connection failed</h1><p>${esc(e.message)}</p></div>`); }
   SC = await DB.get('pub/config');
@@ -642,6 +643,23 @@ const TYPE = t => t === 'CHART' ? '<span class="pill key">CHART + CODE</span>' :
   document.addEventListener('paste', onPaste);
   setInterval(tick, 500);
 })();
+// all crew screens in one tab (rehearsal): one button per crew, each crew screen in its own frame
+async function allCrews() {
+  document.querySelector('.top').innerHTML = '<div class="brand">KSA <em>21</em> · ALL CREWS</div><div class="sp"></div><div id="ac-tabs" class="row"></div>';
+  document.getElementById('main').style.cssText = 'max-width:none;padding:0';
+  M('<div id="ac-wait" class="big"><h1>Waiting for the crews…</h1></div><div id="ac-frames"></div>');
+  const DBa = await KSADB.open(P.s, P.mode === 'local' ? 'local' : 'firebase');
+  const frames = {}; let cur = null;
+  const show = g => { cur = g; Object.entries(frames).forEach(([k, f]) => f.style.display = k === g ? '' : 'none'); document.querySelectorAll('#ac-tabs button').forEach(b => b.classList.toggle('pri', b.dataset.g === g)); };
+  DBa.on('groups', v => {
+    const G = Object.keys(v || {}).sort();
+    G.forEach(g => { if (frames[g]) return; const f = document.createElement('iframe'); f.src = location.href.replace(/([?&])g=ALL/i, '$1g=' + g); f.style.cssText = 'width:100%;height:calc(100vh - 52px);border:0;display:none'; document.getElementById('ac-frames').appendChild(f); frames[g] = f; });
+    document.getElementById('ac-tabs').innerHTML = G.map(g => `<button class="btn ${g === cur ? 'pri' : ''}" data-g="${g}">${esc((v[g] || {}).name || g)}${v[g].locked ? ' ✓' : ''}</button>`).join('');
+    document.querySelectorAll('#ac-tabs button').forEach(b => b.onclick = () => show(b.dataset.g));
+    if (G.length) document.getElementById('ac-wait').style.display = 'none';
+    if (!cur && G.length) show(G[0]);
+  });
+}
 function head() {
   const G = ME();
   document.getElementById('c-name').textContent = G.name || GID;

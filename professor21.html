@@ -3074,7 +3074,8 @@ const TDB = {
 (async function setup() {
   await TDB.open();
   const last = await TDB.get('session2');
-  UI.mode = KSAPP.params().mode === 'local' ? 'local' : 'firebase';
+  UI.mode = KSAPP.params().mode === 'local' || TEST ? 'local' : 'firebase';
+  UI.reh = TEST;
   SC = JSON.parse(JSON.stringify(KSA_DUEL));
   document.getElementById('main').innerHTML = `<div class="setup"><h1>KSA Session 21 — Meteo Duel</h1>
     <p class="lead">Each crew prepares 3 challenges — 2 questions from the session quizzes (they can edit them) and 1 challenge with a weather chart and a related code — and then plays them against the other crews. The platform guides the crews step by step; the instructor steps in only in the debriefing.</p>
@@ -3087,18 +3088,22 @@ const TDB = {
     <h2 style="margin-top:18px">Where does the session run?</h2>
     <div class="grid g2"><div class="opt ${UI.mode === 'firebase' ? 'on' : ''}" data-a="mode" data-v="firebase"><b>🌐 Online — Firebase</b><span class="muted">Phones and crew laptops. Needs internet in the room.</span></div>
       <div class="opt ${UI.mode === 'local' ? 'on' : ''}" data-a="mode" data-v="local"><b>💻 This computer only</b><span class="muted">All screens are tabs of this browser — rehearsal and demos.</span></div></div>
+    ${TEST ? `<h2 style="margin-top:18px">Rehearsal</h2><div class="opt ${UI.reh ? 'on' : ''}" data-a="reh"><b>🧪 Automatic rehearsal — you play Crew 1</b><span class="muted">11 demo students (3 crews) answer the pre-test and the peer assessment; the other crews prepare and answer their challenges by themselves. You only need the Crew 1 screen.</span></div>` : ''}
     <div class="row" style="margin-top:20px"><button class="btn pri lg" data-a="create">Create session ▶</button>${TEST ? '<span class="pill wait">TEST MODE — timers ÷3</span>' : ''}</div>${KSAPP.disclaimer(SC)}</div>`;
   UI.last = last;
 })();
+A.reh = b => { UI.reh = !UI.reh; b.classList.toggle('on', UI.reh); };
 A.mode = b => { UI.mode = b.dataset.v; document.querySelectorAll('[data-a=mode]').forEach(o => o.classList.toggle('on', o.dataset.v === UI.mode)); };
 A.create = async () => {
   SC.build.minutes = Math.max(5, +document.getElementById('c-build').value || SC.build.minutes);
   SC.duel.answerSec.BANK = Math.max(10, +document.getElementById('c-q').value || 45);
   SC.duel.answerSec.CHART = Math.max(10, +document.getElementById('c-c').value || 90);
   SC.schedule.find(x => x.id === 'build').min = SC.build.minutes;
+  if (TEST) SC.pretest.secondsPerQ = 10;
   const code = KSAPP.newCode();
   DB = await KSADB.open(code, UI.mode);
-  await DB.set('', { meta: { created: now(), title: SC.meta.title }, pub: { config: KSAD.publicConfig(SC) }, state: { phase: 'lobby', phaseAt: now(), moment: 'opening', momentAt: now() } });
+  await DB.set('', { meta: { created: now(), title: SC.meta.title }, pub: { config: KSAD.publicConfig(SC) }, state: { phase: 'lobby', phaseAt: now(), moment: 'opening', momentAt: now(), rehearsal: !!(TEST && UI.reh) } });
+  if (TEST && UI.reh) { const up = {}; for (let k = 1; k <= 11; k++) up['b' + Date.now().toString(36) + k] = { name: 'Demo ' + k, bot: true, at: now() }; await DB.update('students', up); }
   await TDB.put('session2', { code, mode: UI.mode, config: SC });
   start();
 };
@@ -3191,7 +3196,8 @@ A.links = () => {
   const su = base() + 'aluno21.html' + q();
   const gl = (gids().length ? gids() : ['G1', 'G2', 'G3', 'G4']).map(g => [g, crewURL(g)]);
   KSAPP.modal('Join links', `<div class="join"><div>${KSAPP.qrImg(su, 6)}</div><div><div class="lbl">Students — phone</div><div class="mono" style="margin:6px 0">${esc(su)}</div><a class="btn sm" href="${esc(su)}" target="_blank">Open a student tab</a></div></div>
-    <h2 style="margin-top:16px">Crew laptops</h2><div class="grid g4">${gl.map(([g, u]) => `<div class="card" style="text-align:center">${KSAPP.qrImg(u, 3)}<div><b>${esc(gname(g))}</b></div><a href="${esc(u)}" target="_blank" style="color:var(--cyan);font-size:.72rem;word-break:break-all">${esc(u.replace(base(), ''))}</a></div>`).join('')}</div>`);
+    <h2 style="margin-top:16px">Crew laptops ${gids().length ? `<a class="btn sm pri" style="margin-left:10px" href="${esc(crewURL('ALL'))}" target="_blank">🗂 Open all crews in one tab</a>` : ''}</h2><div class="grid g4">${gl.map(([g, u]) => `<div class="card" style="text-align:center">${KSAPP.qrImg(u, 3)}<div><b>${esc(gname(g))}</b></div><a href="${esc(u)}" target="_blank" style="color:var(--cyan);font-size:.72rem;word-break:break-all">${esc(u.replace(base(), ''))}</a></div>`).join('')}</div>`);
+  document.querySelectorAll('#m-body a[target=_blank]').forEach(x => x.addEventListener('click', () => setTimeout(KSAPP.closeModal, 50)));
 };
 
 // ════════════════════════════════════════════════════════════════════════
@@ -3236,7 +3242,7 @@ function stepsHTML() {
 }
 function vLobby() {
   const S = Object.entries(STU), url = base() + 'aluno21.html' + q();
-  return `<h1>Meteo Duel — KSA Activities (2 of 3)</h1><p class="lead">Choose good challenges — you score when the other crews miss them.</p>
+  return `<h1>Meteo Duel — KSA Activities (2 of 3)</h1><p class="lead">Choose good challenges — you score when the other crews miss them.</p>${ST.rehearsal ? `<div class="card" style="border-color:var(--amber);margin-bottom:14px"><b>🧪 Rehearsal ready</b> — 11 demo students are in. Press <b>Start ▶</b>; when the crews appear, press <b>💻 Open Crew 1</b>.</div>` : ''}
   <div class="card join"><div>${KSAPP.qrImg(url, 7)}</div><div><div class="lbl">Join with your phone</div><div class="code" style="font-size:3rem">${DB.code}</div><div class="mono muted" style="margin:4px 0 12px">${esc(url)}</div>
   <div class="lbl" style="margin-bottom:6px">${S.length} student(s)</div><div class="chips">${S.map(([id, s]) => `<span class="pill">${esc(s.name)} <button class="btn sm ghost" style="padding:0 4px" data-a="kick" data-id="${id}">✕</button></span>`).join('') || '<span class="muted">Waiting…</span>'}</div></div></div>
   ${stepsHTML()}
@@ -3250,7 +3256,45 @@ A.bots = async () => {
 };
 const BOTDONE = new Set();
 const hash = str => { let h = 7; for (const c of str) h = (h * 31 + c.charCodeAt(0)) % 9973; return h; };
+// rehearsal: every crew except Crew 1 prepares and answers by itself
+const botCrew = g => !!ST.rehearsal && g !== 'G1';
+function demoChart() {
+  const c = document.createElement('canvas'); c.width = 1000; c.height = 640; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, 1000, 640); x.strokeStyle = '#cbd5e1'; x.lineWidth = 1;
+  for (let i = 0; i < 1000; i += 50) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 640); x.stroke(); }
+  for (let i = 0; i < 640; i += 50) { x.beginPath(); x.moveTo(0, i); x.lineTo(1000, i); x.stroke(); }
+  x.strokeStyle = '#1e293b'; x.lineWidth = 2;
+  [60, 120, 180, 240].forEach(r => { x.beginPath(); x.ellipse(380, 300, r * 1.3, r, 0, 0, 7); x.stroke(); });
+  x.fillStyle = '#dc2626'; x.font = 'bold 44px sans-serif'; x.fillText('L', 365, 315); x.font = '20px sans-serif'; x.fillText('992', 360, 345);
+  x.strokeStyle = '#1d4ed8'; x.lineWidth = 5; x.beginPath(); x.moveTo(470, 330); x.quadraticCurveTo(560, 470, 520, 630); x.stroke();
+  x.fillStyle = '#1d4ed8'; for (let k = 0; k < 6; k++) { const yy = 360 + k * 45, xx = 470 + 60 * Math.sin(k / 2); x.beginPath(); x.moveTo(xx, yy); x.lineTo(xx + 22, yy + 12); x.lineTo(xx, yy + 24); x.fill(); }
+  x.fillStyle = '#334155'; x.font = 'bold 18px sans-serif'; x.fillText('DEMO surface chart — not real data', 20, 30);
+  return c.toDataURL('image/jpeg', 0.8);
+}
+async function botBuild(g) {
+  const taken = new Set(); Object.values(GRP).forEach(G => Object.values(G.ch || {}).forEach(c => c && c.src && taken.add(c.src)));
+  const free = KSA_BANK.filter(q => !taken.has(q.id)), h = hash(g);
+  const pick = [free[h % free.length], free[(h * 7 + 13) % free.length]].filter((q, k, a) => a.indexOf(q) === k);
+  if (pick.length < 2) pick.push(free.find(q => !pick.includes(q)));
+  const ch = {};
+  pick.forEach((q, i) => ch[i] = { src: q.id, stem: q.text, options: q.options.slice(0, 4), correct: q.correct, at: now() });
+  ch[2] = { chart: 'Surface chart', hasImg: true, code: 'TAF LPPT 211100Z 2112/2218 22015G25KT 9999 SCT020\nTEMPO 2114/2118 4000 SHRA BKN012\nBECMG 2119/2121 31010KT', stem: `[${gname(g)} · demo] Which weather does the TAF forecast at LPPT when the cold front on the chart passes?`, options: ['Temporary showers with reduced visibility, then the wind veers to NW', 'Persistent freezing fog all day', 'CAVOK with calm wind', 'Widespread snow and a wind backing to SE'], correct: 0 };
+  await DB.set('img/' + g + '-2', demoChart());
+  await DB.update('groups/' + g, { ch, step: 4, locked: true, lockedAt: now() });
+}
+function crewBots() {
+  if (!ST.rehearsal) return;
+  const t = now();
+  if (ST.phase === 'build') gids().filter(botCrew).forEach(g => { const key = 'b' + g; if (BOTDONE.has(key) || GRP[g].locked || t - ST.phaseAt < 3000 + hash(g) % 6000) return; BOTDONE.add(key); botBuild(g); });
+  const d = ST.duel || {};
+  if (ST.phase === 'duel' && d.stage === 'read' && d.q) {
+    const ans = ANS[d.q.cid] || {}, ch = KSAD.challengeOf(GRP, d.q.cid);
+    gids().filter(g => botCrew(g) && g !== d.q.author && !ans[g]).forEach(g => { const key = 'a' + g + d.q.cid, h = hash(g + d.q.cid); if (BOTDONE.has(key) || t - d.at < 2000 + h % 5000) return;
+      BOTDONE.add(key); DB.set(`ans/${d.q.cid}/${g}`, { k: h % 5 < 3 ? +ch.correct : (+ch.correct + 1 + h % 3) % 4, t: now() }); });
+  }
+}
 function botTick() {
+  crewBots();
   const bots = Object.entries(STU).filter(([, x]) => x.bot); if (!bots.length) return;
   const t = now();
   if (ST.phase === 'pretest' && ST.pre && !ST.pre.reveal && !ST.preDone) {
@@ -3313,7 +3357,9 @@ async function formCrews() {
 function vGroups() {
   const G = gids();
   if (!G.length) return '<div class="empty">Forming the crews…</div>';
-  return `<h1>Crews</h1><p class="lead">Each crew opens its laptop (scan the QR). The preparation starts in <b data-left></b>.</p>
+  const reh = ST.rehearsal ? `<div class="card" style="border-color:var(--amber);margin-bottom:14px"><div class="row"><b>🧪 Rehearsal</b><span class="muted">You play Crew 1 — the other crews work by themselves.</span><span class="sp"></span><a class="btn go lg" href="${esc(crewURL('G1'))}" target="_blank">💻 Open Crew 1</a></div></div>`
+    : TEST || DB.mode === 'local' ? `<div class="row" style="margin-bottom:12px"><a class="btn pri" href="${esc(crewURL('ALL'))}" target="_blank">🗂 Open all crews in one tab</a></div>` : '';
+  return `<h1>Crews</h1><p class="lead">Each crew opens its laptop (scan the QR). The preparation starts in <b data-left></b>.</p>${reh}
     <div class="grid g${Math.min(5, G.length)}">${G.map(g => `<div class="gcol"><b style="font-size:1.1rem">${esc(gname(g))}</b>
       ${GRP[g].members.map(id => `<div class="gm">${esc((STU[id] || {}).name)}<span class="sp"></span><span class="muted">${STU[id] && STU[id].pre ? STU[id].pre.pts : ''}</span></div>`).join('')}
       <div style="text-align:center;margin-top:6px">${KSAPP.qrImg(crewURL(g), 3)}</div></div>`).join('')}</div>`;
