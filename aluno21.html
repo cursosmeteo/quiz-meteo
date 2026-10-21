@@ -127,18 +127,16 @@ input.name{font-size:1.15rem;padding:12px}
 .ban.contest{background:rgba(245,158,11,.12);border:2px solid var(--amber);color:#fcd34d}
 </style>
 <script>/*!
- * KSA DUEL — ksa-duel.js
- * Core of the "Meteo Duel" KSA exercise (ATPL 050 Meteorology · Session 21).
+ * KSA DUEL — ksa-duel.js  (simple version, first classroom test)
+ * ATPL 050 Meteorology · Session 21
  *  - pre-test speed scoring (end-of-session quiz rules) and crew formation (best + last)
- *  - syllabus areas per crew, challenge slots and validation
- *  - duel order, verdicts of contested challenges, game points
- *  - K / S / A scores
+ *  - 3 challenges per crew: 2 from the question bank (editable) + 1 chart challenge (chart + related code)
+ *  - duel order, game points (right +1 · author +1 per miss), K / S / A
  * Carlos Paizinho · cursos.meteo@gmail.com · Developed with Claude (Anthropic)
  */
 (function (root) {
 'use strict';
 
-// ── pre-test: +6 … +1 by speed (5-second steps), wrong −4, no answer −2 ──
 function quizPoints(correct, answered, secs) {
   if (!answered) return -2;
   if (!correct) return -4;
@@ -168,148 +166,86 @@ function formGroupsTopBottom(ranked, nGroups) {
     return g;
   });
 }
-/** crews of 2 to 4 (5 only if unavoidable): ⌈n/4⌉, at least 2 */
 function autoGroupCount(n) { if (n < 4) return 1; return Math.max(2, Math.ceil(n / 4)); }
 
-// ── areas & slots ─────────────────────────────────────────────────────
-/** two different areas per crew, spread over the syllabus (random start, then cyclic) */
-function assignAreas(SC, nGroups, rnd) {
-  const ids = SC.areas.map(a => a.id);
-  const r = rnd || Math.random;
-  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
-  const out = [];
-  for (let g = 0; g < nGroups; g++) out.push([ids[(2 * g) % ids.length], ids[(2 * g + 1) % ids.length]]);
-  return out;
-}
-function slotsFor(SC, nGroups) { return nGroups <= 4 ? SC.build.slots4 : SC.build.slots3; }
-/** slot code → description */
-function slotInfo(SC, code, areas) {
-  const lab = id => (SC.areas.find(a => a.id === id) || {}).label || id;
-  if (code === 'A') return { type: 'THEORY', areas: [areas[0]], title: 'Theory — ' + lab(areas[0]) };
-  if (code === 'B') return { type: 'THEORY', areas: [areas[1]], title: 'Theory — ' + lab(areas[1]) };
-  if (code === 'AB') return { type: 'THEORY', areas: areas.slice(), title: 'Theory — either of your two areas' };
-  return { type: 'OPS', areas: SC.areas.map(a => a.id), title: 'Operational — a situation you create (METAR / TAF / SIGMET / chart reading) and a decision' };
-}
-/** list of problems that prevent a challenge from being played ([] = ready) */
-function validateChallenge(SC, ch, info) {
-  const p = [];
-  ch = ch || {};
+// ── challenges ─────────────────────────────────────────────────────────
+function slots(SC) { return SC.build.slots; }
+function typeOf(SC, cid) { return slots(SC)[+String(cid).split('-')[1]] || 'BANK'; }
+/** problems that prevent a challenge from being played ([] = ready) */
+function validateChallenge(SC, ch, type, hasImg) {
+  const p = []; ch = ch || {};
   const txt = v => String(v || '').trim();
-  if (txt(ch.stem).length < 12) p.push('question');
-  const opts = (ch.options || []).map(txt);
-  if (opts.length < 4 || opts.slice(0, 4).some(o => !o)) p.push('4 options');
-  else if (new Set(opts.slice(0, 4).map(o => o.toLowerCase())).size < 4) p.push('options must differ');
+  if (txt(ch.stem).length < 8) p.push('question');
+  const opts = (ch.options || []).slice(0, 4).map(txt);
+  if (opts.length < 4 || opts.some(o => !o)) p.push('4 options');
+  else if (new Set(opts.map(o => o.toLowerCase())).size < 4) p.push('options must differ');
   if (!(ch.correct >= 0 && ch.correct <= 3)) p.push('correct option');
-  if (txt(ch.just).length < (SC.build.minJustification || 30)) p.push('justification (≥ ' + (SC.build.minJustification || 30) + ' characters)');
-  if (info.type === 'OPS' && txt(ch.data).length < 10) p.push('data block (METAR / TAF / SIGMET / situation)');
-  if (info.type === 'THEORY' && info.areas.length > 1 && !info.areas.includes(ch.area)) p.push('choose the area');
+  if (type === 'CHART') {
+    if (!ch.chart) p.push('type of chart');
+    if (!(hasImg || ch.hasImg)) p.push('chart image');
+    if (txt(ch.code).length < 8) p.push('code (METAR / TAF / SIGMET)');
+  }
   return p;
 }
-
-// ── duel order: round-robin by crew, slot by slot ─────────────────────
 function buildOrder(SC, groups) {
   const gids = Object.keys(groups || {}).sort();
-  const lists = gids.map(g => {
-    const G = groups[g], slots = slotsFor(SC, gids.length);
-    return slots.map((code, i) => ({ cid: g + '-' + i, g, i, code, info: slotInfo(SC, code, G.areas || []), ch: (G.ch || {})[i] }))
-      .filter(x => validateChallenge(SC, x.ch, x.info).length === 0)
-      .map(x => x.cid);
-  });
+  const lists = gids.map(g => slots(SC).map((t, i) => ({ cid: g + '-' + i, t, ch: ((groups[g] || {}).ch || {})[i] }))
+    .filter(x => validateChallenge(SC, x.ch, x.t).length === 0).map(x => x.cid));
   const out = []; let more = true;
   for (let r = 0; more; r++) { more = false; lists.forEach(l => { if (l[r]) { out.push(l[r]); more = true; } }); }
-  // avoid two consecutive challenges by the same crew where possible (already guaranteed by round-robin)
   return out;
 }
 function challengeOf(groups, cid) { const [g, i] = String(cid).split('-'); return (((groups || {})[g] || {}).ch || {})[i] || null; }
-
-// ── confidence (bet) → calibration (Brier) ────────────────────────────
-const CONF = { 1: 0.4, 2: 0.65, 3: 0.9 };
-function brier(bet, ok) { const p = CONF[bet] || CONF[1]; return 1 - Math.pow(p - (ok ? 1 : 0), 2); }
-
-/**
- * verdict of one played challenge.
- * D.duel = { ans:{cid:{gid:{k,bet,t}}}, contest:{cid:{gid:true}}, vote:{cid:{sid:'valid'|'flawed'}} }
- * D.override = {cid:'valid'|'void'}
- * returns { status:'valid'|'void', contested, contesters[], votes:{valid,flawed}, pending, by:'jury'|'teacher'|'' }
- */
-function verdict(SC, D, cid) {
-  const author = cid.split('-')[0];
-  const ans = ((D.duel || {}).ans || {})[cid] || {};
-  const ch = challengeOf(D.groups, cid) || {};
-  const contesters = Object.keys(((D.duel || {}).contest || {})[cid] || {}).filter(g => g !== author && ans[g] && +ans[g].k !== +ch.correct);
-  const votes = { valid: 0, flawed: 0 };
-  const neutral = sid => { const s = (D.students || {})[sid]; return s && s.group && s.group !== author && !contesters.includes(s.group); };
-  Object.entries(((D.duel || {}).vote || {})[cid] || {}).forEach(([sid, v]) => { if (neutral(sid) && votes[v] !== undefined) votes[v]++; });
-  const hasNeutral = Object.values(D.students || {}).some(s => s.group && s.group !== author && !contesters.includes(s.group));
-  let status = 'valid', by = '', pending = false;
-  if (contesters.length) {
-    if (!hasNeutral) pending = true;
-    else { by = 'jury'; if (votes.flawed > votes.valid) status = 'void'; }
-  }
-  const ov = (D.override || {})[cid];
-  if (ov === 'void' || ov === 'valid') { status = ov; by = 'teacher'; pending = false; }
-  return { status, contested: contesters.length > 0, contesters, votes, pending, by };
+/** was a bank question changed by the crew? */
+function edited(ch, bank) {
+  if (!ch || !ch.src) return 'own';
+  const b = (bank || []).find(q => q.id === ch.src); if (!b) return 'own';
+  const same = String(ch.stem || '').trim() === b.text.trim() && (ch.options || []).every((o, k) => String(o || '').trim() === String(b.options[k] || '').trim()) && +ch.correct === +b.correct;
+  return same ? 'bank' : 'edited';
 }
 
 /**
- * full results: game points per crew, per-challenge table, K/S/A per student.
- * D = { students, groups, duel:{ans,contest,vote}, played:[cid], override, quality:{cid:1..3}, peer }
+ * results: game points per crew, per-challenge table, K/S/A per student.
+ * D = { students, groups, ans:{cid:{gid:{k,t}}}, played:[cid], override:{cid:'void'}, quality:{cid:1..3}, peer }
  */
 function compute(SC, D) {
   const gids = Object.keys(D.groups || {}).sort();
   const G = SC.game, played = D.played || [];
   const game = {}; gids.forEach(g => game[g] = 0);
-  const per = {};                     // gid → {th:[ok], ops:[ok], cal:[score]}
-  gids.forEach(g => per[g] = { th: [], ops: [], cal: [], design: [] });
+  const per = {}; gids.forEach(g => per[g] = { bank: [], chart: [], design: [] });
   const items = {};
   played.forEach(cid => {
     const author = cid.split('-')[0], ch = challengeOf(D.groups, cid); if (!ch || !game.hasOwnProperty(author)) return;
-    const [, i] = cid.split('-');
-    const info = slotInfo(SC, slotsFor(SC, gids.length)[+i] || 'A', (D.groups[author] || {}).areas || []);
-    const ans = ((D.duel || {}).ans || {})[cid] || {};
-    const v = verdict(SC, D, cid);
+    const type = typeOf(SC, cid), ans = (D.ans || {})[cid] || {};
+    const valid = (D.override || {})[cid] !== 'void';
     const rows = {}; let right = 0, wrong = 0;
     gids.filter(g => g !== author).forEach(g => {
       const a = ans[g], answered = !!a && a.k !== undefined && a.k !== null, ok = answered && +a.k === +ch.correct;
-      const bet = answered ? Math.max(1, Math.min(3, +a.bet || 1)) : 0;
-      let pts = 0;
-      if (v.status === 'valid') {
-        pts = answered ? (ok ? bet : -bet) : G.noAnswer;
-        if (v.contesters.includes(g)) pts += G.contestLost;
-        (info.type === 'OPS' ? per[g].ops : per[g].th).push(ok ? 1 : 0);
-        if (answered) per[g].cal.push(brier(bet, ok));
-      } else if (v.contesters.includes(g)) pts = G.contestWon;
+      const pts = valid && ok ? G.right : 0;
+      if (valid) { (type === 'CHART' ? per[g].chart : per[g].bank).push(ok ? 1 : 0); game[g] += pts; }
       if (ok) right++; else wrong++;
-      game[g] += pts;
-      rows[g] = { k: answered ? +a.k : null, bet, ok, pts, contested: v.contesters.includes(g) };
+      rows[g] = { k: answered ? +a.k : null, ok, pts };
     });
-    let apts = 0;
-    if (v.status === 'valid') apts = G.authorPerMiss * wrong; else apts = G.annulAuthor;
+    const apts = valid ? G.authorPerMiss * wrong : 0;
     game[author] += apts;
-    const disc = right > 0 && wrong > 0;
-    const q = (D.quality || {})[cid];
-    const design = v.status === 'void' ? 0 : q ? (q - 1) / 2 : 0.6 + (disc ? 0.4 : 0);
-    items[cid] = { cid, author, type: info.type, area: ch.area || info.areas[0], verdict: v, rows, right, wrong, authorPts: apts, disc, design };
+    const disc = right > 0 && wrong > 0, q = (D.quality || {})[cid];
+    const design = !valid ? 0 : q ? (q - 1) / 2 : 0.6 + (disc ? 0.4 : 0);
+    items[cid] = { cid, author, type, valid, rows, right, wrong, authorPts: apts, disc, design };
   });
-  // design score per crew: every slot counts; an incomplete slot = 0; a complete slot not played (time) is left out
-  gids.forEach(g => {
-    const slots = slotsFor(SC, gids.length), Gr = D.groups[g] || {};
-    slots.forEach((code, i) => {
-      const cid = g + '-' + i, it = items[cid];
-      if (it) per[g].design.push(it.design);
-      else if (validateChallenge(SC, (Gr.ch || {})[i], slotInfo(SC, code, Gr.areas || [])).length) per[g].design.push(0);
-    });
-  });
+  gids.forEach(g => slots(SC).forEach((t, i) => {
+    const cid = g + '-' + i, it = items[cid];
+    if (it) per[g].design.push(it.design);
+    else if (validateChallenge(SC, ((D.groups[g] || {}).ch || {})[i], t).length) per[g].design.push(0);
+  }));
   const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
   const W = SC.scoring.weights, sp = SC.scoring.split, pScale = +SC.peer.scale || 5;
   const ksa = {};
   Object.entries(D.students || {}).forEach(([sid, st]) => {
-    const g = st.group, P = per[g] || { th: [], ops: [], cal: [], design: [] };
-    const frac = (a, b) => b > 0 ? Math.max(0, Math.min(1, a / b)) : null;
-    const pre = st.pre ? frac(st.pre.pts, st.pre.max) : null;
-    const recv = []; Object.entries(D.peer || {}).forEach(([r, m]) => { if (r !== sid && m && m[sid]) { const v = Object.values(m[sid]).map(Number).filter(x => x > 0); if (v.length) recv.push(v.reduce((a, b) => a + b, 0) / v.length); } });
+    const P = per[st.group] || { bank: [], chart: [], design: [] };
+    const pre = st.pre && st.pre.max ? Math.max(0, Math.min(1, st.pre.pts / st.pre.max)) : null;
+    const recv = []; Object.entries(D.peer || {}).forEach(([r, m]) => { if (r !== sid && m && m[sid]) { const v = Object.values(m[sid]).map(Number).filter(x => x > 0); if (v.length) recv.push(mean(v)); } });
     const peer = recv.length ? (mean(recv) - 1) / Math.max(1, pScale - 1) : null;
-    const comp = { K: { pretest: pre, theory: mean(P.th) }, S: { ops: mean(P.ops), design: mean(P.design) }, A: { calibration: mean(P.cal), peer } };
+    const comp = { K: { pretest: pre, bank: mean(P.bank) }, S: { chart: mean(P.chart), design: mean(P.design) }, A: { peer } };
     const dim = {};
     ['K', 'S', 'A'].forEach(d => { let n = 0, w = 0; Object.entries(sp[d]).forEach(([k, x]) => { const v = comp[d][k]; if (v !== null && v !== undefined) { n += x * v; w += +x; } }); dim[d] = w ? n / w : null; });
     const r1 = v => Math.round(v * 10) / 10;
@@ -321,16 +257,13 @@ function compute(SC, D) {
 
 function scheduleResolved(SC) { let t = 0; return SC.schedule.map(m => { const o = Object.assign({}, m, { start: t, end: t + m.min }); t += m.min; return o; }); }
 function hhmm(min) { return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(Math.round(min % 60)).padStart(2, '0'); }
-
-/** public configuration: without the pre-test key */
 function publicConfig(SC) {
   const P = JSON.parse(JSON.stringify(SC));
   P.pretest.questions = P.pretest.questions.map(q => ({ id: q.id, area: q.area, text: q.text, options: q.options }));
   return P;
 }
 
-const KSAD = { quizPoints, gradePretest, formGroupsTopBottom, autoGroupCount, assignAreas, slotsFor, slotInfo, validateChallenge,
-  buildOrder, challengeOf, CONF, brier, verdict, compute, scheduleResolved, hhmm, publicConfig };
+const KSAD = { quizPoints, gradePretest, formGroupsTopBottom, autoGroupCount, slots, typeOf, validateChallenge, buildOrder, challengeOf, edited, compute, scheduleResolved, hhmm, publicConfig };
 if (typeof module !== 'undefined' && module.exports) module.exports = KSAD; else root.KSAD = KSAD;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -669,8 +602,6 @@ function watchItem() {
   const cid = ((ST.duel || {}).q || {}).cid || null;
   if (cid === watched) return; watched = cid; if (unV) unV(); if (unC) unC(); MYVOTE = null; CON = {};
   if (!cid) return;
-  unV = DB.on(`duel/vote/${cid}/${ID}`, v => { MYVOTE = v; render(); });
-  unC = DB.on(`duel/contest/${cid}`, v => { CON = v || {}; render(); });
 }
 function go() {
   DB.on('state', v => { ST = v || {}; watchItem(); render(); });
@@ -695,12 +626,11 @@ function draw() {
   const ph = ST.phase, g = GRP[MY.group];
   if (ph === 'lobby') return M(`<div class="big"><div class="ic">✅</div><h1>You are in, ${esc(MY.name)}</h1><p class="muted">The pre-test starts soon: ${SC.pretest.questions.length} questions, ${SC.pretest.secondsPerQ}″ each. Faster correct answers score more (+6 … +1); wrong −4; no answer −2. The ranking forms the crews (best with the last).</p></div>`);
   if (ph === 'pretest') return preView();
-  if (ph === 'groups') return M(`<div class="big"><div class="ic">👥</div>${MY.pre ? `<p class="muted">Pre-test</p><h1>${MY.pre.pts} pts · ${MY.pre.correct}/${MY.pre.n} correct</h1>` : ''}${g ? `<h1 style="color:var(--cyan)">${esc(g.name)}</h1><p>${g.members.map(id => esc((STU[id] || {}).name)).join(' · ')}</p><p class="muted">Areas: ${(g.areas || []).join(' · ')} — go to your crew laptop.</p>` : '<p class="muted">Crews are being formed…</p>'}</div>`);
+  if (ph === 'groups') return M(`<div class="big"><div class="ic">👥</div>${MY.pre ? `<p class="muted">Pre-test</p><h1>${MY.pre.pts} pts · ${MY.pre.correct}/${MY.pre.n} correct</h1>` : ''}${g ? `<h1 style="color:var(--cyan)">${esc(g.name)}</h1><p>${g.members.map(id => esc((STU[id] || {}).name)).join(' · ')}</p><p class="muted">Go to your crew laptop.</p>` : '<p class="muted">Crews are being formed…</p>'}</div>`);
   if (ph === 'peer') return peerView();
-  if (ph === 'debrief') return M(`<h1>Your KSA profile</h1>${KSAPP.ksaBars(SCORE, SC.scoring.weights)}<p class="muted" style="margin-top:10px">K = pre-test + theory answers · S = operational answers + quality of your crew's challenges · A = calibration of the bets + peer assessment.<br>Training session — feedback, not assessment.</p>`);
-  if (ph === 'duel' && d.stage === 'vote' && d.q && neutral()) return voteView();
-  const txt = { build: '🛠 Round 1 — write the challenges on the crew laptop. Use your phone for the theory and the question bank.', duel: '⚔ Round 2 — the duel: answer on the crew laptop.', break: '☕ Break' }[ph] || '';
-  const extra = ph === 'duel' && d.stage === 'vote' ? `<div class="ban contest">🗳 Jury vote — your crew is involved, so you do not vote</div>` : ph === 'duel' && ['defend', 'counter'].includes(d.stage) && neutral() ? `<div class="ban contest">⚖ Listen carefully — you will be on the jury</div>` : '';
+  if (ph === 'debrief') return M(`<h1>Your KSA profile</h1>${KSAPP.ksaBars(SCORE, SC.scoring.weights)}<p class="muted" style="margin-top:10px">K = pre-test + answers to the questions · S = answers to the chart challenges + quality of your crew's challenges · A = peer assessment.<br>Training session — feedback, not assessment.</p>`);
+  const txt = { build: '🛠 Prepare the 3 challenges on the crew laptop — follow the steps. Use your phone to look up the theory or to find a chart.', duel: '⚔ The duel — answer on the crew laptop and follow the explanations.', break: '☕ Break' }[ph] || '';
+  const extra = '';
   const pts = g && BOARD.game && BOARD.game[MY.group] !== undefined ? `<p class="muted">Crew points: <b style="color:var(--amber)">${BOARD.game[MY.group]}</b></p>` : '';
   M(`<div class="big"><div class="ic">${g ? '👥' : '⏳'}</div><h1>${g ? esc(g.name) : ''}</h1><p>${txt}</p>${pts}</div>${extra}${SCORE ? `<div style="margin-top:20px">${KSAPP.ksaBars(SCORE, SC.scoring.weights)}</div>` : ''}`);
 }
